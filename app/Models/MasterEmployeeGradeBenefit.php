@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class MasterEmployeeGradeBenefit extends Model
+{
+    use HasFactory, HasUuids;
+
+    protected $table = 'master_employee_grade_banefit';
+    protected $fillable = ['benefit_id', 'grade_id', 'amount', 'desc', 'users_id'];
+
+    public $timestamps = true;
+
+    public function GradeBenefit()
+    {
+        return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id');
+    }
+
+    public function BenefitGrade()
+    {
+        return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
+    }
+}
