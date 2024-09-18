@@ -22,6 +22,7 @@ class EmployeeMutations extends Model
         'new_sub_department_id',
         'old_position_id',
         'new_position_id',
+        'docs',
         'users_id',
     ];
 

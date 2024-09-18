@@ -19,4 +19,9 @@ class MasterEmployeeAgreement extends Model
     {
         return $this->hasMany(Employees::class, 'employee_agreement_id');
     }
+
+    public function agreement()
+    {
+        return $this->hasMany(EmployeeAgreement::class, 'agreement_id', 'id');
+    }
 }

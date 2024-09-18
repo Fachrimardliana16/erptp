@@ -18,25 +18,30 @@ return new class extends Migration
             $table->uuid('category_id');
             $table->date('purchase_date');
             $table->uuid('condition_id');
+            $table->uuid('transaction_status_id')->nullable();
+            $table->uuid('sub_location_id')->nullable();
+            $table->uuid('location_id')->nullable();
             $table->string('img')->nullable();
             $table->decimal('price', 10, 2);
             $table->string('funding_source');
             $table->string('brand');
             $table->string('book_value');
+            $table->string('desc')->nullable();
             $table->date('book_value_expiry');
-            $table->text('desc')->nullable();
             $table->uuid('status_id');
-            $table->uuid('transaction_status_id')->nullable();
             $table->timestamps();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('transaction_status_id')->references('id')->on('master_assets_transaction_status');
             $table->foreign('category_id')->references('id')->on('master_assets_category');
             $table->foreign('condition_id')->references('id')->on('master_assets_condition');
             $table->foreign('status_id')->references('id')->on('master_assets_status');
-            $table->foreign('transaction_status_id')->references('id')->on('master_assets_transaction_status');
+            $table->foreign('sub_location_id')->references('id')->on('master_assets_sub_locations');
+            $table->foreign('location_id')->references('id')->on('master_assets_locations');
         });
     }
+
 
     /**
      * Reverse the migrations.

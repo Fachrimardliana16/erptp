@@ -28,7 +28,9 @@ class EmployeeGradeSeeder extends Seeder
             ['name' => 'C1', 'desc' => ''],
             ['name' => 'C2', 'desc' => ''],
             ['name' => 'C3', 'desc' => ''],
-            ['name' => 'C4', 'desc' => '']
+            ['name' => 'C4', 'desc' => ''],
+            ['name' => 'Kontrak', 'desc' => ''],
+            ['name' => 'Tenaga Harian Lepas', 'desc' => '']
         ];
 
         foreach ($grades as $grade) {

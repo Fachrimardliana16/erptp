@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeesResource\Pages;
 use App\Filament\Resources\EmployeesResource\RelationManagers;
 use App\Models\Employees;
+use App\Models\MasterEmployeeBasicSalary;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -86,6 +87,11 @@ class EmployeesResource extends Resource
                                 'o' => 'O',
                             ])
                             ->searchable(),
+                        Select::make('employee_education_id')
+                            ->relationship('employeeEducation', 'name')
+                            ->label('Pendidikan Terakhir')
+                            ->searchable()
+                            ->preload(),
                         Select::make('marital_status')
                             ->label('Status Menikah')
                             ->options([
@@ -164,16 +170,53 @@ class EmployeesResource extends Resource
                             ->label('Perjanjian Kontrak')
                             ->searchable()
                             ->preload(),
-                        Select::make('employee_education_id')
-                            ->relationship('employeeEducation', 'name')
-                            ->label('Pendidikan Terakhir')
-                            ->searchable()
-                            ->preload(),
-                        Select::make('employee_grade_id')
-                            ->relationship('employeeGrade', 'name')
+                        DatePicker::make('agreement_date_start')
+                            ->label('Tanggal Mulai Perjanjian Kontrak'),
+                        DatePicker::make('agreement_date_end')
+                            ->label('Tanggal Akhir Perjanjian Kontrak'),
+
+                        Select::make('basic_salary_id')
+                            ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))
+                            ->afterStateUpdated(function ($set, $state) {
+                                $data = MasterEmployeeBasicSalary::find($state);
+                                if ($data) {
+                                    $set('basic_salary', $data->amount);
+                                }
+                            })
                             ->label('Golongan')
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->live(),
+
+                        // Hidden field for basic_salary_id to store the actual ID
+                        Forms\Components\Hidden::make('basic_salary_id')
+                            ->default(function ($get) {
+                                $basic_salary_id = $get('basic_salary_id');
+                                return $basic_salary_id;
+                            }),
+
+                        // TextInput for basic_salary to display the amount
+                        TextInput::make('basic_salary')
+                            ->label('Gaji Pokok')
+                            ->prefix('Rp. ')
+                            ->readOnly(),
+
+                        // Hidden field for basic_salary to store the amount
+                        Forms\Components\Hidden::make('basic_salary')
+                            ->default(function ($get) {
+                                return $get('basic_salary');
+                            }),
+                        DatePicker::make('grade_date_start')
+                            ->label('Tanggal Mulai Golongan'),
+                        DatePicker::make('grade_date_end')
+                            ->label('Tanggal Akhir Golongan'),
+                        TextInput::make('amount')
+                            ->label('Total Berkala')
+                            ->prefix('Rp. '),
+                        DatePicker::make('periodic_salary_date_start')
+                            ->label('Tanggal Awal Berkala'),
+                        DatePicker::make('periodic_salary_date_end')
+                            ->label('Tanggal Akhir Berkala'),
                         Select::make('employee_position_id')
                             ->relationship('employeePosition', 'name')
                             ->label('Jabatan')
@@ -266,6 +309,10 @@ class EmployeesResource extends Resource
                     ->label('Golongan Darah')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('employeeEducation.name')
+                    ->label('Pendidikan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('marital_status')
                     ->label('Status Menikah')
                     ->searchable()
@@ -330,12 +377,46 @@ class EmployeesResource extends Resource
                     ->label('Kontrak Kerja')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeeEducation.name')
-                    ->label('Pendidikan')
+                Tables\Columns\TextColumn::make('agreement_date_start')
+                    ->label('Tanggal Mulai Perjanjian Kontrak')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeeGrade.name')
+                Tables\Columns\TextColumn::make('agreement_date_end')
+                    ->label('Tanggal Akhir Perjanjian Kontrak')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('employeeBasic.name')
                     ->label('Golongan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('grade_date_start')
+                    ->label('Tanggal Mulai Golongan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('grade_date_end')
+                    ->label('Tanggal Akhir Golongan')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('employeeBasic.amount')
+                    ->Money('Rp. ')
+                    ->label('Gaji Pokok')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('periodic_salary_date_start')
+                    ->label('Tanggal Mulai Berkala')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('periodic_salary_date_end')
+                    ->label('Tanggal Akhir Berkala')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('amount')
+                    ->Money('Rp. ')
+                    ->label('Berkala')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('place_birth')
+                    ->label('Tempat Lahir')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('employeePosition.name')

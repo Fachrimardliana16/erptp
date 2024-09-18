@@ -2,25 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AssetMonitoringResource\Pages;
-use App\Filament\Resources\AssetMonitoringResource\RelationManagers;
-use App\Models\Asset;
-use App\Models\AssetMonitoring;
-use App\Models\AssetMutation;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Asset;
+use Filament\Forms\Form;
+use App\Models\Employees;
 use Filament\Tables\Table;
+use App\Models\AssetMutation;
+use App\Models\AssetMonitoring;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\AssetMonitoringResource\Pages;
+use App\Filament\Resources\AssetMonitoringResource\RelationManagers;
 
 class AssetMonitoringResource extends Resource
 {
     protected static ?string $model = AssetMonitoring::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Kerumah Tanggaan';
+    protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Monitoring Aset';
 
     public static function form(Form $form): Form
@@ -34,7 +37,15 @@ class AssetMonitoringResource extends Resource
                             ->label('Tanggal Monitoring')
                             ->required(),
                         Forms\Components\Select::make('assets_id')
-                            ->options(Asset::query()->pluck('assets_number', 'id'))
+                            ->options(
+                                Asset::query()
+                                    ->get()
+                                    ->mapWithKeys(function ($asset) {
+                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
+                                        return [$asset->id => $asset->assets_number . ' | ' . $asset->name];
+                                    })
+                                    ->toArray()
+                            )
                             ->afterStateUpdated(function ($set, $state) {
                                 $aset = Asset::find($state);
                                 if ($aset) {
@@ -85,6 +96,26 @@ class AssetMonitoringResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                    })->first();
+        
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employee) {
+                        $pdfContent = Blade::render('pdf.report_asset_monitoring', [
+                            'records' => $records,
+                            'employee' => $employee
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'monitoring_assets.pdf');
+                }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -94,22 +125,17 @@ class AssetMonitoringResource extends Resource
                     ->label('Tanggal Monitoring')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('assetMonitoring.assets_number')
+                    ->label('Nomor Aset')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('assetMonitoring.name')
                     ->label('Nama Aset')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('employeeAssetMonitoring.name')
-                    ->label('Nama Pegawai')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('monitoringLocation.name')
-                    ->label('Lokasi')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('monitoringSubLocation.name')
-                    ->label('Sub Lokasi')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('MonitoringoldCondition.name')
                     ->label('Kondisi Lama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('new_condition_id.name')
+                Tables\Columns\TextColumn::make('MonitoringNewCondition.name')
                     ->label('Kondisi Baru')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

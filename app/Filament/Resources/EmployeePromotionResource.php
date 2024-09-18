@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeePromotionResource\Pages;
 use App\Filament\Resources\EmployeePromotionResource\RelationManagers;
 use App\Models\EmployeePromotion;
+use App\Models\Employees;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -35,16 +36,36 @@ class EmployeePromotionResource extends Resource
                             ->label('Tanggal Kenaikan Golongan')
                             ->required(),
                         Forms\Components\Select::make('employee_id')
-                            ->relationship('employeePromotion', 'name')
+                            ->options(Employees::query()->pluck('name', 'id'))
+                            ->afterStateUpdated(function ($set, $state) {
+                                $employees = Employees::find($state);
+                                $set('name', $employees->name);
+                                $set('old_grade_id', $employees->employee_grade_id);
+                                $set('old_basic_salary_id', $employees->employee_basic_salary_id);
+                            })
                             ->label('Nama Pegawai')
-                            ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->live()
+                            ->required(),
+                        Forms\Components\Hidden::make('employee_id')
+                            ->label('Nama Pegawai')
+                            ->required(),
                         Forms\Components\Select::make('old_grade_id')
                             ->relationship('oldGrade', 'name')
                             ->label('Golongan Lama')
                             ->searchable()
                             ->preload()
+                            ->required(),
+                        Forms\Components\Select::make('old_basic_salary_id')
+                            ->relationship('oldBasicSalary', 'amount')
+                            ->label('Gaji Pokok Lama')
+                            ->prefix('Rp. ')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Forms\Components\Hidden::make('old_basic_salary_id')
+                            ->label('Gaji Pokok Lama')
                             ->required(),
                         Forms\Components\Select::make('new_grade_id')
                             ->relationship('newGrade', 'name')
@@ -52,15 +73,10 @@ class EmployeePromotionResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Select::make('old_basic_salary_id')
-                            ->relationship('oldBasicSalary', 'name')
-                            ->label('Gaji Pokok Lama')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
                         Forms\Components\Select::make('new_basic_salary_id')
-                            ->relationship('newBasicSalary', 'name')
+                            ->relationship('newBasicSalary', 'amount')
                             ->label('Gaji Pokok Baru')
+                            ->prefix('Rp. ')
                             ->searchable()
                             ->preload()
                             ->required(),
@@ -81,28 +97,30 @@ class EmployeePromotionResource extends Resource
                 Tables\Columns\TextColumn::make('decision_letter_number')
                     ->label('Nomor SK')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('mutation_date')
+                Tables\Columns\TextColumn::make('promotion_date')
                     ->label('Tanggal Mutasi')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('employee_id')
+                Tables\Columns\TextColumn::make('employeePromotion.name')
                     ->label('Nama Pegawai')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('old_grade_id')
+                Tables\Columns\TextColumn::make('oldGrade.name')
                     ->label('Golongan Lama')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('new_grade_id')
+                Tables\Columns\TextColumn::make('oldBasicSalary.amount')
+                    ->label('Gaji Pokok Lama')
+                    ->sortable()
+                    ->money('Rp. ')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('newGrade.name')
                     ->label('Golongan Baru')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('old_basic_salary_id')
-                    ->label('Gaji Pokok Lama')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('new_basic_salary_id')
+                Tables\Columns\TextColumn::make('newBasicSalary.amount')
                     ->label('Gaji Pokok Baru')
+                    ->money('Rp. ')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

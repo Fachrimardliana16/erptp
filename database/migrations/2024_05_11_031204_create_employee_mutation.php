@@ -22,6 +22,7 @@ return new class extends Migration
             $table->uuid('new_sub_department_id');
             $table->uuid('old_position_id');
             $table->uuid('new_position_id');
+            $table->string('docs');
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

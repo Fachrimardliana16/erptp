@@ -2,25 +2,52 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AssetResource\Pages;
-use App\Filament\Resources\AssetResource\RelationManagers;
-use App\Models\Asset;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Asset;
+use Filament\Forms\Form;
+use App\Models\Employees;
+use Filament\Tables\Table;
+use Filament\Resources\Pages\Page;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Blade;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Forms\Components\DatePicker;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Filters\SelectFilter;
+use App\Filament\Resources\AssetResource\Pages;
+use App\Filament\Resources\AssetResource\Pages\EditAsset;
+use App\Filament\Resources\AssetResource\Pages\ViewAsset;
+use App\Filament\Resources\AssetMonitoringResource\Pages\CreateAssetMonitoring;
+// use Illuminate\Database\Eloquent\Builder;
+
+// library untuk export PDF
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Barryvdh\DomPDF\PDF as DomPDF;
+
+// library endroid qr code
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\ErrorCorrectionLevel;
+
 
 class AssetResource extends Resource
 {
     protected static ?string $model = Asset::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Kerumah Tanggaan';
+    protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Data Aset';
+    public static $order = 2;
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -98,6 +125,26 @@ class AssetResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                    })->first();
+        
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employee) {
+                        $pdfContent = Blade::render('pdf.report_asset', [
+                            'records' => $records,
+                            'employee' => $employee
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'assets.pdf');
+                }),
+        ])
             ->columns([
                 Tables\Columns\TextColumn::make('No.')
                     ->rowIndex(),
@@ -111,14 +158,6 @@ class AssetResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('assetsStatus.name')
-                    ->label('Status')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('AssetTransactionStatus.name')
-                    ->label('Status Transaksi')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('categoryAsset.name')
@@ -146,6 +185,14 @@ class AssetResource extends Resource
                     ->label('Merk')
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('assetsStatus.name')
+                    ->label('Status')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('AssetTransactionStatus.name')
+                    ->label('Status Transaksi')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('book_value')
                     ->label('Nilai Buku')
                     ->sortable()
@@ -155,6 +202,12 @@ class AssetResource extends Resource
                     ->label('Tanggal Habis Nilai Buku')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('AssetMutationLocation.name')
+                    ->label('Lokasi')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('AssetMutationSubLocation.name')
+                    ->label('Sub Lokasi')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -165,18 +218,84 @@ class AssetResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                SelectFilter::make('Lokasi')
+                ->relationship('AssetMutationLocation', 'name'),
+                SelectFilter::make('Sub Lokasi')
+                ->relationship('AssetMutationSubLocation', 'name'),
+                Filter::make('Tanggal')
+                ->form([
+                    DatePicker::make('Dari'),
+                    DatePicker::make('Sampai'),
+                ])
+                ], FiltersLayout::Modal)
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+                ViewAction::make(),
+
+                // Action untuk download pdf aset per record
+                Action::make('download_pdf')
+                ->label('Download PDF')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function($record){
+                    $pdf = app (abstract: DomPDF::class);
+                    $pdf->loadView('pdf.dataasset', ['asset'=> $record]);
+
+                    return response()->streamDownload(function() use($pdf){
+                        echo $pdf->output();
+                    }, 'asset-'.$record->name.'.pdf');
+                    }),
+
+                    Action::make('print_label')
+                    ->label('Cetak Label')
+                    ->icon('heroicon-o-printer')
+                    ->action(function($record) {
+                        // Generate URL for asset detail page using assets_number
+                        $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+                
+                        // Generate QR code with URL
+                        $qrCode = Builder::create()
+                            ->writer(new PngWriter())
+                            ->writerOptions([])
+                            ->data($assetDetailUrl) // Use the URL here
+                            ->encoding(new Encoding('UTF-8'))
+                            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                            ->size(100)
+                            ->margin(5)
+                            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+                            ->build();
+                
+                        $qrCodeImage = $qrCode->getString();
+                
+                        // Generate PDF
+                        $pdf = app(DomPDF::class);
+                        $pdf->loadView('pdf.asset_label', [
+                            'asset' => $record,
+                            'qrCodeImage' => base64_encode($qrCodeImage)
+                        ]);
+                
+                        // Format file name as label-assets_number_name.pdf
+                        $fileName = 'label-' . $record->assets_number . '_' . str_replace(' ', '_', $record->name) . '.pdf';
+                
+                        return response()->streamDownload(function() use($pdf) {
+                            echo $pdf->output();
+                        }, $fileName);
+                    }),                            
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewAsset::class,
+            EditAsset::class,
+            CreateAssetMonitoring::class,
+        ]);
     }
 
     public static function getRelations(): array
@@ -192,6 +311,7 @@ class AssetResource extends Resource
             'index' => Pages\ListAssets::route('/'),
             'create' => Pages\CreateAsset::route('/create'),
             'edit' => Pages\EditAsset::route('/{record}/edit'),
+            'view' => Pages\ViewAsset::route('/{record}'),
         ];
     }
 }

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('master_billing_customerstatus', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('code');
             $table->string('name');
             $table->text('desc')->nullable();
             $table->timestamps();

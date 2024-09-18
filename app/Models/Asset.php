@@ -2,9 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Filament\Resources\AssetResource\Pages\EditAsset;
+use App\Filament\Resources\AssetResource\Pages\ViewAsset;
+use App\Filament\Resources\AssetResource\Pages\ListAssets;
+use App\Filament\Resources\AssetResource\Pages\CreateAsset;
 
 class Asset extends Model
 {
@@ -24,6 +29,8 @@ class Asset extends Model
         'brand',
         'book_value',
         'book_value_expiry',
+        'location_id',
+        'sub_location_id',
         'status_id',
         'transaction_status_id',
         'desc',
@@ -73,5 +80,15 @@ class Asset extends Model
     public function AssetTransactionStatus()
     {
         return $this->belongsTo(MasterAssetsTransactionStatus::class, 'transaction_status_id', 'id');
+    }
+
+    public function AssetMutationLocation()
+    {
+        return $this->belongsTo(MasterAssetsLocation::class, 'location_id', 'id');
+    }
+
+    public function AssetMutationSubLocation()
+    {
+        return $this->belongsTo(MasterAssetsSubLocation::class, 'sub_location_id', 'id');
     }
 }

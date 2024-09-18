@@ -55,6 +55,6 @@ class AssetMutation extends Model
 
     public function MutationCondition()
     {
-        return $this->belongsTo(MasterAssetsCondition::class, 'condition_id');
+        return $this->belongsTo(MasterAssetsCondition::class, 'condition_id', 'id');
     }
 }

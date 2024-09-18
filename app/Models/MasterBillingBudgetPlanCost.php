@@ -20,4 +20,9 @@ class MasterBillingBudgetPlanCost extends Model
     {
         return $this->belongsTo(MasterBillingRegistrationType::class, 'registrationtype_id');
     }
+
+    public function budgetPlanCost()
+    {
+        return $this->hasMany(MasterBillingBudgetPlanCostDetail::class, 'budget_plan_cost_id');
+    }
 }

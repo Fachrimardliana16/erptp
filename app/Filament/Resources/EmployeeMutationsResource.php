@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeMutationsResource\Pages;
 use App\Filament\Resources\EmployeeMutationsResource\RelationManagers;
 use App\Models\EmployeeMutations;
+use App\Models\Employees;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -35,10 +36,21 @@ class EmployeeMutationsResource extends Resource
                             ->label('Tanggal Mutasi')
                             ->required(),
                         Forms\Components\Select::make('employee_id')
-                            ->relationship('employeeMutation', 'name')
+                            ->options(Employees::query()->pluck('name', 'id'))
+                            ->afterStateUpdated(function ($set, $state) {
+                                $employees = Employees::find($state);
+                                $set('name', $employees->name);
+                                $set('old_department_id', $employees->departments_id);
+                                $set('old_sub_department_id', $employees->sub_department_id);
+                                $set('old_position_id', $employees->employees_position_id);
+                            })
                             ->label('Nama Pegawai')
                             ->searchable()
                             ->preload()
+                            ->live()
+                            ->required(),
+                        Forms\Components\Hidden::make('employee_id')
+                            ->label('Nama Pegawai')
                             ->required(),
                         Forms\Components\Select::make('old_department_id')
                             ->relationship('oldDepartment', 'name')
@@ -46,11 +58,17 @@ class EmployeeMutationsResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Forms\Components\Hidden::make('old_department_id')
+                            ->label('Bagian Lama')
+                            ->required(),
                         Forms\Components\Select::make('old_sub_department_id')
                             ->relationship('oldSubDepartment', 'name')
                             ->label('Sub Bagian Lama')
                             ->searchable()
                             ->preload()
+                            ->required(),
+                        Forms\Components\Hidden::make('old_sub_department_id')
+                            ->label('Sub Bagian Lama')
                             ->required(),
                         Forms\Components\Select::make('new_department_id')
                             ->relationship('newDepartment', 'name')
@@ -58,11 +76,17 @@ class EmployeeMutationsResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Forms\Components\Hidden::make('new_department_id')
+                            ->label('Bagian Baru')
+                            ->required(),
                         Forms\Components\Select::make('new_sub_department_id')
                             ->relationship('newSubDepartment', 'name')
                             ->label('Sub Bagian Baru')
                             ->searchable()
                             ->preload()
+                            ->required(),
+                        Forms\Components\Hidden::make('new_sub_department_id')
+                            ->label('Sub Bagian Baru')
                             ->required(),
                         Forms\Components\Select::make('old_position_id')
                             ->relationship('oldPosition', 'name')
@@ -70,11 +94,20 @@ class EmployeeMutationsResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Forms\Components\Hidden::make('old_position_id')
+                            ->label('Jabatan Lama')
+                            ->required(),
                         Forms\Components\Select::make('new_position_id')
                             ->relationship('newPosition', 'name')
                             ->label('Jabatan Baru')
                             ->searchable()
                             ->preload()
+                            ->required(),
+                        Forms\Components\Hidden::make('new_position_id')
+                            ->label('Jabatan Baru')
+                            ->required(),
+                        Forms\Components\FileUpload::make('docs')
+                            ->label('Lampiran Surat')
                             ->required(),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
@@ -97,26 +130,29 @@ class EmployeeMutationsResource extends Resource
                     ->label('Tanggal Mutasi')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('employee_id')
+                Tables\Columns\TextColumn::make('employeeMutation.name')
                     ->label('Nama Pegawai')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('old_department_id')
+                Tables\Columns\TextColumn::make('oldDepartment.name')
                     ->label('Bagian Lama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('old_sub_department_id')
+                Tables\Columns\TextColumn::make('oldSubDepartment.name')
                     ->label('Sub Bagian Lama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('new_department_id')
+                Tables\Columns\TextColumn::make('newDepartment.name')
                     ->label('Bagian Baru')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('new_sub_department_id')
+                Tables\Columns\TextColumn::make('newSubDepartment.name')
                     ->label('Sub Bagian Baru')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('old_position_id')
+                Tables\Columns\TextColumn::make('oldPosition.name')
                     ->label('Jabatan Lama')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('new_position_id')
+                Tables\Columns\TextColumn::make('newPosition.name')
                     ->label('Jabatan Baru')
+                    ->searchable(),
+                Tables\Columns\ImageColumn::make('docs')
+                    ->label('Lampiran Surat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

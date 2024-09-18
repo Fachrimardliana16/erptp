@@ -11,7 +11,7 @@ class MasterBillingCustomerStatus extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'master_billing_customerstatus';
-    protected $fillable = ['name', 'desc', 'users_id',];
+    protected $fillable = ['code', 'name', 'desc', 'users_id',];
 
     public $timestamps = true;
 }

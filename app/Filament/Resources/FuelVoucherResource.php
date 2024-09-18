@@ -19,7 +19,7 @@ class FuelVoucherResource extends Resource
     protected static ?string $model = FuelVoucher::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Kerumah Tanggaan';
+    protected static ?string $navigationGroup = 'Permintaan Kas Kecil';
     protected static ?string $navigationLabel = 'Permintaan Bahan Bakar';
 
     public static function form(Form $form): Form

@@ -2,25 +2,34 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AssetMutationResource\Pages;
-use App\Filament\Resources\AssetMutationResource\RelationManagers;
-use App\Models\Asset;
-use App\Models\AssetMutation;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Asset;
+use Filament\Forms\Form;
+use App\Models\Employees;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\AssetMutation;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Blade;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Forms\Components\DatePicker;
+
+// library untuk export PDF
+use App\Filament\Resources\AssetMutationResource\Pages;
 
 class AssetMutationResource extends Resource
 {
     protected static ?string $model = AssetMutation::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Kerumah Tanggaan';
+    protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Mutasi Aset';
+    public static $order = 3;
+
 
     public static function form(Form $form): Form
     {
@@ -42,7 +51,15 @@ class AssetMutationResource extends Resource
                             ->preload()
                             ->required(),
                         Forms\Components\Select::make('assets_id')
-                            ->options(Asset::query()->pluck('assets_number', 'id'))
+                            ->options(
+                                Asset::query()
+                                    ->get()
+                                    ->mapWithKeys(function ($assets) {
+                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
+                                        return [$assets->id => $assets->assets_number . ' | ' . $assets->name];
+                                    })
+                                    ->toArray()
+                            )
                             ->afterStateUpdated(function ($set, $state) {
                                 $aset = Asset::find($state);
                                 $set('assets_number', $aset->assets_number);
@@ -106,6 +123,26 @@ class AssetMutationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                    })->first();
+        
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employee) {
+                        $pdfContent = Blade::render('pdf.report_asset_mutation', [
+                            'records' => $records,
+                            'employee' => $employee
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'mutation_assets.pdf');
+                }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -149,12 +186,29 @@ class AssetMutationResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                Filter::make('Tanggal')
+                ->form([
+                    DatePicker::make('Dari'),
+                    DatePicker::make('Sampai'),
+                ])
+            ], FiltersLayout::Modal)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ViewAction::make(),
+                // Action untuk download pdf aset per record
+                Action::make('download_pdf')
+                ->label('Cetak Surat Mutasi')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->action(function($record){
+                    $pdf = app (abstract: DomPDF::class);
+                    $pdf->loadView('pdf.surat_mutasi_asset', ['assetmutation'=> $record]);
+
+                    return response()->streamDownload(function() use($pdf){
+                        echo $pdf->output();
+                    }, 'mutasi_asset-'.$record->name.'.pdf');
+                    })
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

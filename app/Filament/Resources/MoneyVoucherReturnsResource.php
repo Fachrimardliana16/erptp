@@ -20,7 +20,7 @@ class MoneyVoucherReturnsResource extends Resource
     protected static ?string $model = MoneyVoucherReturns::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Kerumah Tanggaan';
+    protected static ?string $navigationGroup = 'Permintaan Kas Kecil';
     protected static ?string $navigationLabel = 'Pengembalian Bon Uang';
 
     public static function form(Form $form): Form
@@ -83,7 +83,7 @@ class MoneyVoucherReturnsResource extends Resource
                             ->required(),
                         Forms\Components\Hidden::make('employee_id')
                             ->required(),
-                        Forms\Components\TextInput::make('total_amont')
+                        Forms\Components\TextInput::make('total_amount')
                             ->label('Total Jumlah')
                             ->prefix('Rp. ')
                             ->required()

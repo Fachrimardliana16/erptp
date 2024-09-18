@@ -29,4 +29,9 @@ class MasterEmployeePosition extends Model
     {
         return $this->hasMany(EmployeeMutations::class, 'new_position_id', 'id');
     }
+
+    public function agreementPosition()
+    {
+        return $this->hasMany(EmployeeAgreement::class, 'employee_position_id', 'id');
+    }
 }

@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('phone_number', 13)->nullable();
             $table->string('id_number', 16)->nullable();
             $table->string('familycard_number', 16)->nullable();
-            $table->string('npwp_number', 16)->nullable();
+            $table->string('npwp_number', 20)->nullable();
             $table->string('bank_account_number', 17)->nullable();
             $table->string('bpjs_tk_number', 16)->nullable();
             $table->string('bpjs_kes_number', 13)->nullable();
@@ -42,13 +42,22 @@ return new class extends Migration
             $table->date('probation_appointment_date')->nullable(); // New column: probation appointment date
             $table->integer('length_service')->nullable();
             $table->date('retirement')->nullable();
-            $table->uuid('employment_status_id');
-            $table->uuid('employee_agreement_id');
-            $table->uuid('employee_education_id');
-            $table->uuid('employee_grade_id');
-            $table->uuid('employee_position_id');
-            $table->uuid('departments_id');
-            $table->uuid('sub_department_id');
+            $table->uuid('employment_status_id')->nullable();
+            $table->uuid('employee_agreement_id')->nullable();
+            $table->date('agreement_date_start')->nullable();
+            $table->date('agreement_date_end')->nullable();
+            $table->uuid('employee_education_id')->nullable();
+            $table->uuid('basic_salary_id')->nullable();
+            $table->date('grade_date_start')->nullable();
+            $table->date('grade_date_end')->nullable();
+            $table->decimal('basic_salary', 15, 2)->nullable();
+            $table->date('periodic_salary_date_start')->nullable();
+            $table->date('periodic_salary_date_end')->nullable();
+            $table->decimal('amount', 15, 2)->nullable();
+            $table->uuid('employee_position_id')->nullable();
+            $table->uuid('departments_id')->nullable();
+            $table->uuid('sub_department_id')->nullable();
+
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
@@ -57,10 +66,10 @@ return new class extends Migration
             $table->foreign('employment_status_id')->references('id')->on('master_employee_status_employement');
             $table->foreign('employee_agreement_id')->references('id')->on('master_employee_agreement');
             $table->foreign('employee_education_id')->references('id')->on('master_employee_education');
-            $table->foreign('employee_grade_id')->references('id')->on('master_employee_grade');
             $table->foreign('employee_position_id')->references('id')->on('master_employee_position');
             $table->foreign('departments_id')->references('id')->on('master_departments');
             $table->foreign('sub_department_id')->references('id')->on('master_sub_departments');
+            $table->foreign('basic_salary_id')->references('id')->on('master_employee_basic_salary');
         });
     }
 

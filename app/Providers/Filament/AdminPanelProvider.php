@@ -22,6 +22,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,27 +35,28 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification(EmailVerification::class)
-            ->favicon(fn (GeneralSettings $settings) => Storage::url($settings->site_favicon))
             ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)
-            ->brandLogo(fn (GeneralSettings $settings) => Storage::url($settings->brand_logo))
-            ->brandLogoHeight(fn (GeneralSettings $settings) => $settings->brand_logoHeight)
             ->colors(fn (GeneralSettings $settings) => $settings->site_theme)
             ->databaseNotifications()->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->sidebarCollapsibleOnDesktop()
-            ->viteTheme('resources/css/filament/admin/theme.css')
+            // ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->resources([
                 config('filament-logger.activity_resource')
             ])
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
+                fn () => view('footer')
+            )
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

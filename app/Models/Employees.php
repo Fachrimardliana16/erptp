@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\MasterEmployeePosition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Employees extends Model
 {
@@ -35,8 +36,16 @@ class Employees extends Model
         'length_service',
         'employment_status_id',
         'employee_agreement_id',
+        'agreement_date_start',
+        'agreement_date_end',
         'employee_education_id',
-        'employee_grade_id',
+        'basic_salary_id',
+        'basic_salary',
+        'grade_date_start',
+        'grade_date_end',
+        'periodic_salary_date_start',
+        'periodic_salary_date_end',
+        'amount',
         'employee_position_id',
         'departments_id',
         'sub_department_id',
@@ -124,5 +133,15 @@ class Employees extends Model
     public function employeeDisposals()
     {
         return $this->hasMany(AssetDisposal::class, 'employee_id', 'id');
+    }
+
+    public function employeeBasic()
+    {
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'basic_salary_id', 'id');
+    }
+
+    public function agreementEmployee()
+    {
+        return $this->hasMany(EmployeeAgreement::class, 'employee_id', 'id');
     }
 }

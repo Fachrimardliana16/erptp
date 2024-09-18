@@ -6,6 +6,7 @@ use App\Filament\Resources\MasterBranchOfficeResource\Pages;
 use App\Filament\Resources\MasterBranchOfficeResource\RelationManagers;
 use App\Models\MasterBranchOffice;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,22 +28,30 @@ class MasterBranchOfficeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('branch_unit_id')
-                    ->relationship('BranchOffice', 'name')
-                    ->required(),
-                Forms\Components\TextInput::make('code')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('address')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('phone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\Hidden::make('users_id')
-                    ->default(auth()->id()),
+                Section::make('Form Input Kantor Cabang')
+                    ->schema([
+                        Forms\Components\TextInput::make('code')
+                            ->label('Kode')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Select::make('branch_unit_id')
+                            ->relationship('BranchOffice', 'name')
+                            ->label('Kantor Unit')
+                            ->required(),
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nama Kantor Cabang')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('address')
+                            ->label('Alamat')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Nomor Telp')
+                            ->tel()
+                            ->maxLength(255),
+                        Forms\Components\Hidden::make('users_id')
+                            ->default(auth()->id()),
+                    ])
             ]);
     }
 
@@ -54,14 +63,14 @@ class MasterBranchOfficeResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('BranchOffice.name')
-                    ->label('Cabang')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('code')
                     ->label('Kode')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('BranchOffice.name')
+                    ->label('Kantor Unit')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Telepon')

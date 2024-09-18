@@ -6,6 +6,7 @@ use App\Filament\Resources\MasterBillingCustomerStatusResource\Pages;
 use App\Filament\Resources\MasterBillingCustomerStatusResource\RelationManagers;
 use App\Models\MasterBillingCustomerStatus;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -25,15 +26,18 @@ class MasterBillingCustomerStatusResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nama')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('desc')
-                    ->label('Keterangan')
-                    ->columnSpanFull(),
-                Forms\Components\Hidden::make('users_id')
-                    ->default(auth()->id()),
+                Section::make('Form Status Pelanggan')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nama')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('desc')
+                            ->label('Keterangan')
+                            ->columnSpanFull(),
+                        Forms\Components\Hidden::make('users_id')
+                            ->default(auth()->id()),
+                    ])
             ]);
     }
 

@@ -6,7 +6,6 @@ use App\Filament\Resources\MasterDepartmentsResource\Pages;
 use App\Filament\Resources\MasterDepartmentsResource\RelationManagers;
 use App\Models\MasterDepartments;
 use Filament\Forms;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -21,23 +20,20 @@ class MasterDepartmentsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Master';
     protected static ?string $navigationLabel = 'Bagian';
-    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Form Bagian')
-                    ->description('Input Bagian pada form di bawah ini.')
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('desc')
-                            ->columnSpanFull(),
-                        Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
-                    ])
+                Forms\Components\TextInput::make('name')
+                    ->label('Nama Bagian')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('desc')
+                    ->label('Keterangan')
+                    ->columnSpanFull(),
+                Forms\Components\Hidden::make('users_id')
+                    ->default(auth()->id()),
             ]);
     }
 
@@ -51,11 +47,6 @@ class MasterDepartmentsResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('desc')
-                    ->label('Keterangan')
-                    ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -64,6 +55,9 @@ class MasterDepartmentsResource extends Resource
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('users_id')
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

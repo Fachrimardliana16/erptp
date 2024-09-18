@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\MasterHelpDeskCategory;
+use App\Models\MasterHelpDeskSla;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -42,7 +45,12 @@ class DatabaseSeeder extends Seeder
             BillingVillagesSeeder::class,
             BillingRegistrationTypeSeeder::class,
             BillingServiceTypeSeeder::class,
+            IdTypeSeeder::class,
             LoggerTypeSeeder::class,
+            FloorTypeSeeder::class,
+            RoofTypeSeeder::class,
+            VehicleTypeSeeder::class,
+            WallTypeSeeder::class,
         ]);
 
         Artisan::call('shield:generate --all');

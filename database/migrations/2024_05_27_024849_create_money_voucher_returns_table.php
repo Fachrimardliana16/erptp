@@ -20,9 +20,10 @@ return new class extends Migration
             $table->uuid('money_voucher_id');
             $table->decimal('amount', 10, 2);
             $table->text('usage_purpose');
-            $table->decimal('total_amont', 10, 2);
+            $table->decimal('total_amount', 15, 2);
             $table->text('description')->nullable();
             $table->string('docs')->nullable();
+            $table->string('docs_return')->nullable();
             $table->uuid('employee_id');
             $table->uuid('users_id');
             $table->timestamps();

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\MasterEmployeeBasicSalaryResource\Pages;
 use App\Filament\Resources\MasterEmployeeBasicSalaryResource\RelationManagers;
 use App\Models\MasterEmployeeBasicSalary;
+use App\Models\MasterEmployeeGrade;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -29,10 +30,24 @@ class MasterEmployeeBasicSalaryResource extends Resource
                 Section::make('Form Gaji Pokok')
                     ->description('Input gaji pokok pada form di bawah ini.')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nama')
-                            ->required()
-                            ->maxLength(255),
+
+                        Forms\Components\Select::make('employee_grade_id')
+                            ->options(MasterEmployeeGrade::query()->pluck('name', 'id'))
+                            ->afterStateUpdated(function ($set, $state) {
+                                $data = MasterEmployeeGrade::find($state);
+                                $set('name', $data->name);
+                            })
+                            ->label('Golongan')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->required(),
+                        Forms\Components\Hidden::make('name')
+                            ->default(function ($get) {
+                                $employee_grade_id = $get('employee_grade_id');
+                                $data = MasterEmployeeGrade::find($employee_grade_id);
+                                return $data ? $data->name : null;
+                            }),
                         Forms\Components\TextInput::make('amount')
                             ->label('Jumlah')
                             ->required()
@@ -54,8 +69,8 @@ class MasterEmployeeBasicSalaryResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Nama')
+                Tables\Columns\TextColumn::make('gradeSalary.name')
+                    ->label('Golongan')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')

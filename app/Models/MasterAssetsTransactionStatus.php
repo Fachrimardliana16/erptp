@@ -17,7 +17,7 @@ class MasterAssetsTransactionStatus extends Model
 
     public function AssetsMutationtransactionStatus()
     {
-        return $this->hasMany(AssetMutation::class, 'transaction_status_id');
+        return $this->hasMany(AssetMutation::class, 'transaction_status_id', 'id');
     }
 
     public function AssetsTransactionStatus()
