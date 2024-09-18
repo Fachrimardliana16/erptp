@@ -117,7 +117,7 @@ class AssetMaintenanceResource extends Resource
                     ->money('Rp. ')
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('invoice_file')
-                    ->label('Bukti Pembyaran')
+                    ->label('Bukti Pembayaran')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
