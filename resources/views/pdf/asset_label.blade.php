@@ -23,7 +23,7 @@
         }
         td {
             border: 1px solid #000;
-            padding: 5px;
+            padding: 2px;
             text-align: center;
             vertical-align: middle;
         }
@@ -45,6 +45,7 @@
         .footer {
             font-size: 14px;
             text-align: center;
+            font-weight: bold;
         }
     </style>
 </head>
