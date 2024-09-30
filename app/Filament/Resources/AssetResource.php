@@ -9,34 +9,37 @@ use App\Models\Asset;
 use Filament\Forms\Form;
 use App\Models\Employees;
 use Filament\Tables\Table;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Barryvdh\DomPDF\PDF as DomPDF;
 use Filament\Resources\Pages\Page;
+use Endroid\QrCode\Builder\Builder;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
 use Illuminate\Support\Facades\Blade;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Filament\Support\Enums\ActionSize;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Endroid\QrCode\ErrorCorrectionLevel;
+// use Illuminate\Database\Eloquent\Builder;
+
+// library untuk export PDF
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
+
+// library endroid qr code
 use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\AssetResource\Pages;
 use App\Filament\Resources\AssetResource\Pages\EditAsset;
 use App\Filament\Resources\AssetResource\Pages\ViewAsset;
 use App\Filament\Resources\AssetMonitoringResource\Pages\CreateAssetMonitoring;
-// use Illuminate\Database\Eloquent\Builder;
-
-// library untuk export PDF
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Resources\Resource;
-use Barryvdh\DomPDF\PDF as DomPDF;
-
-// library endroid qr code
-use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\RoundBlockSizeMode;
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\ErrorCorrectionLevel;
 
 
 class AssetResource extends Resource
@@ -125,26 +128,71 @@ class AssetResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
-                    $employee = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
-                    })->first();
-        
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employee) {
-                        $pdfContent = Blade::render('pdf.report_asset', [
-                            'records' => $records,
-                            'employee' => $employee
+            ->headerActions([
+                // BulkAction untuk cetak label, diletakkan di sebelah kiri
+                Tables\Actions\BulkAction::make('print_label')
+                    ->label('Cetak Label')
+                    ->icon('heroicon-o-printer')
+                    ->action(function (Collection $records) {
+                        // Inisialisasi array untuk QR code
+                        $qrCodes = [];
+            
+                        // Loop untuk setiap record yang dipilih
+                        foreach ($records as $record) {
+                            // Generate URL untuk detail aset
+                            $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+            
+                            // Generate QR code dengan URL aset
+                            $qrCode = Builder::create()
+                                ->writer(new PngWriter())
+                                ->writerOptions([])
+                                ->data($assetDetailUrl)
+                                ->encoding(new Encoding('UTF-8'))
+                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                                ->size(100)
+                                ->margin(5)
+                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+                                ->build();
+            
+                            // Simpan QR code dalam bentuk string base64
+                            $qrCodes[$record->id] = base64_encode($qrCode->getString());
+                        }
+            
+                        // Generate PDF
+                        $pdf = app(DomPDF::class);
+                        $pdf->loadView('pdf.asset_label_massal', [
+                            'assets' => $records, // Kirim semua record ke Blade
+                            'qrCodes' => $qrCodes, // Kirim QR code ke Blade
                         ]);
-                        echo Pdf::loadHTML($pdfContent)->stream();
-                    }, 'assets.pdf');
-                }),
-        ])
+            
+                        // Format nama file PDF
+                        $fileName = 'label-assets-selected.pdf';
+            
+                        return response()->streamDownload(function() use ($pdf) {
+                            echo $pdf->output();
+                        }, $fileName);
+                    }),
+                    
+                // BulkAction untuk export PDF (sudah ada sebelumnya)
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                        })->first();
+            
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_asset', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'assets.pdf');
+                    }),
+            ])            
             ->columns([
                 Tables\Columns\TextColumn::make('No.')
                     ->rowIndex(),
@@ -229,10 +277,10 @@ class AssetResource extends Resource
                 ])
                 ], FiltersLayout::Modal)
             ->actions([
+                ActionGroup::make([
                 EditAction::make(),
                 DeleteAction::make(),
                 ViewAction::make(),
-
                 // Action untuk download pdf aset per record
                 Action::make('download_pdf')
                 ->label('Download PDF')
@@ -280,7 +328,13 @@ class AssetResource extends Resource
                         return response()->streamDownload(function() use($pdf) {
                             echo $pdf->output();
                         }, $fileName);
-                    }),                            
+                    }),                     
+                ])
+                ->label('Aksi')
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->size(ActionSize::Small)
+                ->color('primary')
+                ->button(),      
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
