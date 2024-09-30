@@ -38,7 +38,7 @@ class AssetMaintenanceResource extends Resource
                             ->label('Tanggal Pemeliharaan')
                             ->required(),
                         Forms\Components\TextInput::make('location_service')
-                            ->label('Lokasi Service')
+                            ->label('Lokasi')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\Select::make('assets_id')
@@ -52,18 +52,19 @@ class AssetMaintenanceResource extends Resource
                                 'Perbaikian Ringan' => 'Perbaikian Ringan',
                                 'Perbaikian Sedang' => 'Perbaikian Sedang',
                                 'Perbaikian Berat' => 'Perbaikan Berat',
+                                'Pembaruan Dokumen' => 'Pembaruan Dokumen',
                             ])
-                            ->label('Tipe Service')
+                            ->label('Tipe Pemeliharaan')
                             ->required(),
                         Forms\Components\TextInput::make('service_cost')
-                            ->label('Total Biaya Service')
+                            ->label('Total Biaya Pemeliharaan')
                             ->prefix('Rp. ')
                             ->required()
                             ->numeric(),
                         Forms\Components\FileUpload::make('invoice_file')
-                            ->label('Struck'),
+                            ->label('Bukti Pembayaran Pemeliharaan '),
                         Forms\Components\Textarea::make('desc')
-                            ->label('Catatan Service')
+                            ->label('Catatan Pemeliharaan')
                             ->columnSpanFull(),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
@@ -117,7 +118,7 @@ class AssetMaintenanceResource extends Resource
                     ->money('Rp. ')
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('invoice_file')
-                    ->label('Bukti Pembayaran')
+                    ->label('Bukti Pembyaran')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

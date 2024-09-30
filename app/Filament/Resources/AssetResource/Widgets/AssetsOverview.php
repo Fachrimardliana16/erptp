@@ -18,6 +18,18 @@ class AssetsOverview extends BaseWidget
         $inactiveStatusId = \DB::table('master_assets_status')
             ->where('name', 'inactive')
             ->value('id'); // Ambil UUID untuk status 'inactive'
+        $categoryAssetElec = \DB::table('master_assets_category')
+            ->where('name', 'elektronik')
+            ->value('id'); // Ambil UUID untuk status 'active'
+
+        $categoryAssetFurnitur = \DB::table('master_assets_category')
+            ->where('name', 'furnitur')
+            ->value('id'); // Ambil UUID untuk status 'active'
+
+        $categoryAssetKendaraan = \DB::table('master_assets_category')
+            ->where('name', 'Kendaraan')
+            ->value('id'); // Ambil UUID untuk status 'inactive' = \DB::table('master_assets_status')
+           
 
         // Hitung total aset
         $totalAssets = Asset::count();
@@ -28,6 +40,10 @@ class AssetsOverview extends BaseWidget
         // Hitung total aset dengan status 'inactive'
         $totalAssetsInactive = Asset::where('status_id', $inactiveStatusId)->count();
 
+        $totalCategoryElec = Asset::where('category_id', $categoryAssetElec)->count();
+        $totalCategoryFurnitur = Asset::where('category_id', $categoryAssetFurnitur)->count();
+        $totalCategoryKendaraan = Asset::where('category_id', $categoryAssetKendaraan)->count();
+
         return [
             Stat::make('Total Aset', $totalAssets)
                 ->color('primary')
@@ -37,7 +53,17 @@ class AssetsOverview extends BaseWidget
                 ->description('Total Aset Aktif'),
             Stat::make('Aset Inaktif', $totalAssetsInactive)
                 ->color('primary')
-                ->description('Total Aset Inaktif'),
+                ->description('Total Aset Aktif'),
+                Stat::make('Aset Elektronik', $totalCategoryElec)
+                ->color('primary')
+                ->description('Total Aset Elektronik'),
+                Stat::make('Aset Furnitur', $totalCategoryFurnitur)
+                ->color('primary')
+                ->description('Total Aset Furnitur'),
+                Stat::make('Aset Kendaraan', $totalCategoryKendaraan)
+                ->color('primary')
+                ->description('Total Aset Kendaraan'),
         ];
+        
     }
 }
