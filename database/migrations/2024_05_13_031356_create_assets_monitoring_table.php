@@ -20,6 +20,7 @@ return new class extends Migration
             $table->uuid('old_condition_id');
             $table->uuid('new_condition_id');
             $table->uuid('user_id')->nullable();
+            $table->string('img')->nullable();
             $table->text('desc')->nullable();
             $table->timestamps();
 

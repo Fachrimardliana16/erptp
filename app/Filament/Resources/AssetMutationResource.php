@@ -109,7 +109,7 @@ class AssetMutationResource extends Resource
                             ->preload()
                             ->required(),
                         Forms\Components\FileUpload::make('scan_doc')
-                            ->directory('Mutation Assets')
+                            ->directory('Asset_Mutation')
                             ->label('Scan Dokumen'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
@@ -123,25 +123,25 @@ class AssetMutationResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
-                    $employee = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
-                    })->first();
-        
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employee) {
-                        $pdfContent = Blade::render('pdf.report_asset_mutation', [
-                            'records' => $records,
-                            'employee' => $employee
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)->stream();
-                    }, 'mutation_assets.pdf');
-                }),
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                        })->first();
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_asset_mutation', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'mutation_assets.pdf');
+                    }),
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
@@ -187,10 +187,10 @@ class AssetMutationResource extends Resource
             ])
             ->filters([
                 Filter::make('Tanggal')
-                ->form([
-                    DatePicker::make('Dari'),
-                    DatePicker::make('Sampai'),
-                ])
+                    ->form([
+                        DatePicker::make('Dari'),
+                        DatePicker::make('Sampai'),
+                    ])
             ], FiltersLayout::Modal)
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -198,15 +198,15 @@ class AssetMutationResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 // Action untuk download pdf aset per record
                 Action::make('download_pdf')
-                ->label('Cetak Surat Mutasi')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->action(function($record){
-                    $pdf = app (abstract: DomPDF::class);
-                    $pdf->loadView('pdf.surat_mutasi_asset', ['assetmutation'=> $record]);
+                    ->label('Cetak Surat Mutasi')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function ($record) {
+                        $pdf = app(abstract: DomPDF::class);
+                        $pdf->loadView('pdf.surat_mutasi_asset', ['assetmutation' => $record]);
 
-                    return response()->streamDownload(function() use($pdf){
-                        echo $pdf->output();
-                    }, 'mutasi_asset-'.$record->name.'.pdf');
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, 'mutasi_asset-' . $record->name . '.pdf');
                     })
 
             ])

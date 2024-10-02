@@ -21,6 +21,7 @@ class AssetMonitoring extends Model
         'new_condition_id',
         'user_id',
         'desc',
+        'img',
         'users_id',
     ];
 
