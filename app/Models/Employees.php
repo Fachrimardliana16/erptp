@@ -144,4 +144,16 @@ class Employees extends Model
     {
         return $this->hasMany(EmployeeAgreement::class, 'employee_id', 'id');
     }
+    public function assignedEmployee()
+    {
+        return $this->hasMany(EmployeeAssignmentLetters::class, 'assigned_employee_id', 'id');
+    }
+    public function aassigningEmployee()
+    {
+        return $this->hasMany(EmployeeAssignmentLetters::class, 'assigning_employee_id', 'id');
+    }
+    public function businessTravelEmployee()
+    {
+        return $this->hasMany(EmployeeBusinessTravelLetters::class, 'employee_id', 'id');
+    }
 }

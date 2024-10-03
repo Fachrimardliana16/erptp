@@ -44,4 +44,9 @@ class MasterEmployeeGrade extends Model
     {
         return $this->hasMany(MasterEmployeeBasicSalary::class, 'employee_grade_id', 'id');
     }
+
+    public function gradeAssigned()
+    {
+        return $this->hasMany(EmployeeAssignmentLetters::class, 'grade_id', 'id');
+    }
 }
