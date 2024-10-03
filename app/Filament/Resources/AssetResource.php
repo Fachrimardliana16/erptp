@@ -114,6 +114,8 @@ class AssetResource extends Resource
                         Forms\Components\DatePicker::make('book_value_expiry')
                             ->label('Tanggal Habis Buku')
                             ->required(),
+                        Forms\Components\DatePicker::make('date_document_extension')
+                            ->label('Tanggal Perpanjangan Dokumen'),
                         Forms\Components\Textarea::make('desc')
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('img')
@@ -248,6 +250,10 @@ class AssetResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('book_value_expiry')
                     ->label('Tanggal Habis Nilai Buku')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('date_document_extension')
+                    ->label('Tanggal Perpanjangan Dokumen')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('AssetMutationLocation.name')
