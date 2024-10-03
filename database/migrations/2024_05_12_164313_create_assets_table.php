@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('book_value');
             $table->string('desc')->nullable();
             $table->date('book_value_expiry');
+            $table->date('date_document_extension')->nullable();
             $table->uuid('status_id');
             $table->timestamps();
 
