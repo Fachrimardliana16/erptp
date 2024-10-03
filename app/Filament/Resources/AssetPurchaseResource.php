@@ -104,7 +104,7 @@ class AssetPurchaseResource extends Resource
                             ->maxLength(255),
                         Forms\Components\FileUpload::make('img')
                             ->label('Gambar')
-                            ->directory('Pembelian Aset'),
+                            ->directory('Asset_Purchase'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
@@ -114,27 +114,27 @@ class AssetPurchaseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
-                    $employee = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
-                    })->first();
-        
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employee) {
-                        $pdfContent = Blade::render('pdf.report_asset_purchase', [
-                            'records' => $records,
-                            'employee' => $employee
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)
-                            ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
-                            ->stream();
-                    }, 'purchase_assets.pdf');
-                }),
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                        })->first();
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_asset_purchase', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)
+                                ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
+                                ->stream();
+                        }, 'purchase_assets.pdf');
+                    }),
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
@@ -187,10 +187,10 @@ class AssetPurchaseResource extends Resource
             ])
             ->filters([
                 Filter::make('Tanggal')
-                ->form([
-                    DatePicker::make('Dari'),
-                    DatePicker::make('Sampai'),
-                ])
+                    ->form([
+                        DatePicker::make('Dari'),
+                        DatePicker::make('Sampai'),
+                    ])
             ], FiltersLayout::Modal)
             ->actions([
                 Tables\Actions\EditAction::make(),

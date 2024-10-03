@@ -33,7 +33,6 @@ class DatabaseSeeder extends Seeder
             AssetComplaintStatusSeeder::class,
             AssetTransactionStatusSeeder::class,
             AssetCategorySeeder::class,
-            AssetTransactionStatusSeeder::class,
             AssetsStatusSeeder::class,
             FuelTypeSeeder::class,
             VoucherStatusTypeSeeder::class,

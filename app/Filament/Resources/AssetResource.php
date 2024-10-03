@@ -114,6 +114,8 @@ class AssetResource extends Resource
                         Forms\Components\DatePicker::make('book_value_expiry')
                             ->label('Tanggal Habis Buku')
                             ->required(),
+                        Forms\Components\DatePicker::make('date_document_extension')
+                            ->label('Tanggal Perpanjangan Dokumen'),
                         Forms\Components\Textarea::make('desc')
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('img')
@@ -136,12 +138,12 @@ class AssetResource extends Resource
                     ->action(function (Collection $records) {
                         // Inisialisasi array untuk QR code
                         $qrCodes = [];
-            
+
                         // Loop untuk setiap record yang dipilih
                         foreach ($records as $record) {
                             // Generate URL untuk detail aset
                             $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
-            
+
                             // Generate QR code dengan URL aset
                             $qrCode = Builder::create()
                                 ->writer(new PngWriter())
@@ -153,26 +155,26 @@ class AssetResource extends Resource
                                 ->margin(5)
                                 ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
                                 ->build();
-            
+
                             // Simpan QR code dalam bentuk string base64
                             $qrCodes[$record->id] = base64_encode($qrCode->getString());
                         }
-            
+
                         // Generate PDF
                         $pdf = app(DomPDF::class);
                         $pdf->loadView('pdf.asset_label_massal', [
                             'assets' => $records, // Kirim semua record ke Blade
                             'qrCodes' => $qrCodes, // Kirim QR code ke Blade
                         ]);
-            
+
                         // Format nama file PDF
                         $fileName = 'label-assets-selected.pdf';
-            
-                        return response()->streamDownload(function() use ($pdf) {
+
+                        return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
                         }, $fileName);
                     }),
-                    
+
                 // BulkAction untuk export PDF (sudah ada sebelumnya)
                 Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
@@ -182,7 +184,7 @@ class AssetResource extends Resource
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
-            
+
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_asset', [
@@ -192,7 +194,7 @@ class AssetResource extends Resource
                             echo Pdf::loadHTML($pdfContent)->stream();
                         }, 'assets.pdf');
                     }),
-            ])            
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('No.')
                     ->rowIndex(),
@@ -250,6 +252,10 @@ class AssetResource extends Resource
                     ->label('Tanggal Habis Nilai Buku')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('date_document_extension')
+                    ->label('Tanggal Perpanjangan Dokumen')
+                    ->date()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('AssetMutationLocation.name')
                     ->label('Lokasi')
                     ->searchable(),
@@ -267,74 +273,74 @@ class AssetResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('Lokasi')
-                ->relationship('AssetMutationLocation', 'name'),
+                    ->relationship('AssetMutationLocation', 'name'),
                 SelectFilter::make('Sub Lokasi')
-                ->relationship('AssetMutationSubLocation', 'name'),
+                    ->relationship('AssetMutationSubLocation', 'name'),
                 Filter::make('Tanggal')
-                ->form([
-                    DatePicker::make('Dari'),
-                    DatePicker::make('Sampai'),
-                ])
-                ], FiltersLayout::Modal)
+                    ->form([
+                        DatePicker::make('Dari'),
+                        DatePicker::make('Sampai'),
+                    ])
+            ], FiltersLayout::Modal)
             ->actions([
                 ActionGroup::make([
-                EditAction::make(),
-                DeleteAction::make(),
-                ViewAction::make(),
-                // Action untuk download pdf aset per record
-                Action::make('download_pdf')
-                ->label('Download PDF')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->action(function($record){
-                    $pdf = app (abstract: DomPDF::class);
-                    $pdf->loadView('pdf.dataasset', ['asset'=> $record]);
+                    EditAction::make(),
+                    DeleteAction::make(),
+                    ViewAction::make(),
+                    // Action untuk download pdf aset per record
+                    Action::make('download_pdf')
+                        ->label('Download PDF')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function ($record) {
+                            $pdf = app(abstract: DomPDF::class);
+                            $pdf->loadView('pdf.dataasset', ['asset' => $record]);
 
-                    return response()->streamDownload(function() use($pdf){
-                        echo $pdf->output();
-                    }, 'asset-'.$record->name.'.pdf');
-                    }),
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, 'asset-' . $record->name . '.pdf');
+                        }),
 
                     Action::make('print_label')
-                    ->label('Cetak Label')
-                    ->icon('heroicon-o-printer')
-                    ->action(function($record) {
-                        // Generate URL for asset detail page using assets_number
-                        $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
-                
-                        // Generate QR code with URL
-                        $qrCode = Builder::create()
-                            ->writer(new PngWriter())
-                            ->writerOptions([])
-                            ->data($assetDetailUrl) // Use the URL here
-                            ->encoding(new Encoding('UTF-8'))
-                            ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-                            ->size(100)
-                            ->margin(5)
-                            ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-                            ->build();
-                
-                        $qrCodeImage = $qrCode->getString();
-                
-                        // Generate PDF
-                        $pdf = app(DomPDF::class);
-                        $pdf->loadView('pdf.asset_label', [
-                            'asset' => $record,
-                            'qrCodeImage' => base64_encode($qrCodeImage)
-                        ]);
-                
-                        // Format file name as label-assets_number_name.pdf
-                        $fileName = 'label-' . $record->assets_number . '_' . str_replace(' ', '_', $record->name) . '.pdf';
-                
-                        return response()->streamDownload(function() use($pdf) {
-                            echo $pdf->output();
-                        }, $fileName);
-                    }),                     
+                        ->label('Cetak Label')
+                        ->icon('heroicon-o-printer')
+                        ->action(function ($record) {
+                            // Generate URL for asset detail page using assets_number
+                            $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+
+                            // Generate QR code with URL
+                            $qrCode = Builder::create()
+                                ->writer(new PngWriter())
+                                ->writerOptions([])
+                                ->data($assetDetailUrl) // Use the URL here
+                                ->encoding(new Encoding('UTF-8'))
+                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                                ->size(100)
+                                ->margin(5)
+                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+                                ->build();
+
+                            $qrCodeImage = $qrCode->getString();
+
+                            // Generate PDF
+                            $pdf = app(DomPDF::class);
+                            $pdf->loadView('pdf.asset_label', [
+                                'asset' => $record,
+                                'qrCodeImage' => base64_encode($qrCodeImage)
+                            ]);
+
+                            // Format file name as label-assets_number_name.pdf
+                            $fileName = 'label-' . $record->assets_number . '_' . str_replace(' ', '_', $record->name) . '.pdf';
+
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, $fileName);
+                        }),
                 ])
-                ->label('Aksi')
-                ->icon('heroicon-m-ellipsis-vertical')
-                ->size(ActionSize::Small)
-                ->color('primary')
-                ->button(),      
+                    ->label('Aksi')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->size(ActionSize::Small)
+                    ->color('primary')
+                    ->button(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

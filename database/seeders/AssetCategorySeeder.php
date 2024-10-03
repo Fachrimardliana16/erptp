@@ -21,6 +21,7 @@ class AssetCategorySeeder extends Seeder
             ['name' => 'Elektronik', 'desc' => 'Kategori aset untuk perangkat elektronik seperti komputer, printer, dan perangkat komunikasi.'],
             ['name' => 'Furnitur', 'desc' => 'Kategori aset untuk perabotan kantor dan perlengkapan furnitur lainnya.'],
             ['name' => 'Kendaraan', 'desc' => 'Kategori aset untuk kendaraan roda dua, roda tiga, dan roda empat yang dimiliki oleh perusahaan.'],
+            ['name' => 'Tanah dan bangunan', 'desc' => 'Kategori aset untuk tanah dan bangunan yang dimiliki oleh perusahaan.'],
         ];
 
         foreach ($categories as $category) {
