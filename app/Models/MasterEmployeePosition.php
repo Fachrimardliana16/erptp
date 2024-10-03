@@ -34,4 +34,9 @@ class MasterEmployeePosition extends Model
     {
         return $this->hasMany(EmployeeAgreement::class, 'employee_position_id', 'id');
     }
+
+    public function positionAssign()
+    {
+        return $this->hasMany(EmployeeAssignmentLetters::class, 'employee_position_id', 'id');
+    }
 }
