@@ -29,7 +29,6 @@ class Asset extends Model
         'brand',
         'book_value',
         'book_value_expiry',
-        'date_document_extension',
         'location_id',
         'sub_location_id',
         'status_id',
@@ -91,9 +90,5 @@ class Asset extends Model
     public function AssetMutationSubLocation()
     {
         return $this->belongsTo(MasterAssetsSubLocation::class, 'sub_location_id', 'id');
-    }
-    public function AssetDocumentExtension()
-    {
-        return $this->hasMany(AssetDocumentExtension::class, 'assets_id', 'id');
     }
 }
