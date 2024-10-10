@@ -51,6 +51,7 @@
             padding-left: 60%;
         }
         .signature p {
+            text-align: center;
             margin: 5px 0;
             font-size: 12px; /* Menyamakan ukuran font dengan tabel */
         }
