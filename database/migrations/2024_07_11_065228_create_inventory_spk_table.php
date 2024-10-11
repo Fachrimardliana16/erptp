@@ -12,8 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory_spk', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('spk_number');
+            $table->unsignedBigInteger('supplier_id');
+            $table->date('date');
+            $table->unsignedBigInteger('dbp_id');
+            $table->string('status');
             $table->timestamps();
+            $table->uuid('users_id');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

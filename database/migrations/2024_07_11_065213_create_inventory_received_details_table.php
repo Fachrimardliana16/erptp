@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventory_opening_balances', function (Blueprint $table) {
-            $table->uuid('id');
+        Schema::create('inventory_received_details', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->uuid('item_id');
-            $table->decimal('amount_item', 8, 2);
-            $table->decimal('price', 10, 2);
-            $table->uuid('allocation_id');
+            $table->integer('amount');
+            $table->decimal('price', 15, 2);
+            $table->text('desc')->nullable();
+            $table->boolean('isdeleted')->default(false);
             $table->uuid('users_id');
             $table->timestamps();
             $table->foreign('item_id')->references('id')->on('inventory_items')->onDelete('cascade');
-            $table->foreign('allocation_id')->references('id')->on('master_inventory_allocations')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventory_opening_balances');
+        Schema::dropIfExists('inventory_received_details');
     }
 };

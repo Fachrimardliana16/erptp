@@ -11,16 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventory_opening_balances', function (Blueprint $table) {
-            $table->uuid('id');
+        Schema::create('inventory_bpp_details', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->uuid('bpp_id');
             $table->uuid('item_id');
-            $table->decimal('amount_item', 8, 2);
-            $table->decimal('price', 10, 2);
-            $table->uuid('allocation_id');
+            $table->uuid('received_id');
+            $table->decimal('amount_req', 8, 2);
+            $table->decimal('amount_out', 8, 2);
+            $table->text('desc')->nullable();
             $table->uuid('users_id');
             $table->timestamps();
+
+            $table->foreign('bpp_id')->references('id')->on('inventory_bpp')->onDelete('cascade');
             $table->foreign('item_id')->references('id')->on('inventory_items')->onDelete('cascade');
-            $table->foreign('allocation_id')->references('id')->on('master_inventory_allocations')->onDelete('cascade');
+            $table->foreign('received_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -30,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventory_opening_balances');
+        Schema::dropIfExists('inventory_bpp_details');
     }
 };

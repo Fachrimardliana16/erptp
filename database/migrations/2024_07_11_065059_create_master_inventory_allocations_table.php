@@ -9,11 +9,13 @@ class CreateMasterInventoryAllocationsTable extends Migration
     public function up()
     {
         Schema::create('master_inventory_allocations', function (Blueprint $table) {
-            $table->uuid('uuid')->primary();
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('breakdown')->nullable();
             $table->timestamps();
+            $table->uuid('users_id');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

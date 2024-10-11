@@ -12,8 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory_opnames', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->date('opname_date');
+            $table->string('reason');
+            $table->uuid('allocation_id');
+            $table->uuid('users_id');
             $table->timestamps();
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('allocation_id')->references('id')->on('master_inventory_allocations')->onDelete('cascade');
         });
     }
 
