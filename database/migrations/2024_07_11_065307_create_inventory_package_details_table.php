@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('inventory_package_details', function (Blueprint $table) {
             $table->id();
+            $table->uuid('item_id');
+            $table->integer('quantity');
+            $table->integer('quantity_out');
+            $table->uuid('users_id');
             $table->timestamps();
+
+            $table->foreign('item_id')->references('id')->on('inventory_items')->onDelete('cascade');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

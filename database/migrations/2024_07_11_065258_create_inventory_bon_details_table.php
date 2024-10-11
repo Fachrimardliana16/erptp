@@ -12,8 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory_bon_details', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id');
+            $table->uuid('item_id');
+            $table->integer('quantity');
+            $table->string('description');
             $table->timestamps();
+            $table->uuid('users_id');
+
+            $table->foreign('item_id')->references('id')->on('inventory_items')->onDelete('cascade');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

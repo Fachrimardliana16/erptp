@@ -11,17 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventory_return_details', function (Blueprint $table) {
+        Schema::create('inventory_bpp', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('number_bpp');
             $table->date('date');
-            $table->uuid('bpp_id');
-            $table->decimal('amount', 8, 2);
+            $table->string('request_by');
+            $table->uuid('allocation_id');
+            $table->string('nolang');
             $table->text('desc')->nullable();
+            $table->string('used_for');
             $table->uuid('users_id');
             $table->timestamps();
 
-            $table->foreign('bpp_id')->references('id')->on('inventory_bpp')->onDelete('cascade');
+            // Menambahkan nama constraint secara unik
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('allocation_id')->references('id')->on('master_inventory_allocations')->onDelete('cascade');
         });
     }
 
@@ -30,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventory_return_details');
+        Schema::dropIfExists('inventory_bpp');
     }
 };

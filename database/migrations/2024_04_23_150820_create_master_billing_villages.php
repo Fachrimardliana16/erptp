@@ -12,12 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('master_billing_villages', function (Blueprint $table) {
-            $table->uuid('id')->primary;
+            $table->uuid('id')->primary();
             $table->string('name');
             $table->uuid('subdistricts_id');
             $table->timestamps();
 
-            $table->index('id');
+            // tambahkan unique key pada kolom 'id'
+            $table->unique('id');
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
