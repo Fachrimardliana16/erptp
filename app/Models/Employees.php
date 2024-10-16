@@ -156,4 +156,14 @@ class Employees extends Model
     {
         return $this->hasMany(EmployeeBusinessTravelLetters::class, 'employee_id', 'id');
     }
+
+    public function basicSalary()
+    {
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'basic_salary_id');
+    }
+
+    public function grade()
+    {
+        return $this->hasOneThrough(MasterEmployeeGrade::class, MasterEmployeeBasicSalary::class, 'id', 'id', 'basic_salary_id', 'employee_grade_id');
+    }
 }
