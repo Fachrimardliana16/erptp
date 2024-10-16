@@ -23,4 +23,9 @@ class MasterEmployeeStatusEmployemnt extends Model
     {
         return $this->hasMany(EmployeeAgreement::class, 'status_employements_id', 'id');
     }
+
+    public function status()
+    {
+        return $this->hasMany(EmployeePayroll::class, 'status_id');
+    }
 }

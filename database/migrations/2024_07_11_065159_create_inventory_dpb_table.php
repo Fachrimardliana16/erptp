@@ -9,13 +9,15 @@ class CreateInventoryDpbTable extends Migration
     public function up()
     {
         Schema::create('inventory_dpb', function (Blueprint $table) {
-            $table->uuid('uuid')->primary();
+            $table->uuid('id')->primary();
             $table->string('dpb_number');
             $table->date('date');
             $table->string('for');
             $table->string('status');
             $table->text('description')->nullable();
             $table->timestamps();
+            $table->uuid('users_id');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

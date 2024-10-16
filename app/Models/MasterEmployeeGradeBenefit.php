@@ -24,4 +24,39 @@ class MasterEmployeeGradeBenefit extends Model
     {
         return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
     }
+
+
+    public function benefit1()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_1');
+    }
+    public function benefit2()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_2');
+    }
+    public function benefit3()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_3');
+    }
+    public function benefit4()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_4');
+    }
+
+    public function benefit5()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_5');
+    }
+    public function benefit6()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_6');
+    }
+    public function benefit7()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_7');
+    }
+    public function benefit8()
+    {
+        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_8');
+    }
 }

@@ -12,8 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('inventory_opening_balances', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id');
+            $table->uuid('item_id');
+            $table->decimal('amount_item', 8, 2);
+            $table->decimal('price', 10, 2);
+            $table->uuid('allocation_id');
+            $table->uuid('users_id');
             $table->timestamps();
+            $table->foreign('item_id')->references('id')->on('inventory_items')->onDelete('cascade');
+            $table->foreign('allocation_id')->references('id')->on('master_inventory_allocations')->onDelete('cascade');
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
