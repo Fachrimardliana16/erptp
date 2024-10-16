@@ -4717,7 +4717,7 @@
             "support": {
                 "issues": "https://github.com/nette/schema/issues",
 
-                "source": "https://github.com/nette/schema/tree/v1.3.2"
+              "source": "https://github.com/nette/schema/tree/v1.3.2"
             },
             "time": "2024-10-06T23:10:23+00:00"
 

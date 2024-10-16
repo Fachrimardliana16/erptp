@@ -2,18 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EmployeeAssignmentLettersResource\Pages;
-use App\Filament\Resources\EmployeeAssignmentLettersResource\RelationManagers;
-use App\Models\EmployeeAssignmentLetters;
-use App\Models\Employees;
 use Filament\Forms;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Employees;
 use Filament\Tables\Table;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Blade;
+use Filament\Forms\Components\Section;
+use App\Models\EmployeeAssignmentLetters;
+
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\EmployeeAssignmentLettersResource\Pages;
+use App\Filament\Resources\EmployeeAssignmentLettersResource\RelationManagers;
 
 class EmployeeAssignmentLettersResource extends Resource
 {
@@ -51,6 +58,7 @@ class EmployeeAssignmentLettersResource extends Resource
                             ->label('Jabatan')
                             ->required(),
                         Forms\Components\Select::make('assigned_employee_id')
+                            ->multiple()
                             ->relationship('assignedEmployee', 'name')
                             ->label('Penerima Tugas')
                             ->required()
@@ -79,6 +87,27 @@ class EmployeeAssignmentLettersResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                    })->first();
+
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employee) {
+                        $pdfContent = Blade::render('pdf.report_employee_assignmentletter', [
+                            'records' => $records,
+                            'employee' => $employee
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'assignment_letters.pdf');
+                }),
+            ])
+
             ->columns([
                 Tables\Columns\TextColumn::make('registration_number')
                     ->label('Nomor Surat')
@@ -115,10 +144,26 @@ class EmployeeAssignmentLettersResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('Tanggal')
+                ->form([
+                    DatePicker::make('Dari'),
+                    DatePicker::make('Sampai'),
+                ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                    // Action untuk download pdf aset per record
+                    Action::make('download_pdf')
+                        ->label('Download PDF')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function ($record) {
+                            $pdf = app(abstract: DomPDF::class);
+                            $pdf->loadView('pdf.employee_assignmentletter', ['surat_tugas' => $record]);
+
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, 'surat_tugas-' . $record->name . '.pdf');
+                        }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

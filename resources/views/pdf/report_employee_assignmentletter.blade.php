@@ -51,7 +51,6 @@
             padding-left: 60%;
         }
         .signature p {
-            text-align: center;
             margin: 5px 0;
             font-size: 12px; /* Menyamakan ukuran font dengan tabel */
         }
@@ -67,35 +66,27 @@
         <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('storage/kop_surat.png'))) }}" alt="Kop Surat Perusahaan">
     </div>
 
-    <h4 align="center">Laporan Daftar Pembelian Barang</h4>
+    <h4 align="center">Laporan Daftar Surat Tugas </h4>
     <table cellpadding="5" cellspacing="0">
         <thead>
             <tr>
                 <th>No.</th>
-                <th>Nomor Permintaan</th>
-                <th>Nama Aset</th>
-                <th>Kategori</th>
-                <th>Nomor Aset</th>
-                <th>Merk</th>
-                <th>Tanggal Pembelian</th>
-                <th>Kondisi</th>
-                <th>Harga</th>
-                <th>Sumber Dana</th>
+                <th>Nomor Dokumen</th>
+                <th>Tanggal Mulai</th>
+                <th>Tanggal Selesai</th>
+                <th>Penerima Tugas</th>
+                <th>Tugas</th>
             </tr>
         </thead>
         <tbody>
             @foreach($records as $record)
                 <tr>
                     <td class="no-col">{{ $loop->iteration }}</td>
-                    <td>{{ $record->assetRequest->document_number }}</td>
-                    <td>{{ $record->asset_name }}</td>
-                    <td>{{ $record->category->name }}</td>
-                    <td>{{ $record->assets_number }}</td>
-                    <td>{{ $record->brand }}</td>
-                    <td>{{ $record->purchase_date }}</td>
-                    <td>{{ $record->condition->name }}</td>
-                    <td>Rp {{ number_format($record->price, 0, ',','.') }}</td>
-                    <td>{{ $record->funding_source }}</td>
+                    <td>{{ $record->registration_number }}</td>
+                    <td>{{ $record->start_date }}</td>
+                    <td>{{ $record->end_date }}</td>
+                    <td>{{ $record->assignedEmployee->name }}</td>
+                    <td>{{ $record->task }}</td>
                 </tr>
             @endforeach
         </tbody>
