@@ -22,10 +22,7 @@ return new class extends Migration
             $table->decimal('benefits_5', 15, 2)->nullable();
             $table->decimal('benefits_6', 15, 2)->nullable();
             $table->decimal('benefits_7', 15, 2)->nullable();
-            $table->decimal('benefits_12', 15, 2)->nullable();
-            $table->decimal('Rounding', 15, 2)->nullable();
-            $table->decimal('Incentive', 15, 2)->nullable();
-            $table->decimal('Backpay', 15, 2)->nullable();
+            $table->decimal('benefits_8', 15, 2)->nullable();
             $table->timestamps();
             $table->decimal('amount', 15, 2)->nullable();
             $table->uuid('users_id');

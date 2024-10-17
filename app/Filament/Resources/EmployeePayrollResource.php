@@ -32,26 +32,41 @@ class EmployeePayrollResource extends Resource
 
     protected static function calculateTotalBruto($get)
     {
-        return ($get('basic_salary') ?? 0) + ($get('benefits_1') ?? 0) + ($get('benefits_2') ?? 0) +
-            ($get('benefits_3') ?? 0) + ($get('benefits_4') ?? 0) + ($get('benefits_5') ?? 0) +
-            ($get('benefits_6') ?? 0) + ($get('benefits_7') ?? 0) + ($get('benefits_8') ?? 0) +
-            ($get('rounding') ?? 0) + ($get('incentive') ?? 0) + ($get('backpay') ?? 0);
+        return (float) ($get('basic_salary') ?? 0) + (float) ($get('benefits_1') ?? 0) +
+            (float) ($get('benefits_2') ?? 0) + (float) ($get('benefits_3') ?? 0) +
+            (float) ($get('benefits_4') ?? 0) + (float) ($get('benefits_5') ?? 0) +
+            (float) ($get('benefits_6') ?? 0) + (float) ($get('benefits_7') ?? 0) +
+            (float) ($get('benefits_8') ?? 0) + (float) ($get('rounding') ?? 0) +
+            (float) ($get('incentive') ?? 0) + (float) ($get('backpay') ?? 0);
     }
 
     protected static function calculateTotalCut($get)
     {
-        return ($get('paycut_1') ?? 0) + ($get('paycut_2') ?? 0) + ($get('paycut_3') ?? 0) +
-            ($get('paycut_4') ?? 0) + ($get('paycut_5') ?? 0) + ($get('paycut_6') ?? 0) +
-            ($get('paycut_7') ?? 0) + ($get('paycut_8') ?? 0) + ($get('paycut_9') ?? 0)
-            + ($get('paycut_10') ?? 0);
+        return (float) ($get('paycut_1') ?? 0) + (float) ($get('paycut_2') ?? 0) +
+            (float) ($get('paycut_3') ?? 0) + (float) ($get('paycut_4') ?? 0) +
+            (float) ($get('paycut_5') ?? 0) + (float) ($get('paycut_6') ?? 0) +
+            (float) ($get('paycut_7') ?? 0) + (float) ($get('paycut_8') ?? 0) +
+            (float) ($get('paycut_9') ?? 0) + (float) ($get('paycut_10') ?? 0);
     }
 
     protected static function calculateNetto($get)
     {
         $grossAmount = self::calculateTotalBruto($get);
         $cutAmount = self::calculateTotalCut($get);
+
         return $grossAmount - $cutAmount;
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['gross_amount'] = self::calculateTotalBruto($data);
+        $data['cut_amount'] = self::calculateTotalCut($data);
+        $data['netto'] = self::calculateNetto($data);
+
+        return $data;
+    }
+
+
 
     public static function form(Form $form): Form
     {
@@ -125,19 +140,6 @@ class EmployeePayrollResource extends Resource
                                     ]),
                                 Tabs\Tab::make('Tunjangan dan Bruto')
                                     ->schema([
-                                        // Forms\Components\Select::make('employee_id')
-                                        //     ->options(Employees::query()->pluck('name', 'id'))
-                                        //     ->reactive()
-                                        //     ->afterStateUpdated(function ($state, callable $set) {
-                                        //         $employee = Employees::find($state);
-                                        //         if ($employee) {
-                                        //             $set('status_id', $employee->employment_status_id);
-                                        //             $set('grade_id', $employee->basicSalary->employee_grade_id);
-                                        //             $set('position_id', $employee->employee_position_id);
-                                        //         }
-                                        //     })
-                                        //     ->label('Pegawai')
-                                        //     ->required(),
                                         Forms\Components\Select::make('salary_id')
                                             ->options(EmployeeSalary::with('employee')->get()->pluck('employee.name', 'id'))
                                             ->reactive()
@@ -152,9 +154,13 @@ class EmployeePayrollResource extends Resource
                                                     $set('benefits_5', $employee->benefits_5);
                                                     $set('benefits_6', $employee->benefits_6);
                                                     $set('benefits_7', $employee->benefits_7);
-                                                    $set('benefits_8', $employee->benefits_12);
+                                                    $set('benefits_8', $employee->benefits_8);
                                                 }
                                             })
+                                            ->label('Pegawai')
+                                            ->required(),
+                                        Forms\Components\Hidden::make('salary_id')
+                                            ->reactive()
                                             ->label('Pegawai')
                                             ->required(),
                                         Forms\Components\TextInput::make('basic_salary')
@@ -308,17 +314,6 @@ class EmployeePayrollResource extends Resource
                                         Forms\Components\Hidden::make('benefits_8')
                                             ->reactive()
                                             ->label('Lain-lain'),
-                                        Forms\Components\TextInput::make('rounding')
-                                            ->prefix('Rp. ')
-                                            ->label('Pembulatan')
-                                            ->numeric()
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
                                         Forms\Components\TextInput::make('incentive')
                                             ->prefix('Rp. ')
                                             ->label('Insentif')
@@ -341,11 +336,10 @@ class EmployeePayrollResource extends Resource
                                                 $totalNetto = self::calculateNetto($get);
                                                 $set('netto', $totalNetto);
                                             }),
-                                        Forms\Components\TextInput::make('gross_amount')
+                                        Forms\Components\TextInput::make('rounding')
                                             ->prefix('Rp. ')
-                                            ->label('Total Bruto')
+                                            ->label('Pembulatan')
                                             ->numeric()
-                                            ->disabled()
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
                                                 $totalBruto = self::calculateTotalBruto($get);
@@ -353,27 +347,30 @@ class EmployeePayrollResource extends Resource
                                                 $totalNetto = self::calculateNetto($get);
                                                 $set('netto', $totalNetto);
                                             }),
+                                        Forms\Components\TextInput::make('gross_amount')
+                                            ->label('Total Bruto')
+                                            ->prefix('Rp. ')
+                                            ->numeric()
+                                            ->reactive()
+                                            ->disabled()
+                                            ->debounce(300)
+                                            ->readOnly()
+                                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set('gross_amount', $totalBruto);
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', $e->getMessage());
+                                                }
+                                            }),
                                     ]),
                                 Tabs\Tab::make('Potongan dan Netto')
                                     ->schema([
                                         Forms\Components\TextInput::make('absence_count')
                                             ->label('Jumlah Absen')
                                             ->numeric(),
-                                        // Forms\Components\TextInput::make('benefits_4')
-                                        //     ->reactive('')
-                                        //     ->label('Tunjangan Kesehatan')
-                                        //     ->prefix('Rp. ')
-                                        //     ->disabled()
-                                        //     ->numeric()
-                                        //     ->reactive()
-                                        //     ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        //         $total = self::calculateTotalBruto($get);
-                                        //         $set('gross_amount', $total);
-                                        //     }),
-                                        // Forms\Components\Hidden::make('benefits_4')
-                                        //     ->reactive()
-                                        //     ->label('Tunjangan Kesehatan')
-                                        //     ->required(),
                                         Forms\Components\TextInput::make('paycut_1')
                                             ->label('Tabungan Daging')
                                             ->reactive()
@@ -484,30 +481,30 @@ class EmployeePayrollResource extends Resource
                                                 $totalNetto = self::calculateNetto($get);
                                                 $set('netto', $totalNetto);
                                             }),
+
                                         Forms\Components\TextInput::make('cut_amount')
                                             ->label('Jumlah Potongan')
                                             ->prefix('Rp. ')
                                             ->reactive()
-                                            ->disabled()
+                                            ->debounce(300)
+                                            ->readOnly()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalCut = self::calculateTotalCut($get);
+                                                    $set('cut_amount', $totalCut);
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', $e->getMessage());
+                                                }
                                             })
                                             ->numeric(),
                                         Forms\Components\TextInput::make('netto')
                                             ->label('Jumlah Netto')
                                             ->prefix('Rp. ')
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            })
+                                            ->numeric()
                                             ->reactive()
-                                            ->disabled()
-                                            ->numeric(),
+                                            ->readOnly(),
                                         Forms\Components\Textarea::make('desc')
                                             ->label('')
                                             ->columnSpanFull(),
@@ -705,7 +702,7 @@ class EmployeePayrollResource extends Resource
                                 echo $pdf->output();
                             }, 'slip_gaji_' . $record->name . '.pdf');
                         }),
-                    ]),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
