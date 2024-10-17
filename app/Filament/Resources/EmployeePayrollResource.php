@@ -60,9 +60,9 @@ class EmployeePayrollResource extends Resource
                                     ->schema([
                                         Forms\Components\TextInput::make('periode')
                                             ->label('Periode Gaji')
-                                            ->placeholder('MM/YYYY')
+                                            ->placeholder('MMYYYY')
                                             ->required()
-                                            ->helperText('Masukkan dalam format MM/YYYY'),
+                                            ->helperText('Masukkan dalam format MMYYYY'),
                                         Forms\Components\Select::make('employee_id')
                                             ->options(Employees::query()->pluck('name', 'id'))
                                             ->reactive()

@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AssetDocumentExtensionResource\Pages;
-use App\Filament\Resources\AssetDocumentExtensionResource\RelationManagers;
-use App\Models\Asset;
-use App\Models\AssetDocumentExtension;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Asset;
+use Filament\Forms\Form;
+use App\Models\Employees;
 use Filament\Tables\Table;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Blade;
+use App\Models\AssetDocumentExtension;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\AssetDocumentExtensionResource\Pages;
+use App\Filament\Resources\AssetDocumentExtensionResource\RelationManagers;
 
 class AssetDocumentExtensionResource extends Resource
 {
@@ -79,6 +82,26 @@ class AssetDocumentExtensionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                    })->first();
+
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employee) {
+                        $pdfContent = Blade::render('pdf.report_asset_document_extension', [
+                            'records' => $records,
+                            'employee' => $employee
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'document_extension_assets.pdf');
+                }),
+        ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
