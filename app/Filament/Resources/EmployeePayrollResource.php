@@ -2,22 +2,27 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EmployeePayrollResource\Pages;
-use App\Filament\Resources\EmployeePayrollResource\RelationManagers;
-use App\Models\EmployeePayroll;
-use App\Models\Employees;
-use App\Models\EmployeeSalary;
 use Filament\Forms;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Form;
+use App\Models\Employees;
 use Filament\Tables\Table;
+use App\Models\EmployeeSalary;
+use App\Models\EmployeePayroll;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Tabs;
+use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\EmployeePayrollResource\Pages;
+use App\Filament\Resources\EmployeePayrollResource\RelationManagers;
+use Barryvdh\DomPDF\PDF as DomPDF;
 
 class EmployeePayrollResource extends Resource
 {
@@ -685,7 +690,22 @@ class EmployeePayrollResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    ViewAction::make(),
+                    // Action untuk download pdf aset per record
+                    Action::make('download_pdf')
+                        ->label('Cetak Slip Gaji')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function ($record) {
+                            $pdf = app(abstract: DomPDF::class);
+                            $pdf->loadView('pdf.employee_payroll_slip', ['payroll' => $record]);
+
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, 'slip_gaji_' . $record->name . '.pdf');
+                        }),
+                    ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
