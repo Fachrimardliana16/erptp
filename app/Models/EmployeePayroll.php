@@ -17,8 +17,8 @@ class EmployeePayroll extends Model
     protected $table = 'employee_payroll';
 
     protected $casts = [
-        'basic_salary' => 'encrypted',
-        'netto' => 'encrypted',
+        // 'basic_salary' => 'encrypted',
+        // 'netto' => 'encrypted',
     ];
 
     protected static $logAttributes = ['*'];
@@ -31,6 +31,7 @@ class EmployeePayroll extends Model
         'grade_id',
         'position_id',
         'salary_id',
+        'basic_salary',
         'benefits_1',
         'benefits_2',
         'benefits_3',
@@ -54,9 +55,9 @@ class EmployeePayroll extends Model
         'paycut_8',
         'paycut_9',
         'paycut_10',
+        'cut_amount',
         'netto',
         'desc',
-        'cut_amount',
         'users_id'
     ];
 

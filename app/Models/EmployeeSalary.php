@@ -22,10 +22,7 @@ class EmployeeSalary extends Model
         'benefits_5',
         'benefits_6',
         'benefits_7',
-        'benefits_12',
-        'Rounding',
-        'Incentive',
-        'Backpay',
+        'benefits_8',
         'amount',
         'users_id'
     ];
