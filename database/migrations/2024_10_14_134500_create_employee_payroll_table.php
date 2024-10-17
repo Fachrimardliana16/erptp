@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('periode');
             $table->uuid('employee_id');
             $table->uuid('status_id');
-            $table->uuid('grade_id');
+            $table->uuid('grade_id')->nullable();
             $table->uuid('position_id');
             $table->uuid('salary_id');
             $table->decimal('basic_salary', 12, 2)->nullable();

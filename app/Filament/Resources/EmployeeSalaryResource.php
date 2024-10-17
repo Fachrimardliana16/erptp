@@ -60,6 +60,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan Keluarga')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -69,6 +70,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan Beras')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -78,6 +80,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan Jabatan')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -87,6 +90,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan Kesehatan')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -96,6 +100,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan Air')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -105,6 +110,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Tunjangan DPLK')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -114,6 +120,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Lain-lain')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -123,6 +130,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Lain-lain')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -132,6 +140,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Pembulatan')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -141,6 +150,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Insentif')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
@@ -150,6 +160,7 @@ class EmployeeSalaryResource extends Resource
                                     ->label('Rapel')
                                     ->numeric()
                                     ->reactive()
+                                    ->default('0')
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
