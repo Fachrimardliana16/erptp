@@ -506,7 +506,7 @@ class EmployeePayrollResource extends Resource
                                             ->reactive()
                                             ->readOnly(),
                                         Forms\Components\Textarea::make('desc')
-                                            ->label('')
+                                            ->label('Keterangan Potongan')
                                             ->columnSpanFull(),
                                     ]),
                             ]),
@@ -671,6 +671,8 @@ class EmployeePayrollResource extends Resource
                     ->label('Total Penerimaan')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('desc')
+                    ->label('Keterangan Potongan'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

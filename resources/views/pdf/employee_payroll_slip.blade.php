@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Slip Gaji Pegawai</title>
     <style>
         @page {
-            size: A4 landscape; /* Set the page size to landscape */
-            margin: 0; /* Remove default margin */
+            size: A4 landscape;
+            /* Set the page size to landscape */
+            margin: 0;
+            /* Remove default margin */
         }
+
         body {
             font-family: Arial, sans-serif;
             font-size: 10px;
             margin: 5px;
         }
+
         .container {
-            width: 45%; /* Lebar container menjadi 48% */
+            width: 45%;
+            /* Lebar container menjadi 48% */
             margin: 0 auto;
-            float: left; /* Agar container berada di kiri */
+            float: left;
+            /* Agar container berada di kiri */
             padding: 5px;
-            border: 1px solid #000; /* Border untuk container */
+            border: 1px solid #000;
+            /* Border untuk container */
         }
+
         .title {
             text-align: left;
             font-weight: bold;
@@ -28,41 +37,54 @@
             margin-bottom: 20px;
             padding-left: 10px;
         }
+
         .section {
             width: 100%;
             margin-bottom: 10px;
         }
+
         .section-title {
             font-weight: bold;
             margin-top: 10px;
             text-decoration: underline;
         }
+
         table {
-            width: 100%; /* Lebar tabel menjadi 46% */
+            width: 100%;
+            /* Lebar tabel menjadi 46% */
             border-collapse: collapse;
             margin-bottom: 10px;
-            border: 1px solid #000; /* Border untuk tabel */
+            border: 1px solid #000;
+            /* Border untuk tabel */
             padding: 10px;
         }
-        th, td {
+
+        th,
+        td {
             padding-left: 10px;
-            text-align: left; /* Rata kiri untuk isi slip gaji */
+            text-align: left;
+            /* Rata kiri untuk isi slip gaji */
         }
+
         th {
             background-color: #f2f2f2;
         }
+
         .total {
             font-weight: bold;
         }
+
         .align-right {
             text-align: right;
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        <div class="title">SLIP GAJI PEGAWAI<br>PERUMDAM TIRTA PERWIRA<br>KAB. PURBALINGGA<br>Periode: {{ $payroll->periode }}</div>
+        <div class="title">SLIP GAJI PEGAWAI<br>PERUMDAM TIRTA PERWIRA<br>KAB. PURBALINGGA<br>Periode:
+            {{ $payroll->periode }}</div>
 
         <!-- Upper section: Employee identity and salary -->
         <div class="section">
@@ -150,7 +172,7 @@
                 </tr>
                 <tr>
                     <th>Absen</th>
-                    <td class="align-right">{{($payroll->absence_count)}} Hari</td>
+                    <td class="align-right">{{ $payroll->absence_count }} Hari</td>
                 </tr>
                 <tr>
                     <th>Tabungan Daging</th>
@@ -198,6 +220,10 @@
                 </tr>
             </table>
             <table>
+                <tr class="desc">
+                    <th>Keterangan Potongan</th>
+                    <td class="align-right">{{ $payroll->desc }}</td>
+                </tr>
                 <tr class="total">
                     <th>TOTAL PENERIMAAN</th>
                     <td class="align-right">Rp {{ number_format($payroll->netto, 0, ',', '.') }}</td>
@@ -207,4 +233,5 @@
     </div>
 
 </body>
+
 </html>

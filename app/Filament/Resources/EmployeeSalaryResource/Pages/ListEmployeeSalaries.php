@@ -18,9 +18,10 @@ class ListEmployeeSalaries extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Tambah Data'),
             Action::make('generatePayroll')
-                ->label('Generate Payroll Massal')
+                ->label('Hitung Gaji')
                 ->form([
                     DatePicker::make('periode')
                         ->label('Periode Gaji')
