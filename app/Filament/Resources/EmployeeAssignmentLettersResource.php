@@ -57,14 +57,13 @@ class EmployeeAssignmentLettersResource extends Resource
                             ->relationship('positionAssign', 'name')
                             ->label('Jabatan')
                             ->required(),
-                        Forms\Components\Select::make('assigned_employee_id')
+                        Forms\Components\Select::make('assigned_employees')
                             ->multiple()
-                            ->relationship('assignedEmployee', 'name')
+                            ->relationship('assignedEmployees', 'name')
                             ->label('Penerima Tugas')
                             ->required()
                             ->searchable()
-                            ->preload()
-                            ->live(),
+                            ->preload(),
                         Forms\Components\Textarea::make('task')
                             ->label('Detail Tugas')
                             ->required()
@@ -92,16 +91,16 @@ class EmployeeAssignmentLettersResource extends Resource
                 ->icon('heroicon-m-arrow-down-tray')
                 ->deselectRecordsAfterCompletion()
                 ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
-                    $employee = Employees::whereHas('employeePosition', function ($query) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                    $employees = Employees::whereHas('employeePosition', function ($query) {
                         $query->where('name', 'Kepala Sub Bagian Kepegawaian');
                     })->first();
 
                     // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employee) {
+                    return response()->streamDownload(function () use ($records, $employees) {
                         $pdfContent = Blade::render('pdf.report_employee_assignmentletter', [
                             'records' => $records,
-                            'employee' => $employee
+                            'employees' => $employees
                         ]);
                         echo Pdf::loadHTML($pdfContent)->stream();
                     }, 'assignment_letters.pdf');
@@ -119,8 +118,9 @@ class EmployeeAssignmentLettersResource extends Resource
                 Tables\Columns\TextColumn::make('positionAssign.name')
                     ->label('Jabatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('assignedEmployee.name')
+                Tables\Columns\TextColumn::make('assignedEmployees.name')
                     ->label('Penerima Tugas')
+                    ->listWithLineBreaks()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('task')
                     ->label('Tugas')

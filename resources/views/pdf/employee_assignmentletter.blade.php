@@ -70,7 +70,10 @@
         <br>Nama : {{ $surat_tugas->aassigningEmployee->name }}
         <br>Jabatan : {{ $surat_tugas->positionAssign->name }}<br>
     <br>Dengan ini menugaskan kepada:
-    <br>Nama    : {{ $surat_tugas->assignedEmployee->name }}
+    <br>
+    @foreach($surat_tugas->assignedEmployees as $index => $employee)
+        {{ $index + 1 }}. {{ $employee->name }}<br>
+    @endforeach
     <!-- Isi Surat Tugas -->
     <br>
     <br>Untuk melaksanakan tugas {{ $surat_tugas->task }} mulai tanggal {{ \Carbon\Carbon::parse($surat_tugas->start_date)->format('d F Y') }} sampai dengan {{ \Carbon\Carbon::parse($surat_tugas->end_date)->format('d F Y') }}.

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Aset</title>
+    <title>Daftar Surat Tugas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,11 +81,20 @@
         <tbody>
             @foreach($records as $record)
                 <tr>
-                    <td class="no-col">{{ $loop->iteration }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $record->registration_number }}</td>
-                    <td>{{ $record->start_date }}</td>
-                    <td>{{ $record->end_date }}</td>
-                    <td>{{ $record->assignedEmployee->name }}</td>
+                    <td>{{ \Carbon\Carbon::parse($record->start_date)->format('d/m/Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($record->end_date)->format('d/m/Y') }}</td>
+                    <td>
+                        @if($record->assignedEmployees->isNotEmpty())
+                            @foreach($record->assignedEmployees as $index => $employee)
+                                {{ $index + 1 }}. {{ $employee->name }}
+                                @if(!$loop->last)<br>@endif
+                            @endforeach
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td>{{ $record->task }}</td>
                 </tr>
             @endforeach
@@ -95,9 +104,9 @@
     <!-- Tanda tangan di bawah tabel -->
     <div class="signature">
         <p>Purbalingga, {{ \Carbon\Carbon::now()->format('d F Y') }}</p><br>
-        <p>Mengetahui,<br>{{ $employee->employeePosition->name }}</p>
+        <p>Mengetahui,<br>{{ $employees->employeePosition->name }}</p>
         <div class="signature-line">
-            <p><strong>{{ $employee->name }}</strong></p>
+            <p><strong>{{ $employees->name }}</strong></p>
         </div>
     </div>
 </body>
