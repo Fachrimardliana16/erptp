@@ -131,50 +131,6 @@ class AssetResource extends Resource
     {
         return $table
             ->headerActions([
-                // BulkAction untuk cetak label, diletakkan di sebelah kiri
-                Tables\Actions\BulkAction::make('print_label')
-                    ->label('Cetak Label')
-                    ->icon('heroicon-o-printer')
-                    ->action(function (Collection $records) {
-                        // Inisialisasi array untuk QR code
-                        $qrCodes = [];
-
-                        // Loop untuk setiap record yang dipilih
-                        foreach ($records as $record) {
-                            // Generate URL untuk detail aset
-                            $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
-
-                            // Generate QR code dengan URL aset
-                            $qrCode = Builder::create()
-                                ->writer(new PngWriter())
-                                ->writerOptions([])
-                                ->data($assetDetailUrl)
-                                ->encoding(new Encoding('UTF-8'))
-                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-                                ->size(100)
-                                ->margin(5)
-                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-                                ->build();
-
-                            // Simpan QR code dalam bentuk string base64
-                            $qrCodes[$record->id] = base64_encode($qrCode->getString());
-                        }
-
-                        // Generate PDF
-                        $pdf = app(DomPDF::class);
-                        $pdf->loadView('pdf.asset_label_massal', [
-                            'assets' => $records, // Kirim semua record ke Blade
-                            'qrCodes' => $qrCodes, // Kirim QR code ke Blade
-                        ]);
-
-                        // Format nama file PDF
-                        $fileName = 'label-assets-selected.pdf';
-
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
-                        }, $fileName);
-                    }),
-
                 // BulkAction untuk export PDF (sudah ada sebelumnya)
                 Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
@@ -344,6 +300,48 @@ class AssetResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('print_label')
+                    ->label('Cetak Label')
+                    ->icon('heroicon-o-printer')
+                    ->action(function (Collection $records) {
+                        // Inisialisasi array untuk QR code
+                        $qrCodes = [];
+
+                        // Loop untuk setiap record yang dipilih
+                        foreach ($records as $record) {
+                            // Generate URL untuk detail aset
+                            $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+
+                            // Generate QR code dengan URL aset
+                            $qrCode = Builder::create()
+                                ->writer(new PngWriter())
+                                ->writerOptions([])
+                                ->data($assetDetailUrl)
+                                ->encoding(new Encoding('UTF-8'))
+                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                                ->size(100)
+                                ->margin(5)
+                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+                                ->build();
+
+                            // Simpan QR code dalam bentuk string base64
+                            $qrCodes[$record->id] = base64_encode($qrCode->getString());
+                        }
+
+                        // Generate PDF
+                        $pdf = app(DomPDF::class);
+                        $pdf->loadView('pdf.asset_label_massal', [
+                            'assets' => $records, // Kirim semua record ke Blade
+                            'qrCodes' => $qrCodes, // Kirim QR code ke Blade
+                        ]);
+
+                        // Format nama file PDF
+                        $fileName = 'label-assets-selected.pdf';
+
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, $fileName);
+                    }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

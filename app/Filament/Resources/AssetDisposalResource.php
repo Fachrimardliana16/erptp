@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use App\Models\AssetDisposal;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Section;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetDisposalResource\Pages;
 use App\Filament\Resources\AssetDisposalResource\RelationManagers;
+use Barryvdh\DomPDF\PDF as DomPDF;
 
 class AssetDisposalResource extends Resource
 {
@@ -163,6 +165,18 @@ class AssetDisposalResource extends Resource
             ], FiltersLayout::Modal)
             ->actions([
                 Tables\Actions\EditAction::make(),
+                // Action untuk download pdf aset per record
+                Action::make('download_pdf')
+                    ->label('Cetak Surat')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function ($record) {
+                        $pdf = app(abstract: DomPDF::class);
+                        $pdf->loadView('pdf.surat_hapus_asset', ['assetdisposal' => $record]);
+                
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, 'hapus_asset-' . $record->assetDisposals->name . '.pdf');
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
