@@ -25,10 +25,10 @@ class TotalWidget extends BaseWidget
         return [
             Stat::make('Total Aset', $totalAssets)
                 ->color('primary')
-                ->description('Total semua Aset'),
+                ->description('Total Semua Aset'),
             Stat::make('Total Pegawai', $totalEmployees)
                 ->color('primary')
-                ->description('Total Krayawan'),
+                ->description('Total Karyawan'),
             Stat::make('Total Pengeluaran Bulan Ini', $formattedTotalAmount)
                 ->color('primary')
                 ->description('Total Pengeluaran Kas Kecil Yang Selesai'),
