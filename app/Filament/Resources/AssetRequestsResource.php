@@ -132,6 +132,8 @@ class AssetRequestsResource extends Resource
                     }),
             ])
             ->columns([
+                Tables\Columns\TextColumn::make('No.')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()

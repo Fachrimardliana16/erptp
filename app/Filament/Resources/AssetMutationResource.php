@@ -17,6 +17,7 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
+use Carbon\Carbon;
 
 // library untuk export PDF
 use App\Filament\Resources\AssetMutationResource\Pages;
@@ -144,13 +145,15 @@ class AssetMutationResource extends Resource
                     }),
             ])
             ->columns([
+                Tables\Columns\TextColumn::make('No.')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('mutation_date')
                     ->label('Tanggal Mutasi')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('AssetsMutationtransactionStatus.name')
                     ->label('Status Transaksi')
