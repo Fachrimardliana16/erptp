@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetRequestsResource\Pages;
 use App\Filament\Resources\AssetRequestsResource\RelationManagers;
+use Carbon\Carbon;
 
 class AssetRequestsResource extends Resource
 {
@@ -39,65 +40,83 @@ class AssetRequestsResource extends Resource
                         Forms\Components\TextInput::make('document_number')
                             ->label('Nomor Dokumen')
                             ->required()
-                            ->maxLength(255),
+                            ->placeholder('Exp: XX/nama_sub_bagian/MM/YYYY.')
+                            ->maxLength(255)
+                            ->validationAttribute('Nomor Dokumen'),
                         Forms\Components\DatePicker::make('date')
                             ->label('Tanggal Permintaan')
-                            ->required(),
+                            ->default(now())
+                            ->required()
+                            ->validationAttribute('Tanggal Permintaan'),
                         Forms\Components\TextInput::make('asset_name')
                             ->label('Nama Barang')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Nama Barang'),
                         Forms\Components\Select::make('category_id')
                             ->relationship('category', 'name')
                             ->label('Kategori Barang')
                             ->required()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->validationAttribute('Kategori Barang'),
                         Forms\Components\TextInput::make('quantity')
                             ->label('Jumlah Satuan')
                             ->required()
-                            ->numeric(),
+                            ->placeholder('buah/pack/set/dll')
+                            ->numeric()
+                            ->validationAttribute('Jumlah Satuan'),
                         Forms\Components\TextInput::make('purpose')
                             ->label('Untuk Keperluan')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Untuk Keperluan'),
                         Forms\Components\Textarea::make('desc')
-                            ->label('Keteranagan')
-                            ->columnSpanFull(),
+                            ->label('Keterangan')
+                            ->columnSpanFull()
+                            ->validationAttribute('Keterangan'),
                     ]),
                 Section::make('Pengesahan')
                     ->description('Pengesahan Permintaan')
                     ->schema([
                         Forms\Components\Toggle::make('kepala_sub_bagian')
-                            ->label('Kepala Sub Bagian'),
+                            ->label('Kepala Sub Bagian')
+                            ->validationAttribute('Kepala Sub Bagian'),
                         Forms\Components\Toggle::make('kepala_bagian_umum')
-                            ->label('Kepala Bagian Umum'),
+                            ->label('Kepala Bagian Umum')
+                            ->validationAttribute('Kepala Bagian Umum'),
                         Forms\Components\Toggle::make('kepala_bagian_keuangan')
-                            ->label('Kepala Bagian Keuangan'),
+                            ->label('Kepala Bagian Keuangan')
+                            ->validationAttribute('Kepala Bagian Keuangan'),
                         Forms\Components\Toggle::make('direktur_umum')
-                            ->label('Direktur Umum'),
+                            ->label('Direktur Umum')
+                            ->validationAttribute('Direktur Umum'),
                         Forms\Components\Toggle::make('direktur_utama')
-                            ->label('Direktur Utama'),
+                            ->label('Direktur Utama')
+                            ->validationAttribute('Direktur Utama'),
                         Forms\Components\FileUpload::make('docs')
+                            ->helperText('Foto atau scan dengan format ".jpeg atau .png".')
                             ->label('Bukti Lampiran')
                             ->directory('Assets_Request')
-                            ->columnspanfull()
-                            ->required(),
+                            ->columnSpanFull()
+                            ->required()
+                            ->validationAttribute('Bukti Lampiran'),
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+                            ->default(auth()->id())
+                            ->validationAttribute('User ID'),
                     ])->columns(3)
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Pdf')
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
@@ -117,12 +136,15 @@ class AssetRequestsResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('status_request')
+                    ->label('Status Permintaan')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('document_number')
                     ->label('Nomor Dokumen')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Tanggal')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('asset_name')
                     ->label('Nama Barang')
@@ -140,9 +162,6 @@ class AssetRequestsResource extends Resource
                 Tables\Columns\TextColumn::make('desc')
                     ->label('Keterangan')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('status_request')
-                    ->label('Status Permintaan')
-                    ->boolean(),
                 Tables\Columns\IconColumn::make('kepala_sub_bagian')
                     ->label('Kepala Sub Bagian')
                     ->boolean(),

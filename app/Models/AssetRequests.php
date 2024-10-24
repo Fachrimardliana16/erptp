@@ -34,4 +34,20 @@ class AssetRequests extends Model
     {
         return $this->belongsTo(MasterAssetsCategory::class, 'category_id');
     }
+
+    public static function createRequest($data)
+    {
+        $validatedData = validator($data, [
+            'document_number' => 'required|max:255',
+            'date' => 'required|date',
+            'asset_name' => 'required|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'quantity' => 'required|numeric',
+            'purpose' => 'required|max:255',
+            'desc' => 'nullable|string',
+            'docs' => 'required|mimes:jpeg,png|max:10240',
+        ])->validate();
+
+        return self::create($validatedData);
+    }
 }
