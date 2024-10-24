@@ -79,11 +79,14 @@
                 <th>Merk</th>
                 <th>Tanggal Pembelian</th>
                 <th>Kondisi</th>
-                <th>Harga</th>
                 <th>Sumber Dana</th>
+                <th>Harga</th>
             </tr>
         </thead>
         <tbody>
+            @php
+            $totalPrice = 0;
+            @endphp
             @foreach($records as $record)
                 <tr>
                     <td class="no-col">{{ $loop->iteration }}</td>
@@ -93,11 +96,20 @@
                     <td>{{ $record->assets_number }}</td>
                     <td>{{ $record->brand }}</td>
                     <td>{{ $record->purchase_date }}</td>
-                    <td>{{ $record->condition->name }}</td>
-                    <td>Rp {{ number_format($record->price, 0, ',','.') }}</td>
+                    <td>{{ $record->condition->name }}</td>                 
                     <td>{{ $record->funding_source }}</td>
+                    <td>Rp {{ number_format($record->price, 0, ',','.') }}</td>
                 </tr>
+                @php
+                $totalPrice += $record->price;
+                @endphp
             @endforeach
+            <!-- Baris total -->
+            <tr>
+                <td colspan="8"></td> <!-- Kosongkan kolom sebelum kolom total -->
+                <td><strong>Total</strong></td> <!-- Merge sampai kolom sumber dana -->
+                <td><strong>Rp {{ number_format($totalPrice, 0, ',','.') }}</strong></td> <!-- Total Pembelian -->
+            </tr>
         </tbody>
     </table>
 
