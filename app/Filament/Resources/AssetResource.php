@@ -172,7 +172,7 @@ class AssetResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->label('Tanggal Pembelian')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('conditionAsset.name')
                     ->label('Kondisi')
@@ -181,7 +181,7 @@ class AssetResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
                     ->sortable()
-                    ->money('Rp. ')
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('funding_source')
                     ->label('Sumber Dana')
@@ -206,11 +206,11 @@ class AssetResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('book_value_expiry')
                     ->label('Tanggal Habis Nilai Buku')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_document_extension')
                     ->label('Tanggal Perpanjangan Dokumen')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('AssetMutationLocation.name')
                     ->label('Lokasi')
@@ -301,47 +301,47 @@ class AssetResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\BulkAction::make('print_label')
-                    ->label('Cetak Label')
-                    ->icon('heroicon-o-printer')
-                    ->action(function (Collection $records) {
-                        // Inisialisasi array untuk QR code
-                        $qrCodes = [];
+                        ->label('Cetak Label')
+                        ->icon('heroicon-o-printer')
+                        ->action(function (Collection $records) {
+                            // Inisialisasi array untuk QR code
+                            $qrCodes = [];
 
-                        // Loop untuk setiap record yang dipilih
-                        foreach ($records as $record) {
-                            // Generate URL untuk detail aset
-                            $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+                            // Loop untuk setiap record yang dipilih
+                            foreach ($records as $record) {
+                                // Generate URL untuk detail aset
+                                $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
 
-                            // Generate QR code dengan URL aset
-                            $qrCode = Builder::create()
-                                ->writer(new PngWriter())
-                                ->writerOptions([])
-                                ->data($assetDetailUrl)
-                                ->encoding(new Encoding('UTF-8'))
-                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-                                ->size(100)
-                                ->margin(5)
-                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-                                ->build();
+                                // Generate QR code dengan URL aset
+                                $qrCode = Builder::create()
+                                    ->writer(new PngWriter())
+                                    ->writerOptions([])
+                                    ->data($assetDetailUrl)
+                                    ->encoding(new Encoding('UTF-8'))
+                                    ->errorCorrectionLevel(ErrorCorrectionLevel::High)
+                                    ->size(100)
+                                    ->margin(5)
+                                    ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
+                                    ->build();
 
-                            // Simpan QR code dalam bentuk string base64
-                            $qrCodes[$record->id] = base64_encode($qrCode->getString());
-                        }
+                                // Simpan QR code dalam bentuk string base64
+                                $qrCodes[$record->id] = base64_encode($qrCode->getString());
+                            }
 
-                        // Generate PDF
-                        $pdf = app(DomPDF::class);
-                        $pdf->loadView('pdf.asset_label_massal', [
-                            'assets' => $records, // Kirim semua record ke Blade
-                            'qrCodes' => $qrCodes, // Kirim QR code ke Blade
-                        ]);
+                            // Generate PDF
+                            $pdf = app(DomPDF::class);
+                            $pdf->loadView('pdf.asset_label_massal', [
+                                'assets' => $records, // Kirim semua record ke Blade
+                                'qrCodes' => $qrCodes, // Kirim QR code ke Blade
+                            ]);
 
-                        // Format nama file PDF
-                        $fileName = 'label-assets-selected.pdf';
+                            // Format nama file PDF
+                            $fileName = 'label-assets-selected.pdf';
 
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->output();
-                        }, $fileName);
-                    }),
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, $fileName);
+                        }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
