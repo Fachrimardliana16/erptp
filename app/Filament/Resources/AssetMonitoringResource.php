@@ -13,10 +13,8 @@ use App\Models\AssetMonitoring;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetMonitoringResource\Pages;
-use App\Filament\Resources\AssetMonitoringResource\RelationManagers;
+use Carbon\Carbon;
 
 class AssetMonitoringResource extends Resource
 {
@@ -120,13 +118,15 @@ class AssetMonitoringResource extends Resource
                     }),
             ])
             ->columns([
+                Tables\Columns\TextColumn::make('No.')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('monitoring_date')
                     ->label('Tanggal Monitoring')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assetMonitoring.assets_number')
                     ->label('Nomor Aset')

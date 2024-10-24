@@ -13,14 +13,11 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetDisposalResource\Pages;
-use App\Filament\Resources\AssetDisposalResource\RelationManagers;
 use Barryvdh\DomPDF\PDF as DomPDF;
+use Carbon\Carbon;
 
 class AssetDisposalResource extends Resource
 {
@@ -120,7 +117,7 @@ class AssetDisposalResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('disposal_date')
                     ->label('Tanggal Penghapusan')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('assetDisposals.name')
                     ->label('Nama Aset')
@@ -172,7 +169,7 @@ class AssetDisposalResource extends Resource
                     ->action(function ($record) {
                         $pdf = app(abstract: DomPDF::class);
                         $pdf->loadView('pdf.surat_hapus_asset', ['assetdisposal' => $record]);
-                
+
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
                         }, 'hapus_asset-' . $record->assetDisposals->name . '.pdf');

@@ -14,10 +14,8 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetMaintenanceResource\Pages;
-use App\Filament\Resources\AssetMaintenanceResource\RelationManagers;
+use Carbon\Carbon;
 
 class AssetMaintenanceResource extends Resource
 {
@@ -97,13 +95,15 @@ class AssetMaintenanceResource extends Resource
                     }),
             ])
             ->columns([
+                Tables\Columns\TextColumn::make('No.')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('maintenance_date')
                     ->label('Tanggal')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('location_service')
                     ->label('Lokasi Service')
@@ -116,7 +116,7 @@ class AssetMaintenanceResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('service_cost')
                     ->label('Biaya Service')
-                    ->money('Rp. ')
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('invoice_file')
                     ->label('Bukti Pembyaran')
