@@ -22,7 +22,8 @@ class CreateAssetPurchasesTable extends Migration
             $table->uuid('category_id');
             $table->date('purchase_date');
             $table->uuid('condition_id');
-            $table->string('img')->nullable();
+            $table->string('payment_receipt');
+            $table->string('img');
             $table->decimal('price', 15, 2);
             $table->string('funding_source');
             $table->string('brand');

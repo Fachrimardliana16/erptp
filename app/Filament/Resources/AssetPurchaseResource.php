@@ -19,6 +19,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetPurchaseResource\Pages;
 use App\Filament\Resources\AssetPurchaseResource\RelationManagers;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
+use Filament\Forms\Components;
 
 class AssetPurchaseResource extends Resource
 {
@@ -33,20 +36,19 @@ class AssetPurchaseResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Form Daftar Pembelian Barang')
-                    ->description('Input Daftar pembelian Barang')
+                    ->description('Input Daftar Pembelian Barang')
                     ->schema([
                         Forms\Components\Select::make('assetrequest_id')
                             ->options(
                                 AssetRequests::query()
                                     ->get()
                                     ->mapWithKeys(function ($assetrequest) {
-                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
                                         return [$assetrequest->id => $assetrequest->document_number . ' | ' . $assetrequest->asset_name];
                                     })
                                     ->toArray()
                             )
                             ->afterStateUpdated(function ($set, $state) {
-                                $AssetRequest = AssetRequests::find($state); // Tambahkan ini untuk debugging
+                                $AssetRequest = AssetRequests::find($state);
                                 if ($AssetRequest) {
                                     $set('document_number', $AssetRequest->document_number);
                                     $set('asset_name', $AssetRequest->asset_name);
@@ -61,52 +63,71 @@ class AssetPurchaseResource extends Resource
                             ->preload()
                             ->live()
                             ->label('Nomor Permintaan')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Nomor Permintaan'),
                         Forms\Components\Hidden::make('document_number')
                             ->label('Nomor Permintaan')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Nomor Permintaan'),
                         Forms\Components\TextInput::make('asset_name')
                             ->label('Nama Aset')
                             ->required()
                             ->readOnly()
-                            ->reactive(),
+                            ->reactive()
+                            ->validationAttribute('Nama Aset'),
                         Forms\Components\Select::make('category_id')
                             ->relationship('category', 'name')
                             ->label('Kategori Barang')
                             ->required()
-                            ->reactive(),
+                            ->disabled()
+                            ->reactive()
+                            ->validationAttribute('Kategori Barang'),
                         Forms\Components\Hidden::make('category_id')
                             ->label('Kategori Barang')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Kategori Barang'),
                         Forms\Components\TextInput::make('brand')
                             ->label('Merk')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Merk'),
                         Forms\Components\TextInput::make('assets_number')
                             ->label('Nomor Aset')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Nomor Aset'),
                         Forms\Components\DatePicker::make('purchase_date')
                             ->label('Tanggal Pembelian')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Tanggal Pembelian'),
                         Forms\Components\Select::make('condition_id')
                             ->relationship('condition', 'name')
                             ->label('Kondisi Aset')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Kondisi Aset'),
                         Forms\Components\TextInput::make('price')
                             ->label('Harga')
                             ->required()
                             ->numeric()
-                            ->prefix('Rp. '),
+                            ->prefix('Rp. ')
+                            ->validationAttribute('Harga'),
                         Forms\Components\TextInput::make('funding_source')
                             ->label('Sumber Dana')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Sumber Dana'),
+                        Forms\Components\FileUpload::make('payment_receipt')
+                            ->label('Bukti Pembelian')
+                            ->directory('Asset_Payment_Receipt')
+                            ->required()
+                            ->validationAttribute('Bukti Pembelian'),
                         Forms\Components\FileUpload::make('img')
-                            ->label('Gambar')
-                            ->directory('Asset_Purchase'),
+                            ->label('Gambar Barang')
+                            ->directory('Asset_Purchase')
+                            ->validationAttribute('Gambar Barang'),
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+                            ->default(auth()->id())
+                            ->validationAttribute('User ID'),
                     ])
             ]);
     }
@@ -161,17 +182,20 @@ class AssetPurchaseResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('purchase_date')
                     ->label('Tanggal Pembelian')
-                    ->date()
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('condition.name')
                     ->label('Kondisi')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
-                    ->money('Rp. ')
+                    ->money('IDR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('funding_source')
                     ->label('Sumber Dana')
+                    ->searchable(),
+                Tables\Columns\ImageColumn::make('payment_receipt')
+                    ->label('Bukti Beli')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('users_id')
                     ->searchable()

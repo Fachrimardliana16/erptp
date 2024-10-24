@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
+
 class AssetPurchase extends Model
 {
     use HasFactory, HasUuids;
@@ -20,12 +21,15 @@ class AssetPurchase extends Model
         'category_id',
         'purchase_date',
         'condition_id',
+        'payment_receipt',
         'img',
         'price',
         'funding_source',
         'brand',
         'users_id',
     ];
+
+
 
     public function user()
     {

@@ -27,6 +27,8 @@ use Barryvdh\DomPDF\PDF as DomPDF;
 class EmployeePayrollResource extends Resource
 {
     protected static ?string $model = EmployeePayroll::class;
+    protected static ?string $navigationGroup = 'Employee';
+    protected static ?string $navigationLabel = 'Payroll';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
