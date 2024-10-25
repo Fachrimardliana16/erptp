@@ -16,13 +16,14 @@ return new class extends Migration
             $table->string('registration_number');
             $table->date('registration_date');
             $table->string('name');
+            $table->string('gender');
             $table->text('address');
             $table->string('place_of_birth');
             $table->date('date_of_birth');
             $table->string('email')->unique();
             $table->string('contact');
             $table->string('religion')->nullable();
-            $table->string('education');
+            $table->uuid('employee_education_id');
             $table->string('major');
             $table->string('archive_file');
             $table->text('notes')->nullable();
@@ -31,6 +32,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('employee_education_id')->references('id')->on('master_employee_education');
         });
     }
 

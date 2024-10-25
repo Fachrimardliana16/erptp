@@ -19,4 +19,8 @@ class MasterEmployeeEducation extends Model
     {
         return $this->hasMany(Employees::class, 'employee_education_id');
     }
+    public function employeedu()
+    {
+        return $this->hasMany(EmployeeJobApplicationArchives::class, 'employee_education_id', 'id');
+    }
 }

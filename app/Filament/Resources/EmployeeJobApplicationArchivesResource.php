@@ -54,6 +54,14 @@ class EmployeeJobApplicationArchivesResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->validationAttribute('Alamat'),
+                        Forms\Components\Select::make('gender')
+                            ->options([
+                                'laki-laki' => 'Laki-Laki',
+                                'perempuan' => 'Perempuan'
+                            ])
+                            ->label('Jenis Kelamin')
+                            ->required()
+                            ->validationAttribute('Jenis Kelamin'),
                         Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('place_of_birth')
@@ -99,18 +107,11 @@ class EmployeeJobApplicationArchivesResource extends Resource
                             ->validationAttribute('Agama'),
                         Group::make()
                             ->schema([
-                                Forms\Components\Select::make('education')
+                                Forms\Components\Select::make('employee_education_id')
                                     ->label('Pendidikan Terakhir')
-                                    ->options([
-                                        'sd' => 'SD',
-                                        'smp' => 'SMP',
-                                        'sma' => 'SMA',
-                                        'd1' => 'Diploma I',
-                                        'd3' => 'Diploma III',
-                                        'd4' => 'Diploma IV',
-                                        's1' => 'S1',
-                                        's2' => 'S2',
-                                    ])
+                                    ->relationship('employeedu', 'name')
+                                    ->searchable()
+                                    ->preload()
                                     ->required()
                                     ->validationAttribute('Pendidikan Terakhir'),
                                 Forms\Components\TextInput::make('major')
@@ -157,6 +158,14 @@ class EmployeeJobApplicationArchivesResource extends Resource
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('address')
+                    ->label('Alamat')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('gender')
+                    ->label('Jenis Kelamin')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('place_of_birth')
                     ->label('Tempat')
                     ->searchable(),
@@ -174,7 +183,7 @@ class EmployeeJobApplicationArchivesResource extends Resource
                     ->label('Agama')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('education')
+                TextColumn::make('employeedu.name')
                     ->label('Pendidikan')
                     ->searchable()
                     ->sortable(),

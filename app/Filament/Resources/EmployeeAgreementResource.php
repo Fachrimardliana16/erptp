@@ -11,8 +11,15 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\EmployeeJobAplicationArchives;
+use App\Models\EmployeeJobApplicationArchives;
+use App\Models\Employees;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 
 class EmployeeAgreementResource extends Resource
 {
@@ -30,34 +37,69 @@ class EmployeeAgreementResource extends Resource
                 Section::make('Form Perjanjian Kontrak Pegawai')
                     ->description('Input data perjanjian kontrak pegawai.')
                     ->schema([
-                        Forms\Components\TextInput::make('agreement_number')
+                        TextInput::make('agreement_number')
                             ->label('Nomor Perjanjian Kontrak')
-                            ->maxLength(255),
-                        Forms\Components\Select::make('employee_id')
-                            ->relationship('agreementEmployee', 'name')
-                            ->label('Nama Pegawai')
+                            ->maxLength(255)
+                            ->validationAttribute('Nomor Perjanjian Kontrak')
                             ->required(),
-                        Forms\Components\Select::make('agreement_id')
+                        Select::make('job_application_archives_id')
+                            ->options(function () {
+                                return EmployeeJobApplicationArchives::query()
+                                    ->get()
+                                    ->mapWithKeys(function ($archive) {
+                                        return [$archive->id => $archive->registration_number . ' | ' . $archive->name];
+                                    })
+                                    ->toArray();
+                            })
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                $archive = EmployeeJobApplicationArchives::find($state);
+                                if ($archive) {
+                                    $set('name', $archive->name);
+                                    $set('hidden_name', $archive->name); // Update hidden name field
+                                }
+                            })
+                            ->reactive()
+                            ->label('Nomor Registrasi Lamaran')
+                            ->required()
+                            ->validationAttribute('Nomor Registrasi Lamaran'),
+
+                        TextInput::make('name')
+                            ->label('Nama Pegawai')
+                            ->disabled()
+                            ->required()
+                            ->dehydrated(false)
+                            ->validationAttribute('Nama Pegawai'),
+                        Hidden::make('name')
+                            ->label('Nama Pegawai')
+                            ->required()
+                            ->validationAttribute('Nama Pegawai'),
+                        Select::make('agreement_id')
                             ->relationship('agreement', 'name')
                             ->label('Status Kontrak')
-                            ->required(),
-                        Forms\Components\Select::make('employee_position_id')
+                            ->required()
+                            ->validationAttribute('Status Kontrak'),
+                        Select::make('employee_position_id')
                             ->relationship('agreementPosition', 'name')
                             ->label('Jabatan')
-                            ->required(),
-                        Forms\Components\Select::make('status_employemnts_id')
+                            ->required()
+                            ->validationAttribute('Jabatan'),
+                        Select::make('status_employemnts_id')
                             ->relationship('agreementStatus', 'name')
                             ->label('Status Pegawai')
-                            ->required(),
-                        Forms\Components\DatePicker::make('agreement_date_start')
+                            ->required()
+                            ->validationAttribute('Status Pegawai'),
+                        DatePicker::make('agreement_date_start')
                             ->label('Tanggal Mulai Perjanjian')
-                            ->required(),
-                        Forms\Components\DatePicker::make('agreement_date_end')
+                            ->required()
+                            ->validationAttribute('Tanggal Mulai Perjanjian'),
+                        DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian')
-                            ->required(),
-                        Forms\Components\FileUpload::make('docs')
+                            ->required()
+                            ->validationAttribute('Tanggal Akhir Perjanjian'),
+                        FileUpload::make('docs')
                             ->directory('Perjanjian Kontrak')
-                            ->label('Lampiran Dokumen'),
+                            ->label('Lampiran Dokumen')
+                            ->validationAttribute('Lampiran Dokumen'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
@@ -74,7 +116,7 @@ class EmployeeAgreementResource extends Resource
                 Tables\Columns\TextColumn::make('agreement_number')
                     ->label('Nomor Surat Perjanjian')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('agreementEmployee.name')
+                Tables\Columns\TextColumn::make('name')
                     ->label('Nama Pegawai')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('agreement.name')
