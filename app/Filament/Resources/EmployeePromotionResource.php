@@ -20,7 +20,8 @@ class EmployeePromotionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Kenaikan Golongan Pegawai';
+    protected static ?string $navigationLabel = 'Kenaikan Golongan';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {

@@ -24,6 +24,7 @@ class EmployeeJobApplicationArchives extends Model
         'major',
         'archive_file',
         'notes',
+        'application_status',
         'users_id'
     ];
 }

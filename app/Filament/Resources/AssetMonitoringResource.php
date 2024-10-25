@@ -20,9 +20,11 @@ class AssetMonitoringResource extends Resource
 {
     protected static ?string $model = AssetMonitoring::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar-square';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Monitoring Aset';
+    protected static ?int $navigationSort = 5;
+
 
     public static function form(Form $form): Form
     {

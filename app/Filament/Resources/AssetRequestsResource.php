@@ -25,10 +25,10 @@ class AssetRequestsResource extends Resource
 {
     protected static ?string $model = AssetRequests::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Permintaan Barang';
-    public static $order = 1;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

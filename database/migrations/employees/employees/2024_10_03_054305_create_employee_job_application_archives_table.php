@@ -24,9 +24,10 @@ return new class extends Migration
             $table->string('religion')->nullable();
             $table->string('education');
             $table->string('major');
-            $table->string('archive_file'); // to store image or pdf file
+            $table->string('archive_file');
             $table->text('notes')->nullable();
             $table->uuid('users_id');
+            $table->boolean('application_status')->default(false);
             $table->timestamps();
 
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

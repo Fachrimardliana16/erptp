@@ -19,7 +19,8 @@ class EmployeePermissionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Cuti Pegawai';
+    protected static ?string $navigationLabel = 'Cuti';
+    protected static ?int $navigationSort = 13;
 
     public static function form(Form $form): Form
     {
