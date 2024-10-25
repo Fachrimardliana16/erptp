@@ -17,7 +17,7 @@ class MasterAssetsMoneyVoucherTypeResource extends Resource
 {
     protected static ?string $model = MasterAssetsMoneyVoucherType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static ?string $navigationGroup = 'Master Aset';
     protected static ?string $navigationLabel = 'Tipe Bon';
 

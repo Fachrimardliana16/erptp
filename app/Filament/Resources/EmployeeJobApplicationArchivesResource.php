@@ -12,8 +12,9 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 
 class EmployeeJobApplicationArchivesResource extends Resource
 {
@@ -21,7 +22,8 @@ class EmployeeJobApplicationArchivesResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Arsip Berkas Lamaran';
+    protected static ?string $navigationLabel = 'Arsip Lamaran';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -33,32 +35,38 @@ class EmployeeJobApplicationArchivesResource extends Resource
                         Forms\Components\TextInput::make('registration_number')
                             ->label('Nomor Registrasi')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Nomor Registrasi'),
                         Forms\Components\DatePicker::make('registration_date')
-                            ->label('Tanggal Registrasi Masuk')
-                            ->required(),
+                            ->label('Tanggal Registrasi Arsip')
+                            ->required()
+                            ->validationAttribute('Tanggal Registrasi Arsip'),
                     ]),
-                Section::make('')
+                Section::make('Profil Pelamar Kerja')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Pelamar')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Nama Pelamar'),
                         Forms\Components\TextInput::make('address')
-                            ->label('alamat')
+                            ->label('Alamat')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->validationAttribute('Alamat'),
                         Group::make()
                             ->schema([
                                 Forms\Components\TextInput::make('place_of_birth')
                                     ->label('Tempat Lahir')
                                     ->required()
                                     ->maxLength(255)
-                                    ->columnSpan(1),
+                                    ->columnSpan(1)
+                                    ->validationAttribute('Tempat Lahir'),
                                 Forms\Components\DatePicker::make('date_of_birth')
                                     ->label('Tanggal Lahir')
                                     ->required()
-                                    ->columnSpan(1),
+                                    ->columnSpan(1)
+                                    ->validationAttribute('Tanggal Lahir'),
                             ])
                             ->columns(2),
                         Group::make()
@@ -67,11 +75,15 @@ class EmployeeJobApplicationArchivesResource extends Resource
                                     ->label('E-Mail')
                                     ->email()
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationAttribute('E-Mail')
+                                    ->helperText('Pastikan format email benar'),
                                 Forms\Components\TextInput::make('contact')
                                     ->label('Kontak')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationAttribute('Kontak')
+                                    ->helperText('Nomor telepon harus valid'),
                             ])
                             ->columns(2),
                         Forms\Components\Select::make('religion')
@@ -83,11 +95,12 @@ class EmployeeJobApplicationArchivesResource extends Resource
                                 'budha' => 'Budha',
                                 'lainnya' => 'Lain-lain',
                             ])
-                            ->label('Agama'),
+                            ->label('Agama')
+                            ->validationAttribute('Agama'),
                         Group::make()
                             ->schema([
                                 Forms\Components\Select::make('education')
-                                    ->label('Pendidikan')
+                                    ->label('Pendidikan Terakhir')
                                     ->options([
                                         'sd' => 'SD',
                                         'smp' => 'SMP',
@@ -98,25 +111,30 @@ class EmployeeJobApplicationArchivesResource extends Resource
                                         's1' => 'S1',
                                         's2' => 'S2',
                                     ])
-                                    ->required(),
+                                    ->required()
+                                    ->validationAttribute('Pendidikan Terakhir'),
                                 Forms\Components\TextInput::make('major')
                                     ->label('Jurusan')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->validationAttribute('Jurusan'),
                             ])
                             ->columns(2),
                     ]),
-                Section::make('')
+                Section::make('Berkas dan Catatan')
                     ->schema([
                         Forms\Components\FileUpload::make('archive_file')
                             ->directory('Employee_JobApplicationArchive')
                             ->label('Berkas Lamaran')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Berkas Lamaran')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan.'),
                         Forms\Components\Textarea::make('notes')
                             ->label('Catatan')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->validationAttribute('Catatan'),
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
-
+                            ->default(auth()->id())
+                            ->validationAttribute('ID Pengguna'),
                     ])
             ]);
     }
@@ -125,63 +143,66 @@ class EmployeeJobApplicationArchivesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('registration_number')
+                IconColumn::make('application_status')
+                    ->label('Status Lamaran')
+                    ->boolean(),
+                TextColumn::make('registration_number')
                     ->label('No. Registrasi')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('registration_date')
+                TextColumn::make('registration_date')
                     ->label('Tanggal Registrasi')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('place_of_birth')
+                TextColumn::make('place_of_birth')
                     ->label('Tempat')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_of_birth')
+                TextColumn::make('date_of_birth')
                     ->label('Tanggal Lahir')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label('E-Mail')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('contact')
+                TextColumn::make('contact')
                     ->label('Kontak')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('religion')
+                TextColumn::make('religion')
                     ->label('Agama')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('education')
+                TextColumn::make('education')
                     ->label('Pendidikan')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('major')
-                    ->label('Jururan')
+                TextColumn::make('major')
+                    ->label('Jurusan')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('archive_file')
+                TextColumn::make('archive_file')
                     ->label('Berkas Lamaran')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                    ->url(fn($record) => asset('storage/' . $record->archive_file)) // Assumes files are stored in the "storage" directory
+                    ->openUrlInNewTab(), // Ensures the PDF opens in a new tab
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                // Add filters here if needed
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
 

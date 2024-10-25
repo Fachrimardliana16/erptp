@@ -19,7 +19,8 @@ class EmployeeTrainingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Pelatihan/Diklat Pegawai';
+    protected static ?string $navigationLabel = 'Pelatihan/Diklat';
+    protected static ?int $navigationSort = 11;
 
     public static function form(Form $form): Form
     {

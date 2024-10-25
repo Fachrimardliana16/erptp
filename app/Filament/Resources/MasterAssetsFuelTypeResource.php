@@ -18,7 +18,6 @@ class MasterAssetsFuelTypeResource extends Resource
     protected static ?string $model = MasterAssetsFuelType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationGroup = 'Master Aset';
     protected static ?string $navigationLabel = 'Tipe Bahan Bakar';
 

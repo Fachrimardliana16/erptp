@@ -20,7 +20,8 @@ class EmployeeAgreementResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Perjanjian Kontrak Pegawai';
+    protected static ?string $navigationLabel = 'Perjanjian Kontrak';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

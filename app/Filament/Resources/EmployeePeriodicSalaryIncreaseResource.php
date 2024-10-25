@@ -21,7 +21,8 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
-    protected static ?string $navigationLabel = 'Kenaikan Berkala Pegawai';
+    protected static ?string $navigationLabel = 'Kenaikan Berkala';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

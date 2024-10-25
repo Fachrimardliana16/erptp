@@ -23,9 +23,11 @@ class AssetDisposalResource extends Resource
 {
     protected static ?string $model = AssetDisposal::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-trash';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Penghapusan Aset';
+    protected static ?int $navigationSort = 8;
+
 
     public static function form(Form $form): Form
     {

@@ -23,6 +23,7 @@ class EmployeeBusinessTravelLettersResource extends Resource
 
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Surat Perjalanan Dinas';
+    protected static ?int $navigationSort = 9;
 
     public static function form(Form $form): Form
     {

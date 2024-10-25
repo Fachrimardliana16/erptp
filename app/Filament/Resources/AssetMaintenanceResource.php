@@ -21,9 +21,11 @@ class AssetMaintenanceResource extends Resource
 {
     protected static ?string $model = AssetMaintenance::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-wrench';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Pemeliharaan Aset';
+    protected static ?int $navigationSort = 6;
+
 
     public static function form(Form $form): Form
     {

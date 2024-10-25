@@ -21,9 +21,11 @@ class AssetDocumentExtensionResource extends Resource
 {
     protected static ?string $model = AssetDocumentExtension::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Perpanjangan Aset';
+    protected static ?int $navigationSort = 7;
+
 
 
     public static function form(Form $form): Form
@@ -82,26 +84,26 @@ class AssetDocumentExtensionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
-                    $employee = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
-                    })->first();
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kerumahtanggaan'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
+                        })->first();
 
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employee) {
-                        $pdfContent = Blade::render('pdf.report_asset_document_extension', [
-                            'records' => $records,
-                            'employee' => $employee
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)->stream();
-                    }, 'document_extension_assets.pdf');
-                }),
-        ])
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_asset_document_extension', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'document_extension_assets.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

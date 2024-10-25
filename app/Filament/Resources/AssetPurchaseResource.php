@@ -27,9 +27,11 @@ class AssetPurchaseResource extends Resource
 {
     protected static ?string $model = AssetPurchase::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Pembelian Barang';
+    protected static ?int $navigationSort = 2;
+
 
     public static function form(Form $form): Form
     {

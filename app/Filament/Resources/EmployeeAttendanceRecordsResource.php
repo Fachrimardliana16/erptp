@@ -20,6 +20,7 @@ class EmployeeAttendanceRecordsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Log Presensi';
+    protected static ?int $navigationSort = 12;
 
     public static function form(Form $form): Form
     {

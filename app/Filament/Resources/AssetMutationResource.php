@@ -26,10 +26,10 @@ class AssetMutationResource extends Resource
 {
     protected static ?string $model = AssetMutation::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-up-right';
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Mutasi Aset';
-    public static $order = 3;
+    protected static ?int $navigationSort = 4;
 
 
     public static function form(Form $form): Form
