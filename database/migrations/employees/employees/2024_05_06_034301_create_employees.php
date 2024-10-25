@@ -48,6 +48,7 @@ return new class extends Migration
             $table->date('agreement_date_end')->nullable();
             $table->uuid('employee_education_id')->nullable();
             $table->uuid('basic_salary_id')->nullable();
+            $table->uuid('employee_grade_id')->nullable();
             $table->date('grade_date_start')->nullable();
             $table->date('grade_date_end')->nullable();
             $table->decimal('basic_salary', 15, 2)->nullable();
@@ -70,6 +71,7 @@ return new class extends Migration
             $table->foreign('departments_id')->references('id')->on('master_departments');
             $table->foreign('sub_department_id')->references('id')->on('master_sub_departments');
             $table->foreign('basic_salary_id')->references('id')->on('master_employee_basic_salary');
+            $table->foreign('employee_grade_id')->references('id')->on('master_employee_grade');
         });
     }
 

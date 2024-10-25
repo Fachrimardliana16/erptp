@@ -202,6 +202,10 @@ class EmployeesResource extends Resource
                             ->prefix('Rp. ')
                             ->readOnly(),
 
+
+                        TextInput::make('employee_grade_id')
+                            ->label('Golongan'),
+
                         // Hidden field for basic_salary to store the amount
                         Forms\Components\Hidden::make('basic_salary')
                             ->default(function ($get) {
