@@ -40,6 +40,7 @@ class Employees extends Model
         'agreement_date_end',
         'employee_education_id',
         'basic_salary_id',
+        'employee_grade_id',
         'basic_salary',
         'grade_date_start',
         'grade_date_end',
