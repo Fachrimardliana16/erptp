@@ -15,16 +15,26 @@ class EmployeeJobApplicationArchives extends Model
         'registration_date',
         'name',
         'address',
+        'gender',
         'place_of_birth',
         'date_of_birth',
         'email',
         'contact',
         'religion',
-        'education',
+        'employee_education_id',
         'major',
         'archive_file',
         'notes',
         'application_status',
         'users_id'
     ];
+
+    public function agreementJob()
+    {
+        return $this->hasMany(EmployeeAgreement::class, 'job_application_archives_id', 'id');
+    }
+    public function employeedu()
+    {
+        return $this->belongsTo(MasterEmployeeEducation::class, 'employee_education_id', 'id');
+    }
 }

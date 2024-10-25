@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class EmployeeAgreement extends Model
@@ -11,21 +11,20 @@ class EmployeeAgreement extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'employee_agreement';
+
     protected $fillable = [
+        'job_application_archives_id',
         'agreement_number',
-        'employee_id',
+        'name',
         'agreement_id',
         'employee_position_id',
-        'status_employements_id',
+        'status_employemnts_id',
         'agreement_date_start',
         'agreement_date_end',
         'docs',
+        'users_id',
     ];
 
-    public function agreementEmployee()
-    {
-        return $this->belongsTo(Employees::class, 'employee_id', 'id');
-    }
     public function agreement()
     {
         return $this->belongsTo(MasterEmployeeAgreement::class, 'agreement_id', 'id');
@@ -36,6 +35,11 @@ class EmployeeAgreement extends Model
     }
     public function agreementStatus()
     {
-        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'status_employements_id', 'id');
+        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'status_employemnts_id', 'id');
+    }
+
+    public function agreementJob()
+    {
+        return $this->belongsTo(EmployeeJobApplicationArchives::class, 'job_application_archives_id', 'id');
     }
 }
