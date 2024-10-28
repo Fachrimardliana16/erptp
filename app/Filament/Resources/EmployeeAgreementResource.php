@@ -110,7 +110,7 @@ class EmployeeAgreementResource extends Resource
                             ->required()
                             ->validationAttribute('Jabatan'),
 
-                        Select::make('status_employemnts_id')
+                        Select::make('employment_status_id')
                             ->relationship('agreementStatus', 'name')
                             ->label('Status Pegawai')
                             ->required()

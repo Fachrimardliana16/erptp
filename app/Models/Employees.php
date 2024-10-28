@@ -31,9 +31,14 @@ class Employees extends Model
         'bpjs_kes_number',
         'rek_dplk_pribadi',
         'rek_dplk_bersama',
+        'username',
+        'email',
+        'password',
+        'image',
         'entry_date',
         'probation_appointment_date',
         'length_service',
+        'retirement',
         'employment_status_id',
         'master_employee_agreement_id',
         'agreement_date_start',
@@ -41,22 +46,16 @@ class Employees extends Model
         'employee_education_id',
         'basic_salary_id',
         'employee_grade_id',
-        'basic_salary',
         'grade_date_start',
         'grade_date_end',
+        'basic_salary',
         'periodic_salary_date_start',
         'periodic_salary_date_end',
         'amount',
         'employee_position_id',
         'departments_id',
         'sub_department_id',
-        'retirement',
-        'username',
-        'email',
-        'password',
-        'image',
         'users_id',
-
     ];
 
     protected $dates = [
@@ -68,7 +67,7 @@ class Employees extends Model
 
     public function employmentStatus()
     {
-        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'employment_status_id');
+        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'employment_status_id', 'id');
     }
 
     public function employeeAgreement()
@@ -91,12 +90,12 @@ class Employees extends Model
         return $this->belongsTo(MasterEmployeePosition::class, 'employee_position_id');
     }
 
-    public function employeeDepartments()
+    public function EmployeeDepartments()
     {
         return $this->belongsTo(MasterDepartments::class, 'departments_id');
     }
 
-    public function employeesubDepartments()
+    public function EmployeeSubDepartments()
     {
         return $this->belongsTo(MasterSubDepartments::class, 'sub_department_id');
     }

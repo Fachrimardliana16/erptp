@@ -33,22 +33,35 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('number_psi')
                             ->label('Nomor Surat Kenaikan Berkala')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->required(), // Menambahkan validasi required
                         Forms\Components\DatePicker::make('date_periodic_salary_increase')
                             ->label('Tanggal Berkala')
-                            ->required(),
+                            ->required()
+                            ->afterStateUpdated(function ($state, $set) {
+                                if ($state > now()) {
+                                    $set('date_periodic_salary_increase', null); // Reset jika tanggal lebih dari hari ini
+                                    return 'Tanggal tidak boleh lebih dari hari ini';
+                                }
+                            }),
                         Forms\Components\Select::make('employee_id')
                             ->options(Employees::query()->pluck('name', 'id'))
                             ->afterStateUpdated(function ($set, $state) {
                                 $employees = Employees::find($state);
-                                $set('name', $employees->name);
-                                $set('basic_salary', $employees->basic_salary);
+                                if ($employees) {
+                                    $set('name', $employees->name);
+                                    $set('basic_salary', $employees->basic_salary);
+                                } else {
+                                    $set('name', null);
+                                    $set('basic_salary', null);
+                                }
                             })
                             ->label('Nama Pegawai')
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->required(),
+                            ->required()
+                            ->rules(['exists:employees,id']), // Validasi memastikan pegawai ada
                         Forms\Components\Hidden::make('employee_id')
                             ->label('Nama Pegawai')
                             ->required(),
@@ -61,9 +74,11 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                             ->label('Kenaikan Gaji Pokok')
                             ->required()
                             ->prefix('Rp. ')
-                            ->numeric(),
+                            ->numeric()
+                            ->rules(['numeric', 'gt:0']), // Validasi untuk memastikan angka lebih besar dari 0
                         Forms\Components\FileUpload::make('docs_letter')
-                            ->label('Lampiran Surat'),
+                            ->label('Lampiran Surat')
+                            ->required(), // Menambahkan validasi required jika diperlukan
                         Forms\Components\FileUpload::make('docs_archive')
                             ->label('Lampiran Dokumen Pendukung'),
                         Forms\Components\Hidden::make('users_id')

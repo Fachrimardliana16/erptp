@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->uuid('agreement_id');
             $table->uuid('employee_position_id');
-            $table->uuid('status_employemnts_id');
+            $table->uuid('employment_status_id');
             $table->uuid('basic_salary_id')->nullable();
             $table->date('agreement_date_start');
             $table->date('agreement_date_end');
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->foreign('job_application_archives_id')->references('id')->on('employee_job_application_archives')->onDelete('cascade');
             $table->foreign('agreement_id')->references('id')->on('master_employee_agreement')->onDelete('cascade');
             $table->foreign('employee_position_id')->references('id')->on('master_employee_position')->onDelete('cascade');
-            $table->foreign('status_employemnts_id')->references('id')->on('master_employee_status_employement')->onDelete('cascade');
+            $table->foreign('employment_status_id')->references('id')->on('master_employee_status_employement')->onDelete('cascade');
             $table->foreign('basic_salary_id')->references('id')->on('master_employee_basic_salary')->onDelete('cascade');
             $table->foreign('departments_id')->references('id')->on('master_departments');
             $table->foreign('sub_department_id')->references('id')->on('master_sub_departments');
