@@ -101,18 +101,26 @@ class EmployeesResource extends Resource
                             ->tel()
                             ->prefix('+62')
                             ->maxLength(13),
+                        Select::make('employee_education_id')
+                            ->relationship('employeeEducation', 'name')
+                            ->label('Pendidikan Terakhir')
+                            ->searchable()
+                            ->preload(),
                         TextInput::make('id_number')
                             ->label('Nomor NIK')
                             ->numeric()
-                            ->maxLength(16),
+                            ->maxLength(16)
+                            ->helperText('Isikan nomor KTP Anda, pastikan terdiri dari 16 digit.'),
                         TextInput::make('familycard_number')
                             ->label('Nomor KK')
                             ->numeric()
-                            ->maxLength(16),
+                            ->maxLength(16)
+                            ->helperText('Isikan nomor KK Anda, pastikan terdiri dari 16 digit.'),
                         TextInput::make('npwp_number')
                             ->label('Nomor NPWP')
                             ->numeric()
-                            ->maxLength(20),
+                            ->maxLength(20)
+                            ->helperText('Isikan nomor NPWP Anda, pastikan terdiri dari 16 digit.'),
                         TextInput::make('bank_account_number')
                             ->label('Nomor Rekening')
                             ->numeric()
@@ -171,11 +179,7 @@ class EmployeesResource extends Resource
                             ->label('Tanggal Mulai Perjanjian Kontrak'),
                         DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian Kontrak'),
-                        Select::make('employee_education_id')
-                            ->relationship('employeeEducation', 'name')
-                            ->label('Pendidikan Terakhir')
-                            ->searchable()
-                            ->preload(),
+
                         Select::make('basic_salary_id')
                             ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))
                             ->afterStateUpdated(function ($set, $state) {

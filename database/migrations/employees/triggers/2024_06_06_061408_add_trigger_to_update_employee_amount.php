@@ -13,13 +13,18 @@ class AddTriggerToUpdateEmployeeAmount extends Migration
     public function up()
     {
         DB::unprepared('
-            CREATE TRIGGER update_employee_amount AFTER INSERT ON employee_periodic_salary_increases
+            CREATE TRIGGER after_employee_periodic_salary_increase_insert
+            AFTER INSERT ON employee_periodic_salary_increases
             FOR EACH ROW
             BEGIN
                 UPDATE employees
-                SET amount = NEW.salary_increase
+                SET 
+                    basic_salary = basic_salary + NEW.salary_increase,
+                    amount = NEW.salary_increase,
+                    periodic_salary_date_start = NEW.date_periodic_salary_increase,
+                    periodic_salary_date_end = DATE_ADD(NEW.date_periodic_salary_increase, INTERVAL 2 YEAR)
                 WHERE id = NEW.employee_id;
-            END
+            END;
         ');
     }
 
@@ -30,6 +35,6 @@ class AddTriggerToUpdateEmployeeAmount extends Migration
      */
     public function down()
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS update_employee_amount');
+        DB::unprepared('DROP TRIGGER IF EXISTS after_employee_periodic_salary_increase_insert');
     }
 }

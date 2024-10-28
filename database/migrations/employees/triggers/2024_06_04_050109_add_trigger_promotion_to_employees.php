@@ -21,7 +21,7 @@ return new class extends Migration
                 WHERE id = NEW.employee_id;
 
                 UPDATE employees
-                SET employee_basic_salary_id = NEW.new_basic_salary_id
+                SET basic_salary = NEW.new_basic_salary
                 WHERE id = NEW.employee_id;
             END
         ');

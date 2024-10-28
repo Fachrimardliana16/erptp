@@ -19,8 +19,8 @@ class EmployeePromotion extends Model
         'employee_id',
         'old_grade_id',
         'new_grade_id',
-        'old_basic_salary_id',
-        'new_basic_salary_id',
+        'old_basic_salary',
+        'new_basic_salary',
         'users_id',
     ];
 
@@ -36,7 +36,7 @@ class EmployeePromotion extends Model
 
     public function newGrade()
     {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'new_grade_id', 'id');
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_grade_id', 'id');
     }
 
     public function oldBasicSalary()

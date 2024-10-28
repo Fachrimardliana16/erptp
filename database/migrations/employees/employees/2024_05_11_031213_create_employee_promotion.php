@@ -18,17 +18,15 @@ return new class extends Migration
             $table->uuid('employee_id');
             $table->uuid('old_grade_id');
             $table->uuid('new_grade_id');
-            $table->uuid('old_basic_salary_id');
-            $table->uuid('new_basic_salary_id');
+            $table->uuid('old_basic_salary');
+            $table->uuid('new_basic_salary');
             $table->timestamps();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees');
             $table->foreign('old_grade_id')->references('id')->on('master_employee_grade');
-            $table->foreign('new_grade_id')->references('id')->on('master_employee_grade');
-            $table->foreign('old_basic_salary_id')->references('id')->on('master_employee_basic_salary');
-            $table->foreign('new_basic_salary_id')->references('id')->on('master_employee_basic_salary');
+            $table->foreign('new_grade_id')->references('id')->on('master_employee_basic_salary');
         });
     }
 

@@ -37,13 +37,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                             ->required(), // Menambahkan validasi required
                         Forms\Components\DatePicker::make('date_periodic_salary_increase')
                             ->label('Tanggal Berkala')
-                            ->required()
-                            ->afterStateUpdated(function ($state, $set) {
-                                if ($state > now()) {
-                                    $set('date_periodic_salary_increase', null); // Reset jika tanggal lebih dari hari ini
-                                    return 'Tanggal tidak boleh lebih dari hari ini';
-                                }
-                            }),
+                            ->required(),
                         Forms\Components\Select::make('employee_id')
                             ->options(Employees::query()->pluck('name', 'id'))
                             ->afterStateUpdated(function ($set, $state) {
@@ -69,7 +63,9 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                             ->label('Gaji Pokok Awal')
                             ->required()
                             ->prefix('Rp. ')
-                            ->readonly(),
+                            ->numeric()
+                            ->readonly()
+                            ->rules(['numeric', 'gt:0']),
                         Forms\Components\TextInput::make('salary_increase')
                             ->label('Kenaikan Gaji Pokok')
                             ->required()
@@ -93,29 +89,30 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('number_psi')
-                    ->label('')
+                    ->label('Nomor Surat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_periodic_salary_increase')
-                    ->label('')
+                    ->label('Tanggal Berkala')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('employee_id')
-                    ->label('')
+                    ->label('Nama Pegawai')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('basic_salary_id')
-                    ->label('')
+                Tables\Columns\TextColumn::make('basic_salary')
+                    ->label('Gaji Pokok')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('salary_increase')
-                    ->label('')
+                    ->label('Kenaikan')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('docs_letter')
-                    ->label('')
+                    ->label('Dokumen Surat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('docs_archive')
-                    ->label('')
+                    ->label('Lapmpiran Dokument')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
