@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeAgreementResource\Pages;
-use App\Filament\Resources\EmployeeAgreementResource\RelationManagers;
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\EmployeeAgreement;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -11,15 +11,13 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use App\Models\EmployeeJobAplicationArchives;
 use App\Models\EmployeeJobApplicationArchives;
-use App\Models\Employees;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use App\Models\MasterEmployeeBasicSalary;
 
 class EmployeeAgreementResource extends Resource
 {
@@ -40,8 +38,10 @@ class EmployeeAgreementResource extends Resource
                         TextInput::make('agreement_number')
                             ->label('Nomor Perjanjian Kontrak')
                             ->maxLength(255)
+                            ->required()
                             ->validationAttribute('Nomor Perjanjian Kontrak')
-                            ->required(),
+                            ->rules(['string', 'max:255']),
+
                         Select::make('job_application_archives_id')
                             ->options(function () {
                                 return EmployeeJobApplicationArchives::query()
@@ -69,37 +69,104 @@ class EmployeeAgreementResource extends Resource
                             ->required()
                             ->dehydrated(false)
                             ->validationAttribute('Nama Pegawai'),
+
                         Hidden::make('name')
                             ->label('Nama Pegawai')
                             ->required()
                             ->validationAttribute('Nama Pegawai'),
+
                         Select::make('agreement_id')
                             ->relationship('agreement', 'name')
                             ->label('Status Kontrak')
                             ->required()
                             ->validationAttribute('Status Kontrak'),
+
+                        Select::make('departments_id')
+                            ->relationship('agreementDepartement', 'name')
+                            ->label('Bagian')
+                            ->required()
+                            ->live() // Make it live to trigger updates
+                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes
+                            ->validationAttribute('Bagian'),
+
+                        Select::make('sub_department_id')
+                            ->relationship(
+                                'agreementSubDepartement',
+                                'name',
+                                fn(Builder $query, callable $get) => $query
+                                    ->when(
+                                        $get('departments_id'),
+                                        fn(Builder $q, $departmentId) => $q->where('departments_id', $departmentId)
+                                    )
+                            )
+                            ->label('Sub Bagian')
+                            ->required()
+                            ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected
+                            ->validationAttribute('Sub Bagian'),
+
                         Select::make('employee_position_id')
                             ->relationship('agreementPosition', 'name')
                             ->label('Jabatan')
                             ->required()
                             ->validationAttribute('Jabatan'),
+
                         Select::make('status_employemnts_id')
                             ->relationship('agreementStatus', 'name')
                             ->label('Status Pegawai')
                             ->required()
                             ->validationAttribute('Status Pegawai'),
+
+                        Select::make('basic_salary_id')
+                            ->label('Pilih Golongan dan Gaji Pokok')
+                            ->options(function () {
+                                return MasterEmployeeBasicSalary::query()
+                                    ->with('employeeGrade')
+                                    ->get()
+                                    ->mapWithKeys(function ($basicSalary) {
+                                        return [
+                                            $basicSalary->id => "Golongan: {$basicSalary->employeeGrade->name} - Gaji Pokok: Rp " . number_format($basicSalary->amount, 0, ',', '.')
+                                        ];
+                                    });
+                            })
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                if ($state) {
+                                    $basicSalary = MasterEmployeeBasicSalary::with('employeeGrade')->find($state);
+                                    $set('grade_id', $basicSalary->employeeGrade->name);
+                                    $set('amount', number_format($basicSalary->amount, 0, ',', '.'));
+                                } else {
+                                    $set('grade_id', null);
+                                    $set('amount', null);
+                                }
+                            }),
+
+                        // TextInput untuk menampilkan grade (readonly)
+                        TextInput::make('grade_id')
+                            ->label('Golongan Pegawai')
+                            ->validationAttribute('Golongan Pegawai')
+                            ->disabled(),
+
+                        // TextInput untuk menampilkan amount (readonly)
+                        TextInput::make('amount')
+                            ->label('Gaji Pokok')
+                            ->validationAttribute('Gaji Pokok')
+                            ->disabled(),
+
                         DatePicker::make('agreement_date_start')
                             ->label('Tanggal Mulai Perjanjian')
                             ->required()
                             ->validationAttribute('Tanggal Mulai Perjanjian'),
+
                         DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian')
                             ->required()
                             ->validationAttribute('Tanggal Akhir Perjanjian'),
+
                         FileUpload::make('docs')
                             ->directory('Perjanjian Kontrak')
                             ->label('Lampiran Dokumen')
                             ->validationAttribute('Lampiran Dokumen'),
+
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
@@ -112,7 +179,10 @@ class EmployeeAgreementResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('No.')
+                    ->rowIndex(),
                 Tables\Columns\TextColumn::make('agreement_number')
                     ->label('Nomor Surat Perjanjian')
                     ->searchable(),
@@ -128,6 +198,17 @@ class EmployeeAgreementResource extends Resource
                 Tables\Columns\TextColumn::make('agreementStatus.name')
                     ->label('Status Kepegawaian')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('basicSalary.employeeGrade.name')
+                    ->label('Golongan Pegawai')
+                    ->searchable()
+                    ->sortable(),
+
+                // Menampilkan amount dengan format currency
+                Tables\Columns\TextColumn::make('basicSalary.amount')
+                    ->label('Gaji Pokok')
+                    ->money('idr') // Format sebagai mata uang IDR
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('agreement_date_start')
                     ->label('Tanggal Mulai Perjanjian Kontrak')
                     ->date()

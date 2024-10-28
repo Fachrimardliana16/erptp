@@ -43,7 +43,7 @@ return new class extends Migration
             $table->integer('length_service')->nullable();
             $table->date('retirement')->nullable();
             $table->uuid('employment_status_id')->nullable();
-            $table->uuid('employee_agreement_id')->nullable();
+            $table->uuid('master_employee_agreement_id')->nullable();
             $table->date('agreement_date_start')->nullable();
             $table->date('agreement_date_end')->nullable();
             $table->uuid('employee_education_id')->nullable();
@@ -65,7 +65,7 @@ return new class extends Migration
 
 
             $table->foreign('employment_status_id')->references('id')->on('master_employee_status_employement');
-            $table->foreign('employee_agreement_id')->references('id')->on('master_employee_agreement');
+            $table->foreign('master_employee_agreement_id')->references('id')->on('master_employee_agreement');
             $table->foreign('employee_education_id')->references('id')->on('master_employee_education');
             $table->foreign('employee_position_id')->references('id')->on('master_employee_position');
             $table->foreign('departments_id')->references('id')->on('master_departments');

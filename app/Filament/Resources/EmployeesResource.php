@@ -166,9 +166,9 @@ class EmployeesResource extends Resource
                             ->label('Status')
                             ->searchable()
                             ->preload(),
-                        Select::make('employee_agreement_id')
-                            ->relationship('employeeAgreement', 'name')
-                            ->label('Perjanjian Kontrak')
+                        Select::make('agreement_id')
+                            ->relationship('employeeAgreement', 'name') // Pastikan 'employeeAgreement' adalah relasi yang benar
+                            ->label('Kontrak Kerja')
                             ->searchable()
                             ->preload(),
                         DatePicker::make('agreement_date_start')

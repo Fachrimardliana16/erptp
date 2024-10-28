@@ -2,20 +2,29 @@
 
 namespace App\Models;
 
-use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Filament\Resources\AssetResource\Pages\EditAsset;
-use App\Filament\Resources\AssetResource\Pages\ViewAsset;
-use App\Filament\Resources\AssetResource\Pages\ListAssets;
-use App\Filament\Resources\AssetResource\Pages\CreateAsset;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
 
 class Asset extends Model
 {
     use HasFactory, HasUuids;
 
     protected $table = 'assets';
+
+    // Menggunakan guarded untuk melindungi atribut dari mass assignment
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    // Jika ada data sensitif, Anda bisa mengenkripsinya
+    protected $casts = [
+        'purchase_date' => 'date',
+        'book_value_expiry' => 'date',
+        'desc' => 'encrypted', // Enkripsi kolom deskripsi
+        'price' => 'decimal:2', // Mengatur format harga
+        // Jika img adalah data sensitif, pertimbangkan untuk mengenkripsinya
+    ];
 
     protected $fillable = [
         'assets_number',
@@ -35,11 +44,6 @@ class Asset extends Model
         'transaction_status_id',
         'desc',
         'users_id',
-    ];
-
-    protected $casts = [
-        'purchase_date' => 'date',
-        'book_value_expiry' => 'date',
     ];
 
     public function categoryAsset()
@@ -90,5 +94,38 @@ class Asset extends Model
     public function AssetMutationSubLocation()
     {
         return $this->belongsTo(MasterAssetsSubLocation::class, 'sub_location_id', 'id');
+    }
+
+    // Menangani upload file dengan aman
+    public function setImgAttribute($value)
+    {
+        if (request()->hasFile('img')) {
+            // Simpan file dan simpan path-nya
+            $this->attributes['img'] = $value->store('Assets', 'public'); // Simpan di folder public
+        }
+    }
+
+    // Menambahkan metode untuk menghapus file yang diupload saat model dihapus
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function ($model) {
+            if ($model->img) {
+                Storage::disk('public')->delete($model->img);
+            }
+        });
+    }
+
+    // Menambahkan metode untuk mendekripsi deskripsi saat diambil
+    public function getDescAttribute($value)
+    {
+        return Crypt::decryptString($value);
+    }
+
+    // Menambahkan metode untuk mengenkripsi deskripsi sebelum disimpan
+    public function setDescAttribute($value)
+    {
+        $this->attributes['desc'] = Crypt::encryptString($value);
     }
 }

@@ -34,4 +34,9 @@ class MasterSubDepartments extends Model
     {
         return $this->hasMany(EmployeeMutations::class, 'new_sub_department_id', 'id');
     }
+
+    public function agreementSubDepartement()
+    {
+        return $this->hasMany(EmployeeAgreement::class, 'sub_departments_id', 'id');
+    }
 }

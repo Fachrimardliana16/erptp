@@ -42,35 +42,41 @@ class AssetRequestsResource extends Resource
                             ->required()
                             ->placeholder('Exp: XX/nama_sub_bagian/MM/YYYY.')
                             ->maxLength(255)
-                            ->validationAttribute('Nomor Dokumen'),
+                            ->validationAttribute('Nomor Dokumen')
+                            ->rules('required|string|max:255'),
                         Forms\Components\DatePicker::make('date')
                             ->label('Tanggal Permintaan')
                             ->default(now())
                             ->required()
-                            ->validationAttribute('Tanggal Permintaan'),
+                            ->validationAttribute('Tanggal Permintaan')
+                            ->rules('required|date'),
                         Forms\Components\TextInput::make('asset_name')
                             ->label('Nama Barang')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Nama Barang'),
+                            ->validationAttribute('Nama Barang')
+                            ->rules('required|string|max:255'),
                         Forms\Components\Select::make('category_id')
                             ->relationship('category', 'name')
                             ->label('Kategori Barang')
                             ->required()
                             ->preload()
                             ->searchable()
-                            ->validationAttribute('Kategori Barang'),
+                            ->validationAttribute('Kategori Barang')
+                            ->rules('required|exists:master_assets_category,id'),
                         Forms\Components\TextInput::make('quantity')
                             ->label('Jumlah Satuan')
                             ->required()
                             ->placeholder('buah/pack/set/dll')
                             ->numeric()
-                            ->validationAttribute('Jumlah Satuan'),
+                            ->validationAttribute('Jumlah Satuan')
+                            ->rules('required|numeric|min:1'),
                         Forms\Components\TextInput::make('purpose')
                             ->label('Untuk Keperluan')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Untuk Keperluan'),
+                            ->validationAttribute('Untuk Keperluan')
+                            ->rules('required|string|max:255'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
                             ->columnSpanFull()
@@ -95,12 +101,13 @@ class AssetRequestsResource extends Resource
                             ->label('Direktur Utama')
                             ->validationAttribute('Direktur Utama'),
                         Forms\Components\FileUpload::make('docs')
-                            ->helperText('Foto atau scan dengan format ".jpeg atau .png".')
+                            ->helperText('Foto atau scan dengan format ".jpeg atau . png".')
                             ->label('Bukti Lampiran')
                             ->directory('Assets_Request')
                             ->columnSpanFull()
                             ->required()
-                            ->validationAttribute('Bukti Lampiran'),
+                            ->validationAttribute('Bukti Lampiran')
+                            ->rules('required|mimes:jpeg,png|max:5024'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id())
                             ->validationAttribute('User ID'),
