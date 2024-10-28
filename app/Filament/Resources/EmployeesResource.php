@@ -6,17 +6,21 @@ use App\Filament\Resources\EmployeesResource\Pages;
 use App\Filament\Resources\EmployeesResource\RelationManagers;
 use App\Models\Employees;
 use App\Models\MasterEmployeeBasicSalary;
+use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\fileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Carbon\Carbon;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\fileUpload;
+use Illuminate\Database\Eloquent\Builder;
 
 class EmployeesResource extends Resource
 {
@@ -74,25 +78,18 @@ class EmployeesResource extends Resource
                                 'Hindu' => 'Hindu',
                             ])
                             ->label('Agama'),
-
                         TextInput::make('address')
                             ->label('Alamat')
                             ->maxLength(255),
                         Select::make('blood_type')
                             ->label('Golongan Darah')
                             ->options([
-                                'a' => 'A',
-                                'b' => 'B',
-                                'c' => 'C',
-                                'd' => 'D',
-                                'o' => 'O',
+                                'A' => 'A',
+                                'B' => 'B',
+                                'AB' => 'AB',
+                                'O' => 'O',
                             ])
                             ->searchable(),
-                        Select::make('employee_education_id')
-                            ->relationship('employeeEducation', 'name')
-                            ->label('Pendidikan Terakhir')
-                            ->searchable()
-                            ->preload(),
                         Select::make('marital_status')
                             ->label('Status Menikah')
                             ->options([
@@ -115,7 +112,7 @@ class EmployeesResource extends Resource
                         TextInput::make('npwp_number')
                             ->label('Nomor NPWP')
                             ->numeric()
-                            ->maxLength(16),
+                            ->maxLength(20),
                         TextInput::make('bank_account_number')
                             ->label('Nomor Rekening')
                             ->numeric()
@@ -138,13 +135,12 @@ class EmployeesResource extends Resource
                             ->maxLength(255),
                     ])->columns(3),
 
-
-                Forms\Components\Section::make('Form Info Kepegawaian')
+                Section::make('Form Info Kepegawaian')
                     ->description('Form Info Kepegawaiaan')
                     ->collapsed(false)
                     ->schema([
                         DatePicker::make('entry_date')
-                            ->label('Tanggal Masuk'), // New field: entry date
+                            ->label('Tanggal Masuk'),
                         DatePicker::make('probation_appointment_date')
                             ->label('Pengangkatan Capeg')
                             ->live()
@@ -166,8 +162,8 @@ class EmployeesResource extends Resource
                             ->label('Status')
                             ->searchable()
                             ->preload(),
-                        Select::make('agreement_id')
-                            ->relationship('employeeAgreement', 'name') // Pastikan 'employeeAgreement' adalah relasi yang benar
+                        Select::make('master_employee_agreement_id')
+                            ->relationship('employeeAgreement', 'name')
                             ->label('Kontrak Kerja')
                             ->searchable()
                             ->preload(),
@@ -175,7 +171,11 @@ class EmployeesResource extends Resource
                             ->label('Tanggal Mulai Perjanjian Kontrak'),
                         DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian Kontrak'),
-
+                        Select::make('employee_education_id')
+                            ->relationship('employeeEducation', 'name')
+                            ->label('Pendidikan Terakhir')
+                            ->searchable()
+                            ->preload(),
                         Select::make('basic_salary_id')
                             ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))
                             ->afterStateUpdated(function ($set, $state) {
@@ -188,26 +188,16 @@ class EmployeesResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live(),
-
-                        // Hidden field for basic_salary_id to store the actual ID
-                        Forms\Components\Hidden::make('basic_salary_id')
+                        Hidden::make('basic_salary_id')
                             ->default(function ($get) {
                                 $basic_salary_id = $get('basic_salary_id');
                                 return $basic_salary_id;
                             }),
-
-                        // TextInput for basic_salary to display the amount
                         TextInput::make('basic_salary')
                             ->label('Gaji Pokok')
                             ->prefix('Rp. ')
                             ->readOnly(),
-
-
-                        TextInput::make('employee_grade_id')
-                            ->label('Golongan'),
-
-                        // Hidden field for basic_salary to store the amount
-                        Forms\Components\Hidden::make('basic_salary')
+                        Hidden::make('basic_salary')
                             ->default(function ($get) {
                                 return $get('basic_salary');
                             }),
@@ -228,42 +218,54 @@ class EmployeesResource extends Resource
                             ->searchable()
                             ->preload(),
                         Select::make('departments_id')
-                            ->relationship('employeeDepartments', 'name')
+                            ->relationship('EmployeeDepartments', 'name')
                             ->label('Bagian')
-                            ->searchable()
-                            ->preload(),
+                            ->required()
+                            ->live() // Make it live to trigger updates
+                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes
+                            ->validationAttribute('Bagian'),
+
                         Select::make('sub_department_id')
-                            ->relationship('employeesubDepartments', 'name')
+                            ->relationship(
+                                'EmployeeSubDepartments',
+                                'name',
+                                fn(Builder $query, callable $get) => $query
+                                    ->when(
+                                        $get('departments_id'),
+                                        fn(Builder $q, $departmentId) => $q->where('departments_id', $departmentId)
+                                    )
+                            )
                             ->label('Sub Bagian')
-                            ->searchable()
-                            ->preload(),
+                            ->required()
+                            ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected
+                            ->validationAttribute('Sub Bagian'),
+
                     ])->columns(2),
 
-                Forms\Components\Section::make('Form Akun Pegawai')
+                Section::make('Form Akun Pegawai')
                     ->description('Form Akun Pegawai')
                     ->collapsed(false)
                     ->schema([
-                        Forms\Components\TextInput::make('username')
+                        TextInput::make('username')
                             ->label('Username')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
+                        TextInput::make('email')
                             ->label('E-Mail')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('password')
+                        TextInput::make('password')
                             ->label('Password')
                             ->password()
                             ->maxLength(255),
-                        Forms\Components\FileUpload::make('image')
+                        FileUpload::make('image')
                             ->directory('Pegawai')
                             ->label('Foto')
                             ->image(),
-                        Forms\Components\Hidden::make('users_id')
+                        Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])->columns(2),
             ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
@@ -402,7 +404,7 @@ class EmployeesResource extends Resource
                     ->label('Tanggal Akhir Golongan')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeeBasic.amount')
+                Tables\Columns\TextColumn::make('basic_salary')
                     ->Money('Rp. ')
                     ->label('Gaji Pokok')
                     ->searchable()

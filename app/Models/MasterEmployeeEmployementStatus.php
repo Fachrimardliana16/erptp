@@ -14,4 +14,9 @@ class MasterEmployeeEmployementStatus extends Model
     protected $fillable = ['name', 'desc', 'users_id'];
 
     public $timestamps = true;
+
+    public function employmentStatus()
+    {
+        return $this->hasMany(Employees::class, 'employment_status_id', 'id');
+    }
 }

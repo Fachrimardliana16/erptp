@@ -18,7 +18,7 @@ class EmployeeAgreement extends Model
         'name',
         'agreement_id',
         'employee_position_id',
-        'status_employemnts_id',
+        'employment_status_id',
         'basic_salary_id',
         'agreement_date_start',
         'agreement_date_end',
@@ -40,7 +40,7 @@ class EmployeeAgreement extends Model
 
     public function agreementStatus()
     {
-        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'status_employemnts_id', 'id');
+        return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'employment_status_id', 'id');
     }
 
     public function agreementJob()

@@ -20,7 +20,7 @@ class MasterSubDepartments extends Model
         return $this->belongsTo(MasterDepartments::class, 'departments_id');
     }
 
-    public function employeesubDepartments()
+    public function EmployeeSubDepartments()
     {
         return $this->hasMany(Employees::class, 'sub_department_id');
     }
