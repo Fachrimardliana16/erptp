@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EmployeesResource\Pages;
 
 use App\Filament\Resources\EmployeesResource;
 use App\Filament\Resources\EmployeesResource\Widgets\EmployeesAgreementChartOverview;
+use App\Filament\Resources\EmployeesResource\Widgets\EmployeesAgreementOverview;
 use App\Filament\Resources\EmployeesResource\Widgets\EmployeesChartOverview;
 use App\Filament\Resources\EmployeesResource\Widgets\EmployeesEducationOverview;
 use App\Filament\Resources\EmployeesResource\Widgets\EmployeesGenderChartOverview;
@@ -30,7 +31,7 @@ class ListEmployees extends ListRecords
             EmployeesGenderChartOverview::class,
             EmployeesEducationOverview::class,
             EmployeesGradeOverview::class,
-            EmployeesAgreementChartOverview::class,
+            EmployeesAgreementOverview::class,
         ];
     }
 }

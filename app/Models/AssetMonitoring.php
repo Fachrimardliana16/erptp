@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Support\Facades\Storage;
 
 class AssetMonitoring extends Model
 {
@@ -23,6 +24,15 @@ class AssetMonitoring extends Model
         'desc',
         'img',
         'users_id',
+    ];
+
+    // Menggunakan guarded untuk melindungi atribut dari mass assignment
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    // Jika ada data sensitif, Anda bisa mengenkripsinya
+    protected $casts = [
+        // Contoh jika Anda menggunakan enkripsi
+        'img' => 'encrypted', // Jika img adalah data sensitif
     ];
 
     public function assetMonitoring()
@@ -58,5 +68,24 @@ class AssetMonitoring extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+    // Menangani upload file dengan aman
+    public function setImgAttribute($value)
+    {
+        if (request()->hasFile('img')) {
+            $this->attributes['img'] = $value->store('Asset_Monitoring', 'public'); // Simpan di folder public
+        }
+    }
+
+    // Menambahkan metode untuk menghapus file yang diupload saat model dihapus
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function ($model) {
+            if ($model->img) {
+                Storage::disk('public')->delete($model->img);
+            }
+        });
     }
 }

@@ -35,7 +35,7 @@ class Employees extends Model
         'probation_appointment_date',
         'length_service',
         'employment_status_id',
-        'employee_agreement_id',
+        'master_employee_agreement_id',
         'agreement_date_start',
         'agreement_date_end',
         'employee_education_id',
@@ -73,7 +73,7 @@ class Employees extends Model
 
     public function employeeAgreement()
     {
-        return $this->belongsTo(MasterEmployeeAgreement::class, 'employee_agreement_id');
+        return $this->belongsTo(MasterEmployeeAgreement::class, 'master_employee_agreement_id', 'id');
     }
 
     public function employeeEducation()

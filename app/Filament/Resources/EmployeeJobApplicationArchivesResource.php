@@ -144,6 +144,8 @@ class EmployeeJobApplicationArchivesResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('No.')
+                    ->rowIndex(),
                 IconColumn::make('application_status')
                     ->label('Status Lamaran')
                     ->boolean(),

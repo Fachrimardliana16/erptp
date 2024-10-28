@@ -15,13 +15,11 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Support\Facades\Blade;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetPurchaseResource\Pages;
-use App\Filament\Resources\AssetPurchaseResource\RelationManagers;
 use Carbon\Carbon;
-use Illuminate\Validation\Rule;
-use Filament\Forms\Components;
+use Illuminate\Support\Facades\Validator; // Import Validator
+use Illuminate\Validation\ValidationException; // Import ValidationException
+
 
 class AssetPurchaseResource extends Resource
 {
@@ -132,6 +130,33 @@ class AssetPurchaseResource extends Resource
                             ->validationAttribute('User ID'),
                     ])
             ]);
+    }
+
+    public static function validate(Form $form, array $data): array
+    {
+        $rules = [
+            'assetrequest_id' => 'required|exists:asset_requests,id',
+            'document_number' => 'required|string|max:255',
+            'asset_name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'brand' => 'required|string|max:255',
+            'assets_number' => 'required|string|max:255',
+            'purchase_date' => 'required|date',
+            'condition_id' => 'required|exists:master_assets_conditions,id',
+            'price' => 'required|numeric|min:0',
+            'funding_source' => 'required|string|max:255',
+            'payment_receipt' => 'required|mimes:jpeg,png|max:10240',
+            'img' => 'nullable|mimes:jpeg,png|max:10240',
+            'users_id' => 'required|exists:users,id',
+        ];
+
+        $validator = Validator::make($data, $rules);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return $validator->validated();
     }
 
     public static function table(Table $table): Table

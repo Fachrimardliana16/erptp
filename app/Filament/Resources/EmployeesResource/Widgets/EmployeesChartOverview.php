@@ -22,7 +22,7 @@ class EmployeesChartOverview extends ChartWidget
         $totalEmployees = Employees::count();
 
         $pegawaiTetap = Employees::where('employment_status_id', function ($query) {
-            $query->select('id')->from('master_employee_status_employement')->where('name', 'Pegawai Tetap');
+            $query->select('id')->from('master_employee_status_employement')->where('name', 'Pegawai');
         })->count();
 
         $calonPegawai = Employees::where('employment_status_id', function ($query) {

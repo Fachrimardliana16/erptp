@@ -5,12 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Support\Facades\Storage;
 
 class AssetMutation extends Model
 {
     use HasFactory, HasUuids;
 
     protected $table = 'assets_mutation';
+
+    // Menggunakan guarded untuk melindungi atribut dari mass assignment
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    // Jika ada data sensitif, Anda bisa mengenkripsinya
+    // protected $casts = [
+    //     'scan_doc' => 'encrypted', // Contoh jika Anda menggunakan enkripsi
+    // ];
 
     protected $fillable = [
         'mutation_date',
@@ -56,5 +65,24 @@ class AssetMutation extends Model
     public function MutationCondition()
     {
         return $this->belongsTo(MasterAssetsCondition::class, 'condition_id', 'id');
+    }
+
+    public function setScanDocAttribute($value)
+    {
+        if (request()->hasFile('scan_doc')) {
+            $this->attributes['scan_doc'] = $value->store('Asset_Mutation', 'public'); // Simpan di folder public
+        }
+    }
+
+    // Menambahkan metode untuk menghapus file yang diupload saat model dihapus
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function ($model) {
+            if ($model->scan_doc) {
+                Storage::disk('public')->delete($model->scan_doc);
+            }
+        });
     }
 }

@@ -19,8 +19,11 @@ return new class extends Migration
             $table->uuid('agreement_id');
             $table->uuid('employee_position_id');
             $table->uuid('status_employemnts_id');
+            $table->uuid('basic_salary_id')->nullable();
             $table->date('agreement_date_start');
             $table->date('agreement_date_end');
+            $table->uuid('departments_id')->nullable();
+            $table->uuid('sub_department_id')->nullable();
             $table->string('docs')->nullable();
             $table->timestamps();
             $table->uuid('users_id');
@@ -30,6 +33,9 @@ return new class extends Migration
             $table->foreign('agreement_id')->references('id')->on('master_employee_agreement')->onDelete('cascade');
             $table->foreign('employee_position_id')->references('id')->on('master_employee_position')->onDelete('cascade');
             $table->foreign('status_employemnts_id')->references('id')->on('master_employee_status_employement')->onDelete('cascade');
+            $table->foreign('basic_salary_id')->references('id')->on('master_employee_basic_salary')->onDelete('cascade');
+            $table->foreign('departments_id')->references('id')->on('master_departments');
+            $table->foreign('sub_department_id')->references('id')->on('master_sub_departments');
         });
     }
 

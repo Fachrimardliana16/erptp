@@ -4,106 +4,33 @@ namespace App\Filament\Resources\EmployeesResource\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use App\Models\Employees;
+use App\Models\MasterEmployeeBasicSalary; // Pastikan model ini ada
 
 class EmployeesGradeOverview extends ChartWidget
 {
-    protected static ?string $heading = 'Grading Overview';
+    protected static ?string $heading = 'Golongan Pegawai Overview';
 
     protected function getData(): array
     {
-        // Count employees based on grade
-        $a1Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'A1');
-        })->count();
+        // Ambil semua golongan dari master_employee_basic_salary
+        $basicSalaries = MasterEmployeeBasicSalary::all()->pluck('name');
 
-        $a2Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'A2');
-        })->count();
+        // Inisialisasi array untuk menyimpan jumlah pegawai berdasarkan golongan
+        $basicSalaryCounts = [];
 
-        $a3Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'A3');
-        })->count();
-
-        $a4Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'A4');
-        })->count();
-
-        $b1Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'B1');
-        })->count();
-
-        $b2Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'B2');
-        })->count();
-
-        $b3Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'B3');
-        })->count();
-
-        $b4Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'B4');
-        })->count();
-
-        $c1Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'C1');
-        })->count();
-
-        $c2Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'C2');
-        })->count();
-
-        $c3Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'C3');
-        })->count();
-
-        $c4Count = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'C4');
-        })->count();
-
-        $kontrakCount = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'Kontrak');
-        })->count();
-
-        $thlCount = Employees::where('employee_grade_id', function ($query) {
-            $query->select('id')->from('master_employee_grade')->where('name', 'Tenaga Harian Lepas');
-        })->count();
+        // Hitung pegawai berdasarkan golongan
+        foreach ($basicSalaries as $basicSalary) {
+            $basicSalaryCounts[$basicSalary] = Employees::where('basic_salary_id', function ($query) use ($basicSalary) {
+                $query->select('id')->from('master_employee_basic_salary')->where('name', $basicSalary);
+            })->count();
+        }
 
         return [
-            'labels' => [
-                'A1',
-                'A2',
-                'A3',
-                'A4',
-                'B1',
-                'B2',
-                'B3',
-                'B4',
-                'C1',
-                'C2',
-                'C3',
-                'C4',
-                'Kontrak',
-                'Tenaga Harian Lepas'
-            ],
+            'labels' => array_keys($basicSalaryCounts), // Ambil nama-nama golongan sebagai label
             'datasets' => [
                 [
-                    'label' => 'Grade Chart',
-                    'data' => [
-                        $a1Count,
-                        $a2Count,
-                        $a3Count,
-                        $a4Count,
-                        $b1Count,
-                        $b2Count,
-                        $b3Count,
-                        $b4Count,
-                        $c1Count,
-                        $c2Count,
-                        $c3Count,
-                        $c4Count,
-                        $kontrakCount,
-                        $thlCount
-                    ],
+                    'label' => 'Golongan Chart',
+                    'data' => array_values($basicSalaryCounts), // Ambil jumlah pegawai sebagai data
                     'backgroundColor' => [
                         '#FF6384',
                         '#36A2EB',
@@ -127,6 +54,6 @@ class EmployeesGradeOverview extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'doughnut'; // Tipe chart yang digunakan
     }
 }

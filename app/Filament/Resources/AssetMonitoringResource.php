@@ -35,13 +35,13 @@ class AssetMonitoringResource extends Resource
                     ->schema([
                         Forms\Components\DatePicker::make('monitoring_date')
                             ->label('Tanggal Monitoring')
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Tanggal Monitoring'),
                         Forms\Components\Select::make('assets_id')
                             ->options(
                                 Asset::query()
                                     ->get()
                                     ->mapWithKeys(function ($asset) {
-                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
                                         return [$asset->id => $asset->assets_number . ' | ' . $asset->name];
                                     })
                                     ->toArray()
@@ -58,7 +58,8 @@ class AssetMonitoringResource extends Resource
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Nomor Aset'),
                         Forms\Components\Hidden::make('assets_number')
                             ->default(function ($get) {
                                 $assets_id = $get('assets_id');
@@ -68,12 +69,14 @@ class AssetMonitoringResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Aset')
                             ->required()
-                            ->readOnly(),
+                            ->readOnly()
+                            ->validationAttribute('Nama Aset'),
                         Forms\Components\Select::make('old_condition_id')
                             ->relationship('MonitoringoldCondition', 'name')
                             ->label('Kondisi Lama')
                             ->required()
-                            ->disabled(),
+                            ->disabled()
+                            ->validationAttribute('Kondisi Lama'),
                         Forms\Components\Hidden::make('old_condition_id')
                             ->default(function ($get) {
                                 return $get('old_condition_id');
@@ -83,13 +86,15 @@ class AssetMonitoringResource extends Resource
                             ->label('Kondisi Baru')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->validationAttribute('Kondisi Baru'),
                         Forms\Components\FileUpload::make('img')
                             ->directory('Asset_Monitoring')
                             ->label('Foto Upload'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->validationAttribute('Keterangan'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])

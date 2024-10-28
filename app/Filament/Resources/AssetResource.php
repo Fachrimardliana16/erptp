@@ -24,15 +24,11 @@ use Filament\Support\Enums\ActionSize;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Endroid\QrCode\ErrorCorrectionLevel;
-// use Illuminate\Database\Eloquent\Builder;
-
-// library untuk export PDF
+use Illuminate\Support\Facades\Validator; // Import Validator
+use Illuminate\Validation\ValidationException; // Import ValidationException
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
-
-// library endroid qr code
-use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
@@ -40,6 +36,7 @@ use App\Filament\Resources\AssetResource\Pages;
 use App\Filament\Resources\AssetResource\Pages\EditAsset;
 use App\Filament\Resources\AssetResource\Pages\ViewAsset;
 use App\Filament\Resources\AssetMonitoringResource\Pages\CreateAssetMonitoring;
+use Filament\Notifications\Notification;
 
 
 class AssetResource extends Resource
@@ -124,6 +121,36 @@ class AssetResource extends Resource
                             ->default(auth()->id()),
                     ])
             ]);
+    }
+
+    public static function validate(Form $form, array $data): array
+    {
+        $rules = [
+            'assets_number' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'status_id' => 'required|exists:assets_statuses,id',
+            'transaction_status_id' => 'required|exists:asset_transaction_statuses,id',
+            'purchase_date' => 'required|date',
+            'condition_id' => 'required|exists:conditions,id',
+            'price' => 'required|numeric|min:0',
+            'funding_source' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'book_value' => 'required|string|max:255',
+            'book_value_expiry' => 'required|date',
+            'date_document_extension' => 'required|date',
+            'desc' => 'nullable|string',
+            'img' => 'nullable|mimes:jpeg,png|max:10240',
+            'users_id' => 'required|exists:users,id',
+        ];
+
+        $validator = Validator::make($data, $rules);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return $validator->validated();
     }
 
     public static function table(Table $table): Table
@@ -259,6 +286,18 @@ class AssetResource extends Resource
                         ->label('Cetak Label')
                         ->icon('heroicon-o-printer')
                         ->action(function ($record) {
+                            // Check if AssetTransactionStatus.name is present
+                            if (!$record->transaction_status_id) {
+                                // Show error notification
+                                Notification::make()
+                                    ->title('Kesalahan')
+                                    ->body('Aset yang dipilih tidak memiliki status transaksi. Silakan perbarui sebelum mencetak label.')
+                                    ->danger()
+                                    ->send();
+
+                                return; // Exit the action if the check fails
+                            }
+
                             // Generate URL for asset detail page using assets_number
                             $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
 
@@ -303,6 +342,22 @@ class AssetResource extends Resource
                         ->label('Cetak Label')
                         ->icon('heroicon-o-printer')
                         ->action(function (Collection $records) {
+                            // Check if all selected records have a transaction status
+                            $missingTransactionStatus = $records->filter(function ($record) {
+                                return !$record->transaction_status_id; // Filter out records without transaction status
+                            });
+
+                            // If there are records missing the transaction status, show a notification
+                            if ($missingTransactionStatus->isNotEmpty()) {
+                                Notification::make()
+                                    ->title('Kesalahan')
+                                    ->body('Beberapa aset yang dipilih tidak memiliki status transaksi. Silakan perbarui sebelum mencetak label.')
+                                    ->danger()
+                                    ->send();
+
+                                return; // Exit the action if the check fails
+                            }
+
                             // Inisialisasi array untuk QR code
                             $qrCodes = [];
 
