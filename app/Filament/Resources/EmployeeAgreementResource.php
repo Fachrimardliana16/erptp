@@ -3,21 +3,24 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeAgreementResource\Pages;
-use Illuminate\Database\Eloquent\Builder;
 use App\Models\EmployeeAgreement;
+use App\Models\EmployeeJobApplicationArchives;
+use App\Models\MasterEmployeeBasicSalary;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Models\EmployeeJobApplicationArchives;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
-use App\Models\MasterEmployeeBasicSalary;
+use Illuminate\Database\Eloquent\Builder;
 
 class EmployeeAgreementResource extends Resource
 {
@@ -151,16 +154,20 @@ class EmployeeAgreementResource extends Resource
                             ->label('Gaji Pokok')
                             ->validationAttribute('Gaji Pokok')
                             ->disabled(),
+                        Group::make()
+                            ->schema([
+                                DatePicker::make('agreement_date_start')
+                                    ->label('Tanggal Mulai Perjanjian')
+                                    ->required()
+                                    ->validationAttribute('Tanggal Mulai Perjanjian'),
 
-                        DatePicker::make('agreement_date_start')
-                            ->label('Tanggal Mulai Perjanjian')
-                            ->required()
-                            ->validationAttribute('Tanggal Mulai Perjanjian'),
+                                DatePicker::make('agreement_date_end')
+                                    ->label('Tanggal Akhir Perjanjian')
+                                    ->required()
+                                    ->validationAttribute('Tanggal Akhir Perjanjian'),
+                            ])
+                            ->columns(2),
 
-                        DatePicker::make('agreement_date_end')
-                            ->label('Tanggal Akhir Perjanjian')
-                            ->required()
-                            ->validationAttribute('Tanggal Akhir Perjanjian'),
 
                         FileUpload::make('docs')
                             ->directory('Perjanjian Kontrak')

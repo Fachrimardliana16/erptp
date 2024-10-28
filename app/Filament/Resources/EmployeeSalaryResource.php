@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeSalaryResource\Pages;
 use App\Filament\Resources\EmployeeSalaryResource\RelationManagers;
 use App\Models\EmployeeSalary;
+use App\Models\Employees;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,8 +13,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Fieldset;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class EmployeeSalaryResource extends Resource
 {
@@ -40,21 +39,39 @@ class EmployeeSalaryResource extends Resource
                     ->description('Form input master gaji pegawai')
                     ->schema([
                         Forms\Components\Select::make('employee_id')
-                            ->relationship('employee', 'name')
+                            ->relationship('employee', 'name') // Mengambil relasi pegawai
                             ->label('Nama Pegawai')
-                            ->required(),
+                            ->required()
+                            ->reactive() // Menjadikan field ini reaktif
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    // Mengambil data pegawai berdasarkan ID yang dipilih
+                                    $employee = Employees::find($state);
+                                    if ($employee) {
+                                        // Mengupdate basic_salary dengan gaji pegawai yang dipilih
+                                        $set('basic_salary', $employee->basic_salary);
+                                    } else {
+                                        // Jika pegawai tidak ditemukan, set basic_salary ke null
+                                        $set('basic_salary', null);
+                                    }
+                                } else {
+                                    // Jika tidak ada pegawai yang dipilih, set basic_salary ke null
+                                    $set('basic_salary', null);
+                                }
+                            }),
                         Fieldset::make('Gaji dan Tunjangan')
                             ->schema([
                                 TextInput::make('basic_salary')
-                                    ->prefix('Rp. ')
                                     ->label('Gaji Pokok')
-                                    ->numeric()
-                                    ->reactive()
-                                    ->debounce(300)
+                                    ->prefix('Rp. ')
+                                    ->numeric() // Pastikan hanya angka yang bisa dimasukkan
+                                    ->reactive() // Menjadikan field ini reaktif
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
+                                        // Hitung total bruto berdasarkan perubahan di basic_salary
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
-                                    }),
+                                    })
+                                    ->disabled(),
                                 TextInput::make('benefits_1')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan Keluarga')

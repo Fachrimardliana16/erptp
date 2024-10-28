@@ -37,7 +37,7 @@ class MasterEmployeeGrade extends Model
 
     public function newGrade()
     {
-        return $this->hasMany(EmployeePromotion::class, 'new_grade_id', 'id');
+        return $this->belongsTo(EmployeePromotion::class, 'new_grade_id', 'id');
     }
 
     public function gradeSalary()
