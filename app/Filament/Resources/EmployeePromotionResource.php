@@ -61,42 +61,57 @@ class EmployeePromotionResource extends Resource
                             ->label('Golongan Lama')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required() // Keep this required
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Set the hidden field value to the selected old_grade_id
+                                $set('old_grade_id_hidden', $state);
+                            }),
+
+                        Forms\Components\Hidden::make('old_grade_id_hidden') // Hidden field for saving the value
+                            ->label('Old Grade ID (Hidden)')
+                            ->dehydrated(),
+
                         Forms\Components\Select::make('old_basic_salary')
                             ->relationship('oldBasicSalary', 'amount')
                             ->label('Gaji Pokok Lama')
                             ->prefix('Rp. ')
                             ->searchable()
                             ->preload()
-                            ->required(),
-                        Forms\Components\Hidden::make('old_basic_salary')
-                            ->label('Gaji Pokok Lama')
-                            ->required(),
+                            ->required(), // Keep this required
 
-                        Select::make('new_grade_id')
+                        Forms\Components\Hidden::make('old_basic_salary') // Hidden field for saving the value
+                            ->label('Gaji Pokok Lama (Hidden)')
+                            ->dehydrated(),
+
+                        Forms\Components\Select::make('new_grade_id')
                             ->label('Golongan Baru')
                             ->searchable()
-                            ->options(function () {
-                                return MasterEmployeeBasicSalary::select('id', 'name', 'amount')->get()->keyBy('id')->map(function ($item) {
-                                    return $item->name;
-                                });
-                            })
+                            ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))  // Kembalikan ke id
                             ->required()
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state) {
-                                    $basicSalary = MasterEmployeeBasicSalary::find($state);
-                                    if ($basicSalary) {
-                                        $set('new_basic_salary', $basicSalary->amount);
-                                    } else {
-                                        $set('new_basic_salary', null);
-                                    }
+                                    $basicSalary = MasterEmployeeBasicSalary::find($state);  // Query tetap menggunakan id
+                                    $set('new_basic_salary', $basicSalary?->amount);
+                                    $set('new_basic_salary_hidden', $basicSalary?->amount);
+                                } else {
+                                    $set('new_basic_salary', null);
+                                    $set('new_basic_salary_hidden', null);
                                 }
                             }),
-                        TextInput::make('new_basic_salary')
+
+                        Forms\Components\TextInput::make('new_basic_salary')
                             ->label('Gaji Pokok Baru')
                             ->prefix('Rp. ')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        Forms\Components\Hidden::make('new_basic_salary_hidden') // Hidden field for saving the value
+                            ->label('Gaji Pokok Baru (Hidden)')
+                            ->dehydrated(), // Ensure it's submitted with the form
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])

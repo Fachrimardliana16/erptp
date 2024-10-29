@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeesResource\Pages;
 use App\Filament\Resources\EmployeesResource\RelationManagers;
 use App\Models\Employees;
-use App\Models\MasterEmployeeBasicSalary;
+use App\Models\MasterEmployeeGrade;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -179,32 +179,16 @@ class EmployeesResource extends Resource
                             ->label('Tanggal Mulai Perjanjian Kontrak'),
                         DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian Kontrak'),
-
-                        Select::make('basic_salary_id')
-                            ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))
-                            ->afterStateUpdated(function ($set, $state) {
-                                $data = MasterEmployeeBasicSalary::find($state);
-                                if ($data) {
-                                    $set('basic_salary', $data->amount);
-                                }
-                            })
+                        Select::make('employee_grade_id')
+                            ->relationship('employeeGrade', 'name')
                             ->label('Golongan')
                             ->searchable()
                             ->preload()
                             ->live(),
-                        Hidden::make('basic_salary_id')
-                            ->default(function ($get) {
-                                $basic_salary_id = $get('basic_salary_id');
-                                return $basic_salary_id;
-                            }),
                         TextInput::make('basic_salary')
                             ->label('Gaji Pokok')
                             ->prefix('Rp. ')
                             ->readOnly(),
-                        Hidden::make('basic_salary')
-                            ->default(function ($get) {
-                                return $get('basic_salary');
-                            }),
                         DatePicker::make('grade_date_start')
                             ->label('Tanggal Mulai Golongan'),
                         DatePicker::make('grade_date_end')
@@ -396,7 +380,7 @@ class EmployeesResource extends Resource
                     ->label('Tanggal Akhir Perjanjian Kontrak')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeeBasic.name')
+                Tables\Columns\TextColumn::make('employeeGrade.name')
                     ->label('Golongan')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: false),

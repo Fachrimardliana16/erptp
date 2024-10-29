@@ -44,7 +44,6 @@ class Employees extends Model
         'agreement_date_start',
         'agreement_date_end',
         'employee_education_id',
-        'basic_salary_id',
         'employee_grade_id',
         'grade_date_start',
         'grade_date_end',
@@ -82,7 +81,7 @@ class Employees extends Model
 
     public function employeeGrade()
     {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'employee_grade_id');
+        return $this->belongsTo(MasterEmployeeGrade::class, 'employee_grade_id', 'id');
     }
 
     public function employeePosition()

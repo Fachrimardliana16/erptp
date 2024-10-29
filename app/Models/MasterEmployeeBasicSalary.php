@@ -15,14 +15,14 @@ class MasterEmployeeBasicSalary extends Model
 
     public $timestamps = true;
 
-    public function oldBasicSalary()
+    public function employeePromotionsAsOld()
     {
-        return $this->hasMany(EmployeePromotion::class, 'old_basic_salary_id', 'id');
+        return $this->hasMany(EmployeePromotion::class, 'old_basic_salary', 'id'); // Perbaikan
     }
 
-    public function newBasicSalary()
+    public function employeePromotionsAsNew()
     {
-        return $this->hasMany(EmployeePromotion::class, 'new_basic_salary_id', 'id');
+        return $this->hasMany(EmployeePromotion::class, 'new_basic_salary', 'id'); // Perbaikan
     }
 
     public function gradeSalary()
@@ -34,18 +34,9 @@ class MasterEmployeeBasicSalary extends Model
     {
         return $this->hasMany(Employees::class, 'basic_salary_id', 'id');
     }
-    public function grade()
-    {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'employee_grade_id');
-    }
 
     public function employeeGrade()
     {
         return $this->belongsTo(MasterEmployeeGrade::class, 'employee_grade_id');
-    }
-
-    public function newGrade()
-    {
-        return $this->hasMany(EmployeePromotion::class, 'new_grade_id', 'id');
     }
 }

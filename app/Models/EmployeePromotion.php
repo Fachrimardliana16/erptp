@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class EmployeePromotion extends Model
 {
-
     use HasUuids, HasFactory;
 
     protected $table = 'employee_promotion';
@@ -24,7 +23,7 @@ class EmployeePromotion extends Model
         'users_id',
     ];
 
-    public function employeePromotion()
+    public function employee()
     {
         return $this->belongsTo(Employees::class, 'employee_id', 'id');
     }
@@ -36,16 +35,16 @@ class EmployeePromotion extends Model
 
     public function newGrade()
     {
-        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_grade_id', 'id');
+        return $this->belongsTo(MasterEmployeeGrade::class, 'new_grade_id', 'id'); // Perbaikan
     }
 
     public function oldBasicSalary()
     {
-        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'old_basic_salary_id', 'id');
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'old_basic_salary', 'id'); // Perbaikan
     }
 
     public function newBasicSalary()
     {
-        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_basic_salary_id', 'id');
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_basic_salary', 'id'); // Pastikan ini juga benar
     }
 }

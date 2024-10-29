@@ -15,29 +15,29 @@ class MasterEmployeeGrade extends Model
 
     public $timestamps = true;
 
-    public function GradeBenefit()
+    public function gradeBenefits()
     {
         return $this->hasMany(MasterEmployeeGradeBenefit::class);
     }
 
     public function gradeCuts()
     {
-        return $this->hasMany(MasterEmployeeGradeSalaryCuts::class . 'grade_id');
+        return $this->hasMany(MasterEmployeeGradeSalaryCuts::class, 'grade_id');
     }
 
-    public function employeeGrade()
+    public function employees()
     {
-        return $this->hasMany(Employees::class, 'employee_grade_id');
+        return $this->hasMany(Employees::class, 'employee_grade_id', 'id');
     }
 
-    public function oldGrade()
+    public function promotionsAsOld()
     {
-        return $this->hasMany(EmployeePromotion::class, 'old_grade_id', 'id');
+        return $this->hasMany(EmployeePromotion::class, 'old_grade_id', 'id'); // Perbaikan
     }
 
-    public function newGrade()
+    public function promotionsAsNew()
     {
-        return $this->belongsTo(EmployeePromotion::class, 'new_grade_id', 'id');
+        return $this->hasMany(EmployeePromotion::class, 'new_grade_id', 'id'); // Perbaikan
     }
 
     public function gradeSalary()
