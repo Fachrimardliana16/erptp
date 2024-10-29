@@ -19,7 +19,17 @@ class DepartmentsSeeder extends Seeder
             ['name' => 'Bagian Hubungan Langganan', 'desc' => ''],
             ['name' => 'Bagian Umum', 'desc' => ''],
             ['name' => 'Bagian Keuangan', 'desc' => ''],
-            ['name' => 'Bagian Teknik', 'desc' => '']
+            ['name' => 'Bagian Teknik', 'desc' => ''],
+            ['name' => 'Cabang Kota Bangga', 'desc' => ''],
+            ['name' => 'Cabang Usman Janatin', 'desc' => ''],
+            ['name' => 'Cabang Jendral Soedirman', 'desc' => ''],
+            ['name' => 'Cabang Ardilawet', 'desc' => ''],
+            ['name' => 'Cabang Goentoer Djarjono', 'desc' => ''],
+            ['name' => 'Unit IKK Kemangkon', 'desc' => ''],
+            ['name' => 'Unit IKK Bukateja', 'desc' => ''],
+            ['name' => 'Unit IKK Rembang', 'desc' => ''],
+            ['name' => 'Security', 'desc' => ''],
+            ['name' => 'AMDK', 'desc' => '']
         ];
 
         foreach ($departments as $department) {
