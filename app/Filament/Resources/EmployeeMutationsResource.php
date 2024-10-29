@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeMutationsResource\Pages;
-use App\Filament\Resources\EmployeeMutationsResource\RelationManagers;
 use App\Models\EmployeeMutations;
 use App\Models\Employees;
 use Filament\Forms;
@@ -11,8 +10,12 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\DatePicker;
 
 class EmployeeMutationsResource extends Resource
 {
@@ -30,88 +33,104 @@ class EmployeeMutationsResource extends Resource
                 Forms\Components\Section::make('Form Mutasi Pegawai')
                     ->description('Form input mutasi pegawai')
                     ->schema([
-                        Forms\Components\TextInput::make('decision_letter_number')
+                        TextInput::make('decision_letter_number')
                             ->label('Nomor Surat Keputusan')
-                            ->required(),
-                        Forms\Components\DatePicker::make('mutation_date')
+                            ->required()
+                            ->validationAttribute('Nomor Surat Keputusan')
+                            ->rules('unique:employee_mutations,decision_letter_number')
+                            ->helperText('Masukkan nomor surat keputusan yang unik dan valid.'),
+
+                        DatePicker::make('mutation_date')
                             ->label('Tanggal Mutasi')
-                            ->required(),
-                        Forms\Components\Select::make('employee_id')
+                            ->required()
+                            ->validationAttribute('Tanggal Mutasi')
+                            ->rules('date_format:Y-m-d')
+                            ->helperText('Pilih tanggal mutasi sesuai format yang benar.'),
+
+                        Select::make('employee_id')
                             ->options(Employees::query()->pluck('name', 'id'))
                             ->afterStateUpdated(function ($set, $state) {
                                 $employees = Employees::find($state);
-                                $set('name', $employees->name);
                                 $set('old_department_id', $employees->departments_id);
                                 $set('old_sub_department_id', $employees->sub_department_id);
-                                $set('old_position_id', $employees->employees_position_id);
+                                $set('old_position_id', $employees->employee_position_id);
                             })
                             ->label('Nama Pegawai')
                             ->searchable()
                             ->preload()
                             ->live()
                             ->required(),
-                        Forms\Components\Hidden::make('employee_id')
-                            ->label('Nama Pegawai')
-                            ->required(),
-                        Forms\Components\Select::make('old_department_id')
+
+                        Select::make('old_department_id')
+                            ->disabled()
                             ->relationship('oldDepartment', 'name')
                             ->label('Bagian Lama')
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Hidden::make('old_department_id')
-                            ->label('Bagian Lama')
-                            ->required(),
-                        Forms\Components\Select::make('old_sub_department_id')
+
+                        Select::make('old_sub_department_id')
+                            ->disabled()
                             ->relationship('oldSubDepartment', 'name')
                             ->label('Sub Bagian Lama')
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Hidden::make('old_sub_department_id')
-                            ->label('Sub Bagian Lama')
-                            ->required(),
-                        Forms\Components\Select::make('new_department_id')
-                            ->relationship('newDepartment', 'name')
-                            ->label('Bagian Baru')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\Hidden::make('new_department_id')
-                            ->label('Bagian Baru')
-                            ->required(),
-                        Forms\Components\Select::make('new_sub_department_id')
-                            ->relationship('newSubDepartment', 'name')
-                            ->label('Sub Bagian Baru')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\Hidden::make('new_sub_department_id')
-                            ->label('Sub Bagian Baru')
-                            ->required(),
-                        Forms\Components\Select::make('old_position_id')
+
+                        Select::make('old_position_id')
+                            ->disabled()
                             ->relationship('oldPosition', 'name')
                             ->label('Jabatan Lama')
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Hidden::make('old_position_id')
-                            ->label('Jabatan Lama')
-                            ->required(),
-                        Forms\Components\Select::make('new_position_id')
+
+                        Select::make('new_department_id')
+                            ->relationship('newDepartment', 'name')
+                            ->label('Bagian Baru')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn(callable $set) => $set('new_sub_department_id', null)),
+
+                        Select::make('new_sub_department_id')
+                            ->relationship(
+                                'newSubDepartment',
+                                'name',
+                                fn(Builder $query, callable $get) => $query
+                                    ->when(
+                                        $get('new_department_id'),
+                                        fn(Builder $q, $departmentId) =>
+                                        $q->where('departments_id', $departmentId)
+                                    )
+                            )
+                            ->label('Sub Bagian Baru')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabled(fn(callable $get) => !$get('new_department_id')),
+
+                        Select::make('new_position_id')
                             ->relationship('newPosition', 'name')
                             ->label('Jabatan Baru')
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Hidden::make('new_position_id')
-                            ->label('Jabatan Baru')
-                            ->required(),
-                        Forms\Components\FileUpload::make('docs')
+
+                        FileUpload::make('docs')
                             ->label('Lampiran Surat')
                             ->required(),
-                        Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+
+                        Hidden::make('users_id')
+                            ->default(auth()->id())
+                            ->required(),
+
+                        Hidden::make('users_id')
+                            ->default(auth()->id())
+                            ->required()
+                            ->validationAttribute('Users ID') // Validasi atribut untuk error handling
+                            ->helperText('ID pengguna saat ini akan disimpan di sini.')
                     ])
             ]);
     }
