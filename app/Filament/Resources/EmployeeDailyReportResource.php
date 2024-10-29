@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeDailyReportResource\Pages;
-use App\Filament\Resources\EmployeeDailyReportResource\RelationManagers;
 use App\Models\EmployeeDailyReport;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -19,8 +18,8 @@ use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeDailyReportResource extends Resource
 {

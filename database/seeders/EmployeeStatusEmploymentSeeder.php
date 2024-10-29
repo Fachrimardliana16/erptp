@@ -19,6 +19,7 @@ class EmployeeStatusEmploymentSeeder extends Seeder
         $userId = DB::table('users')->value('id');
         $statuses = [
             ['name' => 'Tenaga Harian Lepas', 'desc' => ''],
+            ['name' => 'Pihak Ke 3', 'desc' => ''],
             ['name' => 'Kontrak', 'desc' => ''],
             ['name' => 'Calon Pegawai', 'desc' => ''],
             ['name' => 'Pegawai', 'desc' => ''],
