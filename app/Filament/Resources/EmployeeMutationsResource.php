@@ -18,7 +18,7 @@ class EmployeeMutationsResource extends Resource
 {
     protected static ?string $model = EmployeeMutations::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Mutasi';
     protected static ?int $navigationSort = 7;

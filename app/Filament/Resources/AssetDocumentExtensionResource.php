@@ -2,20 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\Asset;
-use Filament\Forms\Form;
-use App\Models\Employees;
-use Filament\Tables\Table;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Blade;
-use App\Models\AssetDocumentExtension;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetDocumentExtensionResource\Pages;
 use App\Filament\Resources\AssetDocumentExtensionResource\RelationManagers;
+use App\Models\Asset;
+use App\Models\AssetDocumentExtension;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class AssetDocumentExtensionResource extends Resource
 {
@@ -94,6 +95,17 @@ class AssetDocumentExtensionResource extends Resource
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
 
+                        // Cek apakah pegawai ditemukan
+                        if (!$employee) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // Menandakan bahwa ini adalah notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kerumahtanggaan.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_asset_document_extension', [

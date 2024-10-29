@@ -134,7 +134,18 @@ class AssetMutationResource extends Resource
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
-
+                        
+                        // Cek apakah pegawai ditemukan
+                        if (!$employee) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // Menandakan bahwa ini adalah notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kerumahtanggaan.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_asset_mutation', [

@@ -22,7 +22,7 @@ class EmployeePromotionResource extends Resource
 {
     protected static ?string $model = EmployeePromotion::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-arrow-up';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Kenaikan Golongan';
     protected static ?int $navigationSort = 6;

@@ -2,20 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Employees;
-use Filament\Tables\Table;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\AssetMaintenance;
-use Filament\Resources\Resource;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Support\Facades\Blade;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Forms\Components\DatePicker;
 use App\Filament\Resources\AssetMaintenanceResource\Pages;
+use App\Models\AssetMaintenance;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Blade;
 
 class AssetMaintenanceResource extends Resource
 {
@@ -86,6 +87,17 @@ class AssetMaintenanceResource extends Resource
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
 
+                        // Cek apakah pegawai ditemukan
+                        if (!$employee) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // Menandakan bahwa ini adalah notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kerumahtanggaan.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_asset_maintenance', [

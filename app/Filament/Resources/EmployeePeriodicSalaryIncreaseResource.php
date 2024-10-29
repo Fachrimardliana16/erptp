@@ -19,7 +19,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
 {
     protected static ?string $model = EmployeePeriodicSalaryIncrease::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Kenaikan Berkala';
     protected static ?int $navigationSort = 5;
