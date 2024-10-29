@@ -38,7 +38,6 @@ use App\Filament\Resources\AssetResource\Pages\ViewAsset;
 use App\Filament\Resources\AssetMonitoringResource\Pages\CreateAssetMonitoring;
 use Filament\Notifications\Notification;
 
-
 class AssetResource extends Resource
 {
     protected static ?string $model = Asset::class;
@@ -302,18 +301,20 @@ class AssetResource extends Resource
                             $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
 
                             // Generate QR code with URL
-                            $qrCode = Builder::create()
-                                ->writer(new PngWriter())
-                                ->writerOptions([])
-                                ->data($assetDetailUrl) // Use the URL here
-                                ->encoding(new Encoding('UTF-8'))
-                                ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-                                ->size(100)
-                                ->margin(5)
-                                ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-                                ->build();
-
-                            $qrCodeImage = $qrCode->getString();
+                            $qrCode = new Builder(
+                                writer: new PngWriter(),
+                                writerOptions: [],
+                                validateResult: false,
+                                data: $assetDetailUrl,
+                                encoding: new Encoding('UTF-8'),
+                                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                                size: 100,
+                                margin: 5,
+                                roundBlockSizeMode: RoundBlockSizeMode::Margin
+                            );
+                    
+                            $result = $qrCode->build();
+                            $qrCodeImage = $result->getString();
 
                             // Generate PDF
                             $pdf = app(DomPDF::class);
@@ -367,19 +368,22 @@ class AssetResource extends Resource
                                 $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
 
                                 // Generate QR code dengan URL aset
-                                $qrCode = Builder::create()
-                                    ->writer(new PngWriter())
-                                    ->writerOptions([])
-                                    ->data($assetDetailUrl)
-                                    ->encoding(new Encoding('UTF-8'))
-                                    ->errorCorrectionLevel(ErrorCorrectionLevel::High)
-                                    ->size(100)
-                                    ->margin(5)
-                                    ->roundBlockSizeMode(RoundBlockSizeMode::Margin)
-                                    ->build();
+                                $qrCode = new Builder(
+                                    writer: new PngWriter(),
+                                    writerOptions: [],
+                                    validateResult: false,
+                                    data: $assetDetailUrl,
+                                    encoding: new Encoding('UTF-8'),
+                                    errorCorrectionLevel: ErrorCorrectionLevel::High,
+                                    size: 100,
+                                    margin: 5,
+                                    roundBlockSizeMode: RoundBlockSizeMode::Margin
+                                );
+
+                                $result = $qrCode->build();
 
                                 // Simpan QR code dalam bentuk string base64
-                                $qrCodes[$record->id] = base64_encode($qrCode->getString());
+                                $qrCodes[$record->id] = base64_encode($result->getString());
                             }
 
                             // Generate PDF

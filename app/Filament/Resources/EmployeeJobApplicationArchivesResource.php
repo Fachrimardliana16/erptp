@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -23,7 +24,7 @@ class EmployeeJobApplicationArchivesResource extends Resource
 {
     protected static ?string $model = EmployeeJobApplicationArchives::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Arsip Lamaran';
     protected static ?int $navigationSort = 1;
@@ -156,6 +157,17 @@ class EmployeeJobApplicationArchivesResource extends Resource
                             $query->where('name', 'Kepala Sub Bagian Kepegawaian');
                         })->first();
 
+                        // Cek apakah pegawai ditemukan
+                        if (!$employee) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_employee_job_application_archive', [

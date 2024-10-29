@@ -2,24 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Employees;
-use Filament\Tables\Table;
-use App\Models\AssetRequests;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Resources\Resource;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Support\Facades\Blade;
-use Filament\Forms\Components\Section;
-use Filament\Tables\Enums\FiltersLayout;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\AssetRequestsResource\Pages;
 use App\Filament\Resources\AssetRequestsResource\RelationManagers;
+use App\Models\AssetRequests;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class AssetRequestsResource extends Resource
 {
@@ -128,6 +129,17 @@ class AssetRequestsResource extends Resource
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
 
+                        // Cek apakah pegawai ditemukan
+                        if (!$employee) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // Menandakan bahwa ini adalah notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kerumahtanggaan.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
                             $pdfContent = Blade::render('pdf.report_asset_request', [
