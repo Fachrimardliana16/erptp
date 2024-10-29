@@ -5,16 +5,19 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeJobApplicationArchivesResource\Pages;
 use App\Filament\Resources\EmployeeJobApplicationArchivesResource\RelationManagers;
 use App\Models\EmployeeJobApplicationArchives;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeeJobApplicationArchivesResource extends Resource
 {
@@ -143,6 +146,28 @@ class EmployeeJobApplicationArchivesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_employee_job_application_archive', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)
+                                ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
+                                ->stream();
+                        }, 'report_job_application.pdf');
+                    }),
+            ])
             ->columns([
                 TextColumn::make('No.')
                     ->rowIndex(),
