@@ -27,11 +27,11 @@ class ListEmployees extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            EmployeesChartOverview::class,
-            EmployeesGenderChartOverview::class,
-            EmployeesEducationOverview::class,
-            EmployeesGradeOverview::class,
-            EmployeesAgreementOverview::class,
+            // EmployeesChartOverview::class,
+            // EmployeesGenderChartOverview::class,
+            // EmployeesEducationOverview::class,
+            // EmployeesGradeOverview::class,
+            // EmployeesAgreementOverview::class,
         ];
     }
 }

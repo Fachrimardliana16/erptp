@@ -21,9 +21,9 @@ return new class extends Migration
         Schema::table('employee_assignment_letters', function (Blueprint $table) {
             $table->uuid('assigned_employee_id')->after('employee_position_id');
             $table->foreign('assigned_employee_id')
-                  ->references('id')
-                  ->on('employees')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('employees')
+                ->onDelete('cascade');
         });
     }
 };
