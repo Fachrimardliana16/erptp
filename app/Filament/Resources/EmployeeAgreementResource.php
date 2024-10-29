@@ -5,7 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeAgreementResource\Pages;
 use App\Models\EmployeeAgreement;
 use App\Models\EmployeeJobApplicationArchives;
+use App\Models\Employees;
 use App\Models\MasterEmployeeBasicSalary;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -21,6 +23,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeeAgreementResource extends Resource
 {
@@ -183,6 +186,28 @@ class EmployeeAgreementResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employee = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employee) {
+                            $pdfContent = Blade::render('pdf.report_employee_agreement', [
+                                'records' => $records,
+                                'employee' => $employee
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)
+                                ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
+                                ->stream();
+                        }, 'report_employee_agreement.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
