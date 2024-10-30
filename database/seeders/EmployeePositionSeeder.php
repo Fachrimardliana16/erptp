@@ -18,6 +18,7 @@ class EmployeePositionSeeder extends Seeder
         $position = [
             ['name' => 'Direktur Utama', 'desc' => ''],
             ['name' => 'Direktur Umum', 'desc' => ''],
+            ['name' => 'Badan Pengawas', 'desc' => ''],
             ['name' => 'Kepala Bagian Teknik', 'desc' => ''],
             ['name' => 'Kepala Bagian Umum', 'desc' => ''],
             ['name' => 'Kepala Bagian Keuangan', 'desc' => ''],

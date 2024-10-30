@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable(); // Email pegawai
             $table->string('password')->nullable(); // Kata sandi
             $table->string('image')->nullable(); // Gambar pegawai
-            $table->timestamps(); // Timestamps untuk created_at dan updated_at
+
 
             // Kolom tambahan untuk pengelolaan pegawai
             $table->date('entry_date')->nullable(); // Tanggal masuk pegawai
@@ -59,6 +59,7 @@ return new class extends Migration
             $table->uuid('employee_position_id')->nullable(); // Referensi ke posisi pegawai
             $table->uuid('departments_id')->nullable(); // Referensi ke departemen
             $table->uuid('sub_department_id')->nullable(); // Referensi ke sub-departemen
+            $table->timestamps(); // Timestamps untuk created_at dan updated_at
 
             // Referensi ke tabel pengguna
             $table->uuid('users_id');

@@ -18,7 +18,6 @@ return new class extends Migration
             $table->uuid('status_id');
             $table->uuid('grade_id')->nullable();
             $table->uuid('position_id');
-            $table->uuid('salary_id');
             $table->decimal('basic_salary', 12, 2)->nullable();
             $table->decimal('benefits_1', 12, 2)->nullable();
             $table->decimal('benefits_2', 12, 2)->nullable();
@@ -33,16 +32,7 @@ return new class extends Migration
             $table->decimal('backpay', 12, 2)->nullable();
             $table->decimal('gross_amount', 12, 2)->nullable();
             $table->integer('absence_count')->nullable();
-            $table->decimal('paycut_1', 12, 2)->nullable();
-            $table->decimal('paycut_2', 12, 2)->nullable();
-            $table->decimal('paycut_3', 12, 2)->nullable();
-            $table->decimal('paycut_4', 12, 2)->nullable();
-            $table->decimal('paycut_5', 12, 2)->nullable();
-            $table->decimal('paycut_6', 12, 2)->nullable();
-            $table->decimal('paycut_7', 12, 2)->nullable();
-            $table->decimal('paycut_8', 12, 2)->nullable();
-            $table->decimal('paycut_9', 12, 2)->nullable();
-            $table->decimal('paycut_10', 12, 2)->nullable();
+            $table->json('paycuts')->nullable();
             $table->decimal('cut_amount', 12, 2)->nullable();
             $table->decimal('netto', 12, 2)->nullable();
             $table->text('desc')->nullable();
@@ -54,7 +44,6 @@ return new class extends Migration
             $table->foreign('status_id')->references('id')->on('master_employee_status_employement')->onDelete('cascade');
             $table->foreign('grade_id')->references('id')->on('master_employee_grade')->onDelete('cascade');
             $table->foreign('position_id')->references('id')->on('master_employee_position')->onDelete('cascade');
-            $table->foreign('salary_id')->references('id')->on('employee_salaries')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }

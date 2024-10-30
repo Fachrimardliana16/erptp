@@ -25,6 +25,7 @@ class CreateTriggerAddNewPromotion extends Migration
                         grade_date_end = DATE_ADD(NEW.promotion_date, INTERVAL 4 YEAR),
                         employee_grade_id = employeeGradeID,
                         basic_salary = NEW.new_basic_salary,
+                        amount = NULL,  -- Reset amount menjadi NULL
                         users_id = NEW.users_id
                     WHERE id = NEW.employee_id;
 

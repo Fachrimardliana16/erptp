@@ -30,7 +30,6 @@ class EmployeePayroll extends Model
         'status_id',
         'grade_id',
         'position_id',
-        'salary_id',
         'basic_salary',
         'benefits_1',
         'benefits_2',
@@ -45,21 +44,21 @@ class EmployeePayroll extends Model
         'backpay',
         'gross_amount',
         'absence_count',
-        'paycut_1',
-        'paycut_2',
-        'paycut_3',
-        'paycut_4',
-        'paycut_5',
-        'paycut_6',
-        'paycut_7',
-        'paycut_8',
-        'paycut_9',
-        'paycut_10',
+        'paycuts', // Ganti multiple paycut fields dengan satu field
         'cut_amount',
         'netto',
         'desc',
         'users_id'
     ];
+
+    public function getTotalPaycutAttribute()
+    {
+        if (!$this->paycuts) {
+            return 0;
+        }
+
+        return $this->paycuts->sum('amount');
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

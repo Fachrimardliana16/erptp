@@ -19,7 +19,7 @@ class EmployeeBusinessTravelLettersResource extends Resource
 {
     protected static ?string $model = EmployeeBusinessTravelLetters::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
 
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Surat Perjalanan Dinas';

@@ -29,6 +29,8 @@ class EmployeeGradeSeeder extends Seeder
             ['name' => 'C2', 'desc' => ''],
             ['name' => 'C3', 'desc' => ''],
             ['name' => 'C4', 'desc' => ''],
+            ['name' => 'Direksi', 'desc' => ''],
+            ['name' => 'Badan Pengawas', 'desc' => ''],
             ['name' => 'Kontrak', 'desc' => ''],
             ['name' => 'Tenaga Harian Lepas', 'desc' => '']
         ];

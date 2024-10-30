@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid('employee_id');
             $table->decimal('basic_salary', 15, 2);
             $table->decimal('salary_increase', 15, 2)->nullable();
+            $table->decimal('total_basic_salary', 15, 2)->nullable();
             $table->string('docs_letter')->nullable();
             $table->string('docs_archive')->nullable();
             $table->timestamps();

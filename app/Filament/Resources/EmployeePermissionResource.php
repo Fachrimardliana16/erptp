@@ -17,7 +17,7 @@ class EmployeePermissionResource extends Resource
 {
     protected static ?string $model = EmployeePermission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Cuti';
     protected static ?int $navigationSort = 13;
