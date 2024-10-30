@@ -85,6 +85,8 @@ class EmployeeAgreementResource extends Resource
                         Select::make('agreement_id')
                             ->relationship('agreement', 'name')
                             ->label('Status Kontrak')
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->validationAttribute('Status Kontrak'),
 
@@ -112,12 +114,16 @@ class EmployeeAgreementResource extends Resource
                         Select::make('employee_position_id')
                             ->relationship('agreementPosition', 'name')
                             ->label('Jabatan')
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->validationAttribute('Jabatan'),
 
                         Select::make('employment_status_id')
                             ->relationship('agreementStatus', 'name')
                             ->label('Status Pegawai')
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->validationAttribute('Status Pegawai'),
 
