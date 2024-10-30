@@ -18,7 +18,7 @@ class MasterEmployeePositionResource extends Resource
 {
     protected static ?string $model = MasterEmployeePosition::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Jabatan';
 

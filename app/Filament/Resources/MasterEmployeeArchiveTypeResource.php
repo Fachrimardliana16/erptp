@@ -18,7 +18,7 @@ class MasterEmployeeArchiveTypeResource extends Resource
 {
     protected static ?string $model = MasterEmployeeArchiveType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Tipe Arsip';
 

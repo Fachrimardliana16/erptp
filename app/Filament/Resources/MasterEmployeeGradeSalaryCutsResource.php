@@ -18,7 +18,7 @@ class MasterEmployeeGradeSalaryCutsResource extends Resource
 {
     protected static ?string $model = MasterEmployeeGradeSalaryCuts::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-minus-circle';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Golongan Potongan';
 
