@@ -18,7 +18,7 @@ class MasterEmployeeFamilyResource extends Resource
 {
     protected static ?string $model = MasterEmployeeFamily::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Status Keluarga';
 

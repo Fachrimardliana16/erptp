@@ -18,7 +18,7 @@ class MasterEmployeeGradeResource extends Resource
 {
     protected static ?string $model = MasterEmployeeGrade::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Golongan';
 

@@ -19,7 +19,7 @@ class MasterEmployeeBasicSalaryResource extends Resource
 {
     protected static ?string $model = MasterEmployeeBasicSalary::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-wallet';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Gaji Pokok';
 

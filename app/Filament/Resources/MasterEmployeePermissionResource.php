@@ -18,7 +18,7 @@ class MasterEmployeePermissionResource extends Resource
 {
     protected static ?string $model = MasterEmployeePermission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Cuti';
 

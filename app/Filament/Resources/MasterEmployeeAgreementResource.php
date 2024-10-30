@@ -18,7 +18,7 @@ class MasterEmployeeAgreementResource extends Resource
 {
     protected static ?string $model = MasterEmployeeAgreement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Kontrak Kerja';
 

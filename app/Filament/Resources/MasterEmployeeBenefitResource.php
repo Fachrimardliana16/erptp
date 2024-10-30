@@ -18,7 +18,7 @@ class MasterEmployeeBenefitResource extends Resource
 {
     protected static ?string $model = MasterEmployeeBenefit::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-gift';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Tunjangan';
 
