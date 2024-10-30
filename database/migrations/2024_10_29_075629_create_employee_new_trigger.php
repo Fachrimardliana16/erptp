@@ -136,8 +136,47 @@ class CreateEmployeeNewTrigger extends Migration
             AFTER INSERT ON employees
             FOR EACH ROW
             BEGIN
-                INSERT INTO employee_salaries (id, employee_id, basic_salary, users_id, created_at, updated_at)
-                VALUES (UUID(), NEW.id, NEW.basic_salary, NEW.users_id, NOW(), NOW());
+                -- Deklarasi variabel total_amount
+                DECLARE total_amount DECIMAL(15, 2);
+
+                -- Hitung total amount
+                SET total_amount = NEW.basic_salary + 0 + 0 + 0 + 0 + 0 + 0 + 0 + 0;
+
+                -- Sisipkan data ke dalam tabel employee_salaries
+                INSERT INTO employee_salaries (
+                    id,
+                    employee_id,
+                    basic_salary,
+                    benefits_1,
+                    benefits_2,
+                    benefits_3,
+                    benefits_4,
+                    benefits_5,
+                    benefits_6,
+                    benefits_7,
+                    benefits_8,
+                    amount,
+                    users_id,
+                    created_at,
+                    updated_at
+                )
+                VALUES (
+                    UUID(),
+                    NEW.id,
+                    NEW.basic_salary,
+                    0, -- benefits_1
+                    0, -- benefits_2
+                    0, -- benefits_3
+                    0, -- benefits_4
+                    0, -- benefits_5
+                    0, -- benefits_6
+                    0, -- benefits_7
+                    0, -- benefits_8
+                    total_amount, -- amount
+                    NEW.users_id,
+                    NOW(),
+                    NOW()
+                );
             END
         ');
     }
