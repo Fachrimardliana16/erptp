@@ -24,6 +24,25 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
     protected static ?string $navigationLabel = 'Kenaikan Berkala';
     protected static ?int $navigationSort = 5;
 
+    // Jika menggunakan Resource, tambahkan ini:
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $basic_salary = (float) ($data['basic_salary'] ?? 0);
+        $salary_increase = (float) ($data['salary_increase'] ?? 0);
+        $data['total_basic_salary'] = $basic_salary + $salary_increase;
+        return $data;
+    }
+
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $basic_salary = (float) ($data['basic_salary'] ?? 0);
+        $salary_increase = (float) ($data['salary_increase'] ?? 0);
+        $data['total_basic_salary'] = $basic_salary + $salary_increase;
+        return $data;
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -65,13 +84,40 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                             ->prefix('Rp. ')
                             ->numeric()
                             ->readonly()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                $basic_salary = (float) $state;
+                                $salary_increase = (float) $get('salary_increase') ?? 0;
+                                $total = $basic_salary + $salary_increase;
+                                $set('total_basic_salary', $total);
+                            })
                             ->rules(['numeric', 'gt:0']),
+
                         Forms\Components\TextInput::make('salary_increase')
                             ->label('Kenaikan Gaji Pokok')
                             ->required()
                             ->prefix('Rp. ')
                             ->numeric()
-                            ->rules(['numeric', 'gt:0']), // Validasi untuk memastikan angka lebih besar dari 0
+                            ->rules(['numeric', 'gt:0'])
+                            ->live(debounce: 500)
+                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                $basic_salary = (float) $get('basic_salary') ?? 0;
+                                $salary_increase = (float) $state;
+                                $total = $basic_salary + $salary_increase;
+                                $set('total_basic_salary', $total);
+                            }),
+
+                        Forms\Components\TextInput::make('total_basic_salary')
+                            ->label('Total Gaji Pokok')
+                            ->required()
+                            ->prefix('Rp. ')
+                            ->numeric()
+                            ->disabled()
+                            ->rules(['numeric', 'gt:0']),
+
+                        Forms\Components\Hidden::make('total_basic_salary')
+                            ->required(),
+
                         Forms\Components\FileUpload::make('docs_letter')
                             ->label('Lampiran Surat')
                             ->required(), // Menambahkan validasi required jika diperlukan
@@ -98,7 +144,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                     ->label('Tanggal Berkala')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('employee_id')
+                Tables\Columns\TextColumn::make('employeePeriodic.name')
                     ->label('Nama Pegawai')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('basic_salary')
@@ -108,11 +154,15 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                     ->label('Kenaikan')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('total_basic_salary')
+                    ->label('Total Gaji Pokok')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('docs_letter')
                     ->label('Dokumen Surat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('docs_archive')
-                    ->label('Lapmpiran Dokument')
+                    ->label('Lampiran Dokumen')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

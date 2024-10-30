@@ -114,7 +114,7 @@
                 </tr>
                 <tr>
                     <th>Gaji Pokok</th>
-                    <td class="align-right">Rp {{ number_format($payroll->salary->amount, 0, ',', '.') }}</td>
+                    <td class="align-right">Rp {{ number_format($payroll->basic_salary, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <th>Tunjangan Keluarga</th>

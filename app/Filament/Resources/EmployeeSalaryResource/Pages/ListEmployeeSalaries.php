@@ -51,9 +51,8 @@ class ListEmployeeSalaries extends ListRecords
                                 'periode' => $periode,
                                 'employee_id' => $salary->employee_id,
                                 'status_id' => $salary->employee->employment_status_id,
-                                'grade_id' => $salary->employee->basicSalary->employee_grade_id,
+                                'grade_id' => $salary->employee->employee_grade_id,
                                 'position_id' => $salary->employee->employee_position_id,
-                                'salary_id' => $salary->id,
                                 'basic_salary' => $salary->basic_salary,
                                 'benefits_1' => $salary->benefits_1,
                                 'benefits_2' => $salary->benefits_2,
@@ -76,16 +75,7 @@ class ListEmployeeSalaries extends ListRecords
                                 'backpay' => 0,
                                 'rounding' => 0,
                                 'absence_count' => 0,
-                                'paycut_1' => 0,
-                                'paycut_2' => 0,
-                                'paycut_3' => 0,
-                                'paycut_4' => 0,
-                                'paycut_5' => 0,
-                                'paycut_6' => 0,
-                                'paycut_7' => 0,
-                                'paycut_8' => 0,
-                                'paycut_9' => 0,
-                                'paycut_10' => 0,
+                                'paycuts',
                                 'cut_amount' => 0,
                                 'netto' => $salary->basic_salary +
                                     ($salary->benefits_1 ?? 0) +
@@ -105,7 +95,7 @@ class ListEmployeeSalaries extends ListRecords
 
                     Notification::make()
                         ->title('Generate Payroll Berhasil')
-                        ->body("Berhasil membuat {$successCount} data payroll untuk periode " . date('F Y', strtotime('01-' . $periode)))
+                        ->body("Berhasil membuat {$successCount} data payroll")
                         ->success()
                         ->send();
                 })

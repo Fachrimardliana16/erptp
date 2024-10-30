@@ -17,7 +17,7 @@ class EmployeeTrainingResource extends Resource
 {
     protected static ?string $model = EmployeeTraining::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Pelatihan/Diklat';
     protected static ?int $navigationSort = 11;

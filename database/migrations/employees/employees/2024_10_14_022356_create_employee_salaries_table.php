@@ -28,15 +28,6 @@ return new class extends Migration
             $table->uuid('users_id');
 
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
-            // $table->foreign('basic_salary_id')->references('id')->on('master_employee_basic_salary')->onDelete('cascade');
-            // $table->foreign('benefitsid_1')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_2')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_3')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_4')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_5')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_6')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_7')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
-            // $table->foreign('benefitsid_15')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });
     }

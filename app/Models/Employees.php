@@ -165,4 +165,9 @@ class Employees extends Model
     {
         return $this->hasOneThrough(MasterEmployeeGrade::class, MasterEmployeeBasicSalary::class, 'id', 'id', 'basic_salary_id', 'employee_grade_id');
     }
+
+    public function employeePeriodic()
+    {
+        return $this->hasMany(EmployeePeriodicSalaryIncrease::class, 'employee_id', 'id');
+    }
 }

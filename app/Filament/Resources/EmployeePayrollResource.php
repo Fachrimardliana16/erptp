@@ -2,33 +2,36 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Employees;
-use Filament\Tables\Table;
-use App\Models\EmployeeSalary;
+use App\Filament\Resources\EmployeePayrollResource\Pages;
+use App\Filament\Resources\EmployeePayrollResource\RelationManagers;
 use App\Models\EmployeePayroll;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Tabs;
-use Filament\Tables\Actions\Action;
+use App\Models\Employees;
+use App\Models\EmployeeSalary;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\EmployeePayrollResource\Pages;
-use App\Filament\Resources\EmployeePayrollResource\RelationManagers;
-use Barryvdh\DomPDF\PDF as DomPDF;
 
 class EmployeePayrollResource extends Resource
 {
     protected static ?string $model = EmployeePayroll::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-wallet';
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Payroll';
     protected static ?int $navigationSort = 15;
@@ -94,8 +97,9 @@ class EmployeePayrollResource extends Resource
                                                 $employee = Employees::find($state);
                                                 if ($employee) {
                                                     $set('status_id', $employee->employment_status_id);
-                                                    $set('grade_id', $employee->basicSalary->employee_grade_id);
+                                                    $set('grade_id', $employee->employee_grade_id);
                                                     $set('position_id', $employee->employee_position_id);
+                                                    $set('basic_salary', $employee->basic_salary);
                                                 }
                                             })
                                             ->label('Pegawai')
@@ -144,29 +148,6 @@ class EmployeePayrollResource extends Resource
                                     ]),
                                 Tabs\Tab::make('Tunjangan dan Bruto')
                                     ->schema([
-                                        Forms\Components\Select::make('salary_id')
-                                            ->options(EmployeeSalary::with('employee')->get()->pluck('employee.name', 'id'))
-                                            ->reactive()
-                                            ->afterStateUpdated(function ($state, callable $set) {
-                                                $employee = EmployeeSalary::find($state);
-                                                if ($employee) {
-                                                    $set('basic_salary', $employee->basic_salary);
-                                                    $set('benefits_1', $employee->benefits_1);
-                                                    $set('benefits_2', $employee->benefits_2);
-                                                    $set('benefits_3', $employee->benefits_3);
-                                                    $set('benefits_4', $employee->benefits_4);
-                                                    $set('benefits_5', $employee->benefits_5);
-                                                    $set('benefits_6', $employee->benefits_6);
-                                                    $set('benefits_7', $employee->benefits_7);
-                                                    $set('benefits_8', $employee->benefits_8);
-                                                }
-                                            })
-                                            ->label('Pegawai')
-                                            ->required(),
-                                        Forms\Components\Hidden::make('salary_id')
-                                            ->reactive()
-                                            ->label('Pegawai')
-                                            ->required(),
                                         Forms\Components\TextInput::make('basic_salary')
                                             ->reactive('')
                                             ->label('Gaji Pokok')
@@ -375,139 +356,42 @@ class EmployeePayrollResource extends Resource
                                         Forms\Components\TextInput::make('absence_count')
                                             ->label('Jumlah Absen')
                                             ->numeric(),
-                                        Forms\Components\TextInput::make('paycut_1')
-                                            ->label('Tabungan Daging')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_2')
-                                            ->label('Rokok')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_3')
-                                            ->label('Arisan Sumber')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_4')
-                                            ->label('Cendera Mata')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_5')
-                                            ->label('ASTEK')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_6')
-                                            ->label('BPJS')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_7')
-                                            ->label('Tab. Koperasi')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_8')
-                                            ->label('Dapenma')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_9')
-                                            ->label('DANSOS KOP')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
-                                        Forms\Components\TextInput::make('paycut_10')
-                                            ->label('Potongan Absen')
-                                            ->reactive()
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalCut = self::calculateTotalCut($get);
-                                                $set('cut_amount', $totalCut);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
-                                            }),
+                                        Repeater::make('paycuts')
+                                            ->schema([
+                                                Forms\Components\TextInput::make('description')
+                                                    ->required()
+                                                    ->label('Deskripsi Paycut'),
 
+                                                Forms\Components\TextInput::make('amount')
+                                                    ->numeric()
+                                                    ->required()
+                                                    ->rules(['numeric', 'min:0'])
+                                                    ->label('Jumlah Paycut')
+                                                    ->afterStateUpdated(function (Get $get, Set $set) {
+                                                        // Hitung ulang total paycut
+                                                        $totalCut = collect($get('paycuts'))->sum('amount');
+                                                        $set('cut_amount', $totalCut);
+
+                                                        // Hitung ulang netto
+                                                        $grossAmount = $get('gross_amount') ?? 0;
+                                                        $set('netto', $grossAmount - $totalCut);
+                                                    }),
+                                            ])
+                                            ->columns(2)
+                                            ->label('Daftar Paycut')
+                                            ->createItemButtonLabel('Tambah Paycut')
+                                            ->collapsible()
+                                            ->defaultItems(0),
                                         Forms\Components\TextInput::make('cut_amount')
+                                            ->disabled()
+                                            ->label('Total Paycut')
+                                            ->numeric(),
+
+                                        Forms\Components\TextInput::make('netto')
                                             ->label('Jumlah Potongan')
                                             ->prefix('Rp. ')
                                             ->reactive()
                                             ->debounce(300)
-                                            ->readOnly()
-                                            ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                try {
-                                                    $totalCut = self::calculateTotalCut($get);
-                                                    $set('cut_amount', $totalCut);
-                                                    $totalNetto = self::calculateNetto($get);
-                                                    $set('netto', $totalNetto);
-                                                } catch (\Throwable $e) {
-                                                    session()->flash('error', $e->getMessage());
-                                                }
-                                            })
-                                            ->numeric(),
-                                        Forms\Components\TextInput::make('netto')
-                                            ->label('Jumlah Netto')
-                                            ->prefix('Rp. ')
-                                            ->numeric()
-                                            ->reactive()
                                             ->readOnly(),
                                         Forms\Components\Textarea::make('desc')
                                             ->label('Keterangan Potongan')
@@ -545,8 +429,7 @@ class EmployeePayrollResource extends Resource
                 TextColumn::make('position.name')
                     ->label('Jabatan')
                     ->searchable(),
-
-                TextColumn::make('salary.amount')
+                TextColumn::make('basic_salary')
                     ->Money('IDR')
                     ->label('Gaji Pokok')
                     ->searchable(),
@@ -615,55 +498,9 @@ class EmployeePayrollResource extends Resource
                     ->label('Absen')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_1')
-                    ->Money('IDR')
-                    ->label('Tabungan Daging')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_2')
-                    ->Money('IDR')
-                    ->label('Rokok')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_3')
-                    ->Money('IDR')
-                    ->label('Arisan Sumber')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_4')
-                    ->Money('IDR')
-                    ->label('Cendera Mata')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_5')
-                    ->Money('IDR')
-                    ->label('ASTEK')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_6')
-                    ->Money('IDR')
-                    ->label('BPJS')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_7')
-                    ->Money('IDR')
-                    ->label('Tabungan Koperasi')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_8')
-                    ->Money('IDR')
-                    ->label('Dapenma')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_9')
-                    ->Money('IDR')
-                    ->label('Dana Sosial Koperasi')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycut_10')
+                Tables\Columns\TextColumn::make('paycuts')
                     ->Money('IDR')
                     ->label('Potongan Absensi')
-                    ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('cut_amount')
                     ->Money('IDR')
