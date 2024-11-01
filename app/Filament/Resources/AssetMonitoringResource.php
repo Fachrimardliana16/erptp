@@ -36,6 +36,7 @@ class AssetMonitoringResource extends Resource
                     ->schema([
                         Forms\Components\DatePicker::make('monitoring_date')
                             ->label('Tanggal Monitoring')
+                            ->default(now())
                             ->required()
                             ->validationAttribute('Tanggal Monitoring'),
                         Forms\Components\Select::make('assets_id')

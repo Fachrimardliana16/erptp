@@ -2,25 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use App\Models\Employees;
-use Filament\Tables\Table;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Resources\Resource;
-use Barryvdh\DomPDF\PDF as DomPDF;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Support\Facades\Blade;
-use Filament\Forms\Components\Section;
-use App\Models\EmployeeAssignmentLetters;
-
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\EmployeeAssignmentLettersResource\Pages;
 use App\Filament\Resources\EmployeeAssignmentLettersResource\RelationManagers;
+use App\Models\EmployeeAssignmentLetters;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Carbon\Carbon;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeeAssignmentLettersResource extends Resource
 {
@@ -104,7 +105,7 @@ class EmployeeAssignmentLettersResource extends Resource
                                 'employees' => $employees
                             ]);
                             echo Pdf::loadHTML($pdfContent)->stream();
-                        }, 'assignment_letters.pdf');
+                        }, 'report_assignment_letters.pdf');
                     }),
             ])
 
@@ -155,17 +156,25 @@ class EmployeeAssignmentLettersResource extends Resource
                 Tables\Actions\EditAction::make(),
                 // Action untuk download pdf aset per record
                 Action::make('download_pdf')
-                    ->label('Download PDF')
+                    ->label('Cetak Surat Tugas')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
                         $pdf = app(abstract: DomPDF::class);
                         $pdf->loadView('pdf.employee_assignmentletter', ['surat_tugas' => $record]);
-
+            
+                        // Ambil semua nama pegawai yang menerima tugas
+                        $namaPegawai = $record->assignedEmployees->pluck('name')->join('_'); // Menggabungkan nama pegawai dengan '_' sebagai pemisah
+                        // Konversi string tanggal menjadi objek Carbon dan format
+                        $tanggalMulai = Carbon::parse($record->start_date)->format('d-m-Y'); // Format tanggal mulai
+                        $tanggalSelesai = Carbon::parse($record->end_date)->format('d-m-Y'); // Format tanggal selesai
+                        // Format nama file
+                        $fileName = "surat_tugas_{$tanggalMulai}_sd_{$tanggalSelesai}_{$namaPegawai}.pdf";
+            
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
-                        }, 'surat_tugas-' . $record->name . '.pdf');
+                        }, $fileName);
                     }),
-            ])
+            ])          
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
