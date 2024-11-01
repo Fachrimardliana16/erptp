@@ -21,11 +21,11 @@ use Endroid\QrCode\Encoding\Encoding;
 use Illuminate\Support\Facades\Blade;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Filament\Support\Enums\ActionSize;
+use Filament\Navigation\NavigationItem;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Endroid\QrCode\ErrorCorrectionLevel;
-use Illuminate\Support\Facades\Validator; // Import Validator
-use Illuminate\Validation\ValidationException; // Import ValidationException
+use Filament\Notifications\Notification;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
@@ -35,8 +35,9 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\AssetResource\Pages;
 use App\Filament\Resources\AssetResource\Pages\EditAsset;
 use App\Filament\Resources\AssetResource\Pages\ViewAsset;
+use Illuminate\Support\Facades\Validator; // Import Validator
+use Illuminate\Validation\ValidationException; // Import ValidationException
 use App\Filament\Resources\AssetMonitoringResource\Pages\CreateAssetMonitoring;
-use Filament\Notifications\Notification;
 
 class AssetResource extends Resource
 {
@@ -407,12 +408,22 @@ class AssetResource extends Resource
 
     public static function getRecordSubNavigation(Page $page): array
     {
-        return $page->generateNavigationItems([
+        $recordId = $page->record->id; // Ambil ID dari aset yang sedang dilihat
+    
+        // Ambil item navigasi standar
+        $navigationItems = $page->generateNavigationItems([
             ViewAsset::class,
             EditAsset::class,
-            CreateAssetMonitoring::class,
         ]);
-    }
+    
+        // Tambahkan item navigasi kustom untuk CreateAssetMonitoring
+        $navigationItems[] = NavigationItem::make()
+            ->label('Create Asset Monitoring')
+            ->url(url('/admin/asset-monitorings/create?assets_id=' . $recordId))
+            ->icon('heroicon-o-plus'); // opsional: pilih ikon yang sesuai
+    
+        return $navigationItems;
+    }  
 
     public static function getRelations(): array
     {
