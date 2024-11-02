@@ -420,7 +420,12 @@ class AssetResource extends Resource
         $navigationItems[] = NavigationItem::make()
             ->label('Create Asset Monitoring')
             ->url(url('/admin/asset-monitorings/create?assets_id=' . $recordId))
-            ->icon('heroicon-o-plus'); // opsional: pilih ikon yang sesuai
+            ->icon('heroicon-o-plus');
+        // Tambahkan item navigasi untuk Asset Mutation History
+        $navigationItems[] = NavigationItem::make()
+            ->label('Riwayat Mutasi Aset')
+            ->url(url('/admin/asset-mutations?assets_id=' . $recordId)) // Pastikan ini mengarah ke rute yang benar
+            ->icon('heroicon-o-clock');
     
         return $navigationItems;
     }  

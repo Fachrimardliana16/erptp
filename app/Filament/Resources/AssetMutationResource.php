@@ -19,6 +19,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Forms\Components\DatePicker;
 use Carbon\Carbon;
 use Filament\Notifications\Notification; // Import Notification
+use Illuminate\Database\Eloquent\Builder;
 
 // library untuk export PDF
 use App\Filament\Resources\AssetMutationResource\Pages;
@@ -247,4 +248,48 @@ class AssetMutationResource extends Resource
             'edit' => Pages\EditAssetMutation::route('/{record}/edit'),
         ];
     }
+    public static function getTableColumns(): array
+    {
+        return [
+            Tables\Columns\TextColumn::make('No.')
+                ->rowIndex(),
+            Tables\Columns\TextColumn::make('id')
+                ->label('ID')
+                ->searchable()
+                ->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('mutation_date')
+                ->label('Tanggal Mutasi')
+                ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
+                ->sortable(),
+            Tables\Columns\TextColumn::make('AssetsMutationtransactionStatus.name')
+                ->label('Status Transaksi')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('AssetsMutation.assets_number')
+                ->label('Nomor Aset')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('AssetsMutation.name')
+                ->label('Nama Aset')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('MutationCondition.name')
+                ->label('Kondisi')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('AssetsMutationemployee.name')
+                ->label('Pemegang')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('AssetsMutationlocation.name')
+                ->label('Lokasi')
+                ->searchable(),
+            Tables\Columns\TextColumn::make('AssetsMutationsubLocation.name')
+                ->label('Sub Lokasi')
+                ->searchable(),
+        ];
+    }
+
+    // Pastikan untuk menambahkan fungsi ini
+    protected function getTableQuery(): Builder
+    {
+        $assetsId = request()->query('assets_id');
+        return AssetMutation::query()->where('assets_id', $assetsId);
+    }
+    
 }
