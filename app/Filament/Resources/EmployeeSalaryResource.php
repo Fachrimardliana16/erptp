@@ -26,9 +26,32 @@ class EmployeeSalaryResource extends Resource
     // Metode untuk menghitung total bruto
     protected static function calculateTotalBruto($get)
     {
-        return ($get('basic_salary') ?? 0) + ($get('benefits_1') ?? 0) + ($get('benefits_2') ?? 0) +
-            ($get('benefits_3') ?? 0) + ($get('benefits_4') ?? 0) + ($get('benefits_5') ?? 0) +
-            ($get('benefits_6') ?? 0) + ($get('benefits_7') ?? 0) + ($get('benefits_8') ?? 0);
+        $values = [
+            $get('basic_salary'),
+            $get('benefits_1'),
+            $get('benefits_2'),
+            $get('benefits_3'),
+            $get('benefits_4'),
+            $get('benefits_5'),
+            $get('benefits_6'),
+            $get('benefits_7'),
+            $get('benefits_8'),
+        ];
+
+        $total = 0;
+
+        foreach ($values as $value) {
+            // Pastikan nilai adalah angka atau string yang dapat dikonversi menjadi angka
+            if (is_numeric($value)) {
+                $total += intval($value);
+            } else {
+                // Anda bisa menambahkan logika penanganan kesalahan di sini
+                // Misalnya, log kesalahan atau set nilai ke 0
+                // session()->flash('error', 'Nilai tidak valid: ' . $value);
+            }
+        }
+
+        return $total;
     }
 
     public static function form(Form $form): Form
@@ -78,80 +101,96 @@ class EmployeeSalaryResource extends Resource
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_2')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan Beras')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_3')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan Jabatan')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_4')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan Kesehatan')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_5')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan Air')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_6')
                                     ->prefix('Rp. ')
                                     ->label('Tunjangan DPLK')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_7')
                                     ->prefix('Rp. ')
                                     ->label('Lain-lain')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('benefits_8')
                                     ->prefix('Rp. ')
                                     ->label('Lain-lain')
                                     ->numeric()
                                     ->reactive()
                                     ->default('0')
+                                    ->debounce(500) // Debounce selama 500 ms
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
                                         $total = self::calculateTotalBruto($get);
                                         $set('amount', $total);
                                     }),
+
                                 TextInput::make('amount')
                                     ->prefix('Rp. ')
                                     ->label('Total Bruto')
