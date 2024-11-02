@@ -57,10 +57,6 @@
 
     <table>
         <tr>
-            <th>Gambar</th>
-            <td><img src="{{ asset($asset->img) }}" alt="Gambar Aset"></td>
-        </tr>
-        <tr>
             <th>Nomor Aset</th>
             <td>{{ $asset->assets_number }}</td>
         </tr>
