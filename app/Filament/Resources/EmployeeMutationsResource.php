@@ -5,17 +5,23 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeMutationsResource\Pages;
 use App\Models\EmployeeMutations;
 use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Hidden;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\DatePicker;
+use Illuminate\Support\Facades\Blade;
+use Barryvdh\DomPDF\PDF as DomPDF;
 
 class EmployeeMutationsResource extends Resource
 {
@@ -138,6 +144,30 @@ class EmployeeMutationsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_mutation', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+                            
+                            // Load HTML ke dalam PDF dengan orientasi landscape
+                            $pdf = Pdf::loadHTML($pdfContent)->setPaper('a4', 'landscape');
+                            
+                            echo $pdf->stream();
+                        }, 'report_employee_mutation.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -184,7 +214,13 @@ class EmployeeMutationsResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Nama Pegawai')
+                ->relationship('employeeMutation', 'name'),
+                Filter::make('Tanggal')
+                ->form([
+                    DatePicker::make('Dari'),
+                    DatePicker::make('Sampai'),
+                ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

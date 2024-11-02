@@ -6,14 +6,17 @@ use App\Filament\Resources\EmployeePeriodicSalaryIncreaseResource\Pages;
 use App\Filament\Resources\EmployeePeriodicSalaryIncreaseResource\RelationManagers;
 use App\Models\EmployeePeriodicSalaryIncrease;
 use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeePeriodicSalaryIncreaseResource extends Resource
 {
@@ -132,6 +135,26 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+            
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_periodic_salary_increase', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'report_periodic_salary_increase.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -174,7 +197,8 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Nama Pegawai')
+                ->relationship('employeePeriodic', 'name'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

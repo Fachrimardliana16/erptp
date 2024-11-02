@@ -5,13 +5,17 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeFamiliesResource\Pages;
 use App\Filament\Resources\EmployeeFamiliesResource\RelationManagers;
 use App\Models\EmployeeFamilies;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeeFamiliesResource extends Resource
 {
@@ -73,6 +77,26 @@ class EmployeeFamiliesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                    $employees = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                    })->first();
+
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employees) {
+                        $pdfContent = Blade::render('pdf.report_employee_families', [
+                            'records' => $records,
+                            'employees' => $employees
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'report_employee_families_' . ($records->first()->employeeFamilies->name ?? 'unknown') . '.pdf');
+                }),
+        ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -110,7 +134,8 @@ class EmployeeFamiliesResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Nama Pegawai')
+                    ->relationship('employeeFamilies', 'name'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0 1cm;
+            margin: 0;
             padding: 0;
         }
         .kop-surat {
@@ -28,13 +28,13 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 40px;
+            margin-bottom: 10px;
         }
         table, th, td {
-            border: 1px solid black;
+            border: 0px solid black;
         }
         th, td {
-            padding: 8px;
+            padding: 1px;
         }
         th {
             text-align: center;
@@ -66,9 +66,18 @@
     <p class="center">Nomor: {{ $surat_tugas->registration_number }}</p><br><br>
 
     <!-- Pembuka -->
-    <p>Yang bertanda tangan dibawah ini:
-        <br>Nama : {{ $surat_tugas->aassigningEmployee->name }}
-        <br>Jabatan : {{ $surat_tugas->positionAssign->name }}<br>
+    <p>Yang bertanda tangan dibawah ini:</p>
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 10%;">Nama</td>
+            <td>: {{ $surat_tugas->aassigningEmployee->name }}</td>
+        </tr>
+        <tr>
+            <td>Jabatan</td>
+            <td>: {{ $surat_tugas->positionAssign->name }}</td>
+        </tr>
+    </table>
+
     <br>Dengan ini menugaskan kepada:
     <br>
     @foreach($surat_tugas->assignedEmployees as $index => $employee)
@@ -80,7 +89,7 @@
     
     <!-- Penutup -->
     <br>
-    <br>Demikian untuk menjadikan periksa dan dilaksanakan dengan sebaik-baiknya.<br>
+    <br>Demikian untuk menjadikan periksa dan dilaksanakan dengan sebaik-baiknya.<br><br>
 
     <!-- Tanda tangan di bawah tabel -->
     <div class="signature">
