@@ -10,6 +10,7 @@ use App\Models\EmployeeSalary;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
@@ -356,36 +357,55 @@ class EmployeePayrollResource extends Resource
                                         Forms\Components\TextInput::make('absence_count')
                                             ->label('Jumlah Absen')
                                             ->numeric(),
-                                        Repeater::make('paycuts')
+                                        Grid::make(1)
                                             ->schema([
-                                                Forms\Components\TextInput::make('description')
-                                                    ->required()
-                                                    ->label('Deskripsi Paycut'),
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        Repeater::make('paycuts')
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('description')
+                                                                    ->required()
+                                                                    ->label('Deskripsi Potongan'),
 
-                                                Forms\Components\TextInput::make('amount')
-                                                    ->numeric()
-                                                    ->required()
-                                                    ->rules(['numeric', 'min:0'])
-                                                    ->label('Jumlah Paycut')
-                                                    ->afterStateUpdated(function (Get $get, Set $set) {
-                                                        // Hitung ulang total paycut
-                                                        $totalCut = collect($get('paycuts'))->sum('amount');
-                                                        $set('cut_amount', $totalCut);
+                                                                Forms\Components\TextInput::make('amount')
+                                                                    ->numeric()
+                                                                    ->required()
+                                                                    ->rules(['numeric', 'min:0'])
+                                                                    ->label('Besaran Potong')
+                                                                    ->afterStateUpdated(function (Get $get, Set $set) {
+                                                                        $totalCut = collect($get('paycuts'))->sum('amount');
+                                                                        $set('cut_amount', $totalCut);
 
-                                                        // Hitung ulang netto
-                                                        $grossAmount = $get('gross_amount') ?? 0;
-                                                        $set('netto', $grossAmount - $totalCut);
-                                                    }),
-                                            ])
-                                            ->columns(2)
-                                            ->label('Daftar Paycut')
-                                            ->createItemButtonLabel('Tambah Paycut')
-                                            ->collapsible()
-                                            ->defaultItems(0),
+                                                                        $grossAmount = $get('gross_amount') ?? 0;
+                                                                        $set('netto', $grossAmount - $totalCut);
+                                                                    }),
+                                                            ])
+                                                            ->columns(2)
+                                                            ->label('Daftar Paycut')
+                                                            ->createItemButtonLabel('Tambah Potongan')
+                                                            ->collapsible()
+                                                            ->defaultItems(0),
+
+                                                        Forms\Components\Actions::make([
+                                                            Forms\Components\Actions\Action::make('calculate')
+                                                                ->label('Hitung Total')
+                                                                ->icon('heroicon-m-calculator')
+                                                                ->action(function (Get $get, Set $set) {
+                                                                    $totalCut = collect($get('paycuts'))->sum('amount');
+                                                                    $set('cut_amount', $totalCut);
+
+                                                                    $grossAmount = $get('gross_amount') ?? 0;
+                                                                    $set('netto', $grossAmount - $totalCut);
+                                                                })
+                                                        ])
+                                                            ->verticalAlignment('end'),
+                                                    ])
+                                            ]),
                                         Forms\Components\TextInput::make('cut_amount')
                                             ->disabled()
                                             ->label('Total Paycut')
                                             ->numeric(),
+                                        Forms\Components\Hidden::make('cut_amount'),
 
                                         Forms\Components\TextInput::make('netto')
                                             ->label('Jumlah Potongan')
@@ -499,9 +519,21 @@ class EmployeePayrollResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('paycuts')
-                    ->Money('IDR')
                     ->label('Potongan Absensi')
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(function ($record) {
+                        return collect($record->paycuts)
+                            ->map(function ($paycut) {
+                                $amount = 'Rp ' . number_format($paycut['amount'], 0, ',', '.');
+                                return "{$paycut['description']}: {$amount}";
+                            })
+                            ->join(', ');
+                    })
+                    // Jika ingin menampilkan total di bawah detail
+                    ->description(function ($record) {
+                        $total = collect($record->paycuts)->sum('amount');
+                        return 'Total: Rp ' . number_format($total, 0, ',', '.');
+                    }),
                 Tables\Columns\TextColumn::make('cut_amount')
                     ->Money('IDR')
                     ->label('Jumlah Potongan')

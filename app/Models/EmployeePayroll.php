@@ -17,8 +17,7 @@ class EmployeePayroll extends Model
     protected $table = 'employee_payroll';
 
     protected $casts = [
-        // 'basic_salary' => 'encrypted',
-        // 'netto' => 'encrypted',
+        'paycuts' => 'array',
     ];
 
     protected static $logAttributes = ['*'];
@@ -44,21 +43,21 @@ class EmployeePayroll extends Model
         'backpay',
         'gross_amount',
         'absence_count',
-        'paycuts', // Ganti multiple paycut fields dengan satu field
+        'paycuts',
         'cut_amount',
         'netto',
         'desc',
         'users_id'
     ];
 
-    public function getTotalPaycutAttribute()
-    {
-        if (!$this->paycuts) {
-            return 0;
-        }
+    // public function getTotalPaycutAttribute()
+    // {
+    //     if (!$this->paycuts) {
+    //         return 0;
+    //     }
 
-        return $this->paycuts->sum('amount');
-    }
+    //     return $this->paycuts->sum('amount');
+    // }
 
     public function getActivitylogOptions(): LogOptions
     {
