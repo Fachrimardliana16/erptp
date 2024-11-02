@@ -21,7 +21,6 @@ class Asset extends Model
     protected $casts = [
         'purchase_date' => 'date',
         'book_value_expiry' => 'date',
-        'desc' => 'encrypted', // Enkripsi kolom deskripsi
         'price' => 'decimal:2', // Mengatur format harga
         // Jika img adalah data sensitif, pertimbangkan untuk mengenkripsinya
     ];
@@ -120,8 +119,17 @@ class Asset extends Model
     // Menambahkan metode untuk mendekripsi deskripsi saat diambil
     public function getDescAttribute($value)
     {
-        return Crypt::decryptString($value);
-    }
+        if (empty($value)) {
+            return $value; // Mengembalikan nilai kosong jika data tidak ada
+        }
+    
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            // Menangani error jika data tidak valid
+            return $value;
+        }
+    }    
 
     // Menambahkan metode untuk mengenkripsi deskripsi sebelum disimpan
     public function setDescAttribute($value)
