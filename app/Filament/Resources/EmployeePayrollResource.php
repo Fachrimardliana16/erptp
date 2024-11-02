@@ -28,6 +28,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+
 class EmployeePayrollResource extends Resource
 {
     protected static ?string $model = EmployeePayroll::class;
@@ -90,7 +91,9 @@ class EmployeePayrollResource extends Resource
                                             ->label('Periode Gaji')
                                             ->placeholder('MMYYYY')
                                             ->required()
-                                            ->helperText('Masukkan dalam format MMYYYY'),
+                                            ->helperText('Masukkan dalam format MMYYYY')
+                                            ->rule('regex:/^(0[1-9]|1[0-2])\d{4}$/', 'Format harus MMYYYY'),
+
                                         Forms\Components\Select::make('employee_id')
                                             ->options(Employees::query()->pluck('name', 'id'))
                                             ->reactive()
@@ -101,10 +104,13 @@ class EmployeePayrollResource extends Resource
                                                     $set('grade_id', $employee->employee_grade_id);
                                                     $set('position_id', $employee->employee_position_id);
                                                     $set('basic_salary', $employee->basic_salary);
+                                                } else {
+                                                    session()->flash('error', 'Pegawai tidak ditemukan.');
                                                 }
                                             })
                                             ->label('Pegawai')
                                             ->required(),
+
                                         Forms\Components\Select::make('status_id')
                                             ->relationship('status', 'name')
                                             ->reactive()
@@ -114,10 +120,12 @@ class EmployeePayrollResource extends Resource
                                             ->label('Status')
                                             ->required()
                                             ->disabled(),
+
                                         Forms\Components\Hidden::make('status_id')
                                             ->reactive()
                                             ->label('Status')
                                             ->required(),
+
                                         Forms\Components\Select::make('grade_id')
                                             ->relationship('grade', 'name')
                                             ->reactive()
@@ -127,10 +135,12 @@ class EmployeePayrollResource extends Resource
                                             ->label('Golongan')
                                             ->required()
                                             ->disabled(),
+
                                         Forms\Components\Hidden::make('grade_id')
                                             ->reactive()
                                             ->label('Golongan')
                                             ->required(),
+
                                         Forms\Components\Select::make('position_id')
                                             ->relationship('position', 'name')
                                             ->reactive()
@@ -140,10 +150,12 @@ class EmployeePayrollResource extends Resource
                                             ->label('Jabatan')
                                             ->required()
                                             ->disabled(),
+
                                         Forms\Components\Hidden::make('position_id')
                                             ->reactive()
                                             ->label('Jabatan')
                                             ->required(),
+
                                         Forms\Components\Hidden::make('users_id')
                                             ->default(auth()->id()),
                                     ]),
@@ -153,193 +165,283 @@ class EmployeePayrollResource extends Resource
                                             ->reactive('')
                                             ->label('Gaji Pokok')
                                             ->prefix('Rp. ')
-                                            ->disabled()
                                             ->numeric()
-                                            ->reactive()
+                                            ->required()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('basic_salary')
                                             ->reactive()
                                             ->label('Gaji Pokok')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_1')
                                             ->reactive('')
                                             ->label('Tunjangan Keluarga')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_1')
                                             ->reactive()
                                             ->label('Tunjangan Keluarga')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_2')
                                             ->reactive('')
-                                            ->label('Tunjungan Beras')
+                                            ->label('Tunjangan Beras')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_2')
                                             ->reactive()
                                             ->label('Tunjangan Beras')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_3')
                                             ->reactive('')
                                             ->label('Tunjangan Jabatan')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_3')
                                             ->reactive()
                                             ->label('Tunjangan Jabatan')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_4')
                                             ->reactive('')
                                             ->label('Tunjangan Kesehatan')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_4')
                                             ->reactive()
                                             ->label('Tunjangan Kesehatan')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_5')
                                             ->reactive('')
                                             ->label('Tunjangan Air')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_5')
                                             ->reactive()
                                             ->label('Tunjangan Air')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_6')
                                             ->reactive('')
                                             ->label('Tunjangan DPLK')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_6')
                                             ->reactive()
                                             ->label('Tunjangan DPLK')
                                             ->required(),
+
                                         Forms\Components\TextInput::make('benefits_7')
                                             ->reactive('')
                                             ->label('Lain-lain')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
-                                        Forms\Components\Hidden::make('benefits_7')
+
+                                        Forms\Components\Hidden::make('benefits_7 ')
                                             ->reactive()
                                             ->label('Lain-lain'),
+
                                         Forms\Components\TextInput::make('benefits_8')
                                             ->reactive('')
                                             ->label('Lain-lain')
                                             ->prefix('Rp. ')
                                             ->disabled()
                                             ->numeric()
-                                            ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set(
+                                                        'gross_amount',
+                                                        $totalBruto
+                                                    );
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\Hidden::make('benefits_8')
                                             ->reactive()
                                             ->label('Lain-lain'),
+
                                         Forms\Components\TextInput::make('incentive')
                                             ->prefix('Rp. ')
                                             ->label('Insentif')
                                             ->numeric()
                                             ->reactive()
+                                            ->debounce(500) // Debounce selama 500 ms
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set('gross_amount', $totalBruto);
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\TextInput::make('backpay')
                                             ->prefix('Rp. ')
                                             ->label('Rapelan')
                                             ->numeric()
                                             ->reactive()
+                                            ->debounce(500) // Debounce selama 500 ms
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set('gross_amount', $totalBruto);
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\TextInput::make('rounding')
                                             ->prefix('Rp. ')
                                             ->label('Pembulatan')
                                             ->numeric()
                                             ->reactive()
+                                            ->debounce(500) // Debounce selama 500 ms
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
-                                                $totalBruto = self::calculateTotalBruto($get);
-                                                $set('gross_amount', $totalBruto);
-                                                $totalNetto = self::calculateNetto($get);
-                                                $set('netto', $totalNetto);
+                                                try {
+                                                    $totalBruto = self::calculateTotalBruto($get);
+                                                    $set('gross_amount', $totalBruto);
+                                                    $totalNetto = self::calculateNetto($get);
+                                                    $set('netto', $totalNetto);
+                                                } catch (\Throwable $e) {
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
+                                                }
                                             }),
+
                                         Forms\Components\TextInput::make('gross_amount')
                                             ->label('Total Bruto')
                                             ->prefix('Rp. ')
                                             ->numeric()
                                             ->reactive()
                                             ->disabled()
-                                            ->debounce(300)
+                                            ->debounce(500) // Debounce selama 500 ms
                                             ->readOnly()
                                             ->afterStateUpdated(function ($state, callable $set, $get) {
                                                 try {
@@ -348,7 +450,7 @@ class EmployeePayrollResource extends Resource
                                                     $totalNetto = self::calculateNetto($get);
                                                     $set('netto', $totalNetto);
                                                 } catch (\Throwable $e) {
-                                                    session()->flash('error', $e->getMessage());
+                                                    session()->flash('error', 'Kesalahan dalam menghitung total bruto: ' . $e->getMessage());
                                                 }
                                             }),
                                     ]),
@@ -359,17 +461,16 @@ class EmployeePayrollResource extends Resource
                                             ->numeric(),
                                         Grid::make(1)
                                             ->schema([
-                                                Grid::make(2)
+                                                Grid::make(1)
                                                     ->schema([
                                                         Repeater::make('paycuts')
                                                             ->schema([
-                                                                Forms\Components\TextInput::make('description')
-                                                                    ->required()
-                                                                    ->label('Deskripsi Potongan'),
-
+                                                                Forms\Components\TextInput::make('cuts_name')
+                                                                    ->label('Nama Potongan'),
                                                                 Forms\Components\TextInput::make('amount')
                                                                     ->numeric()
                                                                     ->required()
+                                                                    ->prefix('Rp. ')
                                                                     ->rules(['numeric', 'min:0'])
                                                                     ->label('Besaran Potong')
                                                                     ->afterStateUpdated(function (Get $get, Set $set) {
@@ -379,9 +480,12 @@ class EmployeePayrollResource extends Resource
                                                                         $grossAmount = $get('gross_amount') ?? 0;
                                                                         $set('netto', $grossAmount - $totalCut);
                                                                     }),
+
+                                                                Forms\Components\TextInput::make('description')
+                                                                    ->label('Deskripsi'),
                                                             ])
-                                                            ->columns(2)
-                                                            ->label('Daftar Paycut')
+                                                            ->columns(3)
+                                                            ->label('Daftar Potongan')
                                                             ->createItemButtonLabel('Tambah Potongan')
                                                             ->collapsible()
                                                             ->defaultItems(0),
@@ -403,12 +507,13 @@ class EmployeePayrollResource extends Resource
                                             ]),
                                         Forms\Components\TextInput::make('cut_amount')
                                             ->disabled()
-                                            ->label('Total Paycut')
+                                            ->prefix('Rp. ')
+                                            ->label('Total Potongan')
                                             ->numeric(),
                                         Forms\Components\Hidden::make('cut_amount'),
 
                                         Forms\Components\TextInput::make('netto')
-                                            ->label('Jumlah Potongan')
+                                            ->label('Jumlah Bersih')
                                             ->prefix('Rp. ')
                                             ->reactive()
                                             ->debounce(300)
@@ -426,7 +531,7 @@ class EmployeePayrollResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -434,91 +539,124 @@ class EmployeePayrollResource extends Resource
                     ->label('Periode')
                     ->date('M Y') // Mengatur format hanya bulan dan tahun
                     ->sortable(),
+
                 TextColumn::make('employee.name')
                     ->label('Nama Pegawai')
                     ->searchable(),
 
                 TextColumn::make('status.name')
                     ->label('Status')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('grade.name')
                     ->label('Golongan')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('position.name')
                     ->label('Jabatan')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('basic_salary')
-                    ->Money('IDR')
+                    ->money('IDR')
                     ->label('Gaji Pokok')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('benefits_1')
-                    ->Money('IDR')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_1')
+                    ->money('IDR')
                     ->label('Tunjangan Keluarga')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_2')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_2')
+                    ->money('IDR')
                     ->label('Tunjangan Beras')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_3')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_3')
+                    ->money('IDR')
                     ->label('Tunjangan Jabatan')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_4')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_4')
+                    ->money('IDR')
                     ->label('Tunjangan Kesehatan')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_5')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_5')
+                    ->money('IDR')
                     ->label('Tunjangan Air')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_6')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_6')
+                    ->money('IDR')
                     ->label('Tunjangan DPLK')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_7')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_7')
+                    ->money('IDR')
                     ->label('Lain-lain')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('benefits_8')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('benefits_8')
+                    ->money('IDR')
                     ->label('Lain-lain')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('rounding')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('rounding')
+                    ->money('IDR')
                     ->label('Pembulatan')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('incentive')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('incentive')
+                    ->money('IDR')
                     ->label('Insentif')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('backpay')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('backpay')
+                    ->money('IDR')
                     ->label('Rapel')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('gross_amount')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('gross_amount')
+                    ->money('IDR')
                     ->label('Total Bruto')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('absence_count')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+
+                TextColumn::make('absence_count')
+                    ->money('IDR')
                     ->label('Absen')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('paycuts')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('paycuts')
                     ->label('Potongan Absensi')
                     ->sortable()
                     ->getStateUsing(function ($record) {
@@ -529,32 +667,40 @@ class EmployeePayrollResource extends Resource
                             })
                             ->join(', ');
                     })
-                    // Jika ingin menampilkan total di bawah detail
                     ->description(function ($record) {
                         $total = collect($record->paycuts)->sum('amount');
                         return 'Total: Rp ' . number_format($total, 0, ',', '.');
-                    }),
-                Tables\Columns\TextColumn::make('cut_amount')
-                    ->Money('IDR')
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('cut_amount')
+                    ->money('IDR')
                     ->label('Jumlah Potongan')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('netto')
-                    ->Money('IDR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+
+                TextColumn::make('netto')
+                    ->money('IDR')
                     ->label('Total Penerimaan')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('desc')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+
+                TextColumn::make('desc')
                     ->label('Keterangan Potongan'),
-                Tables\Columns\TextColumn::make('created_at')
+
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('users_id')
+
+                TextColumn::make('users_id')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

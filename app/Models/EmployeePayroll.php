@@ -20,6 +20,8 @@ class EmployeePayroll extends Model
         'paycuts' => 'array',
     ];
 
+
+
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
 
