@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,50 +11,64 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid black;
         }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
         }
+
         th {
             background-color: #f2f2f2;
             width: 30%;
             text-align: left;
         }
+
         td {
             text-align: left;
         }
+
         h4 {
             text-align: left;
             margin-top: 20px;
         }
+
         img {
             max-width: 100px;
             height: auto;
         }
+
         .kop-surat {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .kop-surat img {
             max-width: 125%;
             height: auto;
         }
     </style>
 </head>
+
 <body>
     <!-- Kop surat dengan gambar Base64 -->
     <div class="kop-surat">
-        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('storage/kop_surat.png'))) }}" alt="Kop Surat Perusahaan">
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('storage/kop_surat.png'))) }}"
+            alt="Kop Surat Perusahaan">
     </div>
 
-    <h4>Data Asset : {{ $asset->name }}</h4>
+    <h4>Data Aset : {{ $asset->name }}</h4>
 
     <table>
         <tr>
@@ -93,8 +108,8 @@
             <td>{{ $asset->assetsStatus->name }}</td>
         </tr>
         <tr>
-            <th>Status Transaksi</th>
-            <td>{{ $asset->AssetTransactionStatus->name }}</td>
+            <th>Status Mutasi</th>
+            <td>{{ $asset->AssetTransactionStatus->name ?? 'belum ada mutasi' }}</td>
         </tr>
         <tr>
             <th>Nilai Buku</th>
@@ -114,4 +129,5 @@
         </tr>
     </table>
 </body>
+
 </html>

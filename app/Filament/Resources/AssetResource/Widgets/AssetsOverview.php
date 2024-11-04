@@ -40,7 +40,6 @@ class AssetsOverview extends BaseWidget
 
         // Hitung total aset dengan status 'inactive'
         $totalAssetsInactive = Asset::where('status_id', $inactiveStatusId)->count();
-
         $totalCategoryElec = Asset::where('category_id', $categoryAssetElec)->count();
         $totalCategoryFurnitur = Asset::where('category_id', $categoryAssetFurnitur)->count();
         $totalCategoryKendaraan = Asset::where('category_id', $categoryAssetKendaraan)->count();

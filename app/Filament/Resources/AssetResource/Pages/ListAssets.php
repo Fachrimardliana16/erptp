@@ -9,6 +9,7 @@ use App\Models\Asset;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
+use Illuminate\Support\Facades\DB;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ListAssets extends ListRecords
@@ -25,7 +26,7 @@ class ListAssets extends ListRecords
     public function getTabs(): array
     {
         // Ambil semua data kondisi dari tabel master_assets_condition
-        $conditions = \DB::table('master_assets_condition')->pluck('id', 'name');
+        $conditions = DB::table('master_assets_condition')->pluck('id', 'name');
 
         // Inisialisasi array tabs dengan entri default 'Semua'
         $tabs = [

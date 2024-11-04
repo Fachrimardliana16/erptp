@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AssetPurchaseResource\Pages;
 
 use App\Filament\Resources\AssetPurchaseResource;
+use App\Filament\Resources\AssetPurchaseResource\Widgets\PurchaseOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 

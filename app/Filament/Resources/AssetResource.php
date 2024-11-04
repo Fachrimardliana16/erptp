@@ -58,106 +58,105 @@ class AssetResource extends Resource
                         Forms\Components\TextInput::make('assets_number')
                             ->label('Nomor Aset')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Aset')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\Select::make('category_id')
                             ->relationship('categoryAsset', 'name')
                             ->label('Kategori')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:categories,id'),
+
                         Forms\Components\Select::make('status_id')
                             ->relationship('assetsStatus', 'name')
                             ->label('Status')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:assets_statuses,id'),
+
                         Forms\Components\Select::make('transaction_status_id')
                             ->relationship('AssetTransactionStatus', 'name')
                             ->label('Status Transaksi')
-                            ->hidden(),
+                            ->hidden()
+                            ->rules('required|exists:asset_transaction_statuses,id'),
+
                         Forms\Components\DatePicker::make('purchase_date')
                             ->label('Tanggal Pembelian')
                             ->required()
-                            ->default(Carbon::today()),
+                            ->default(Carbon::today())
+                            ->rules('required|date'),
+
                         Forms\Components\Select::make('condition_id')
                             ->relationship('conditionAsset', 'name')
                             ->label('Kondisi')
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->rules('required|exists:conditions,id'),
+
                         Forms\Components\TextInput::make('price')
                             ->label('Harga Beli')
                             ->required()
-                            ->numeric()
-                            ->prefix('Rp. '),
+                            ->prefix('Rp. ')
+                            ->rules('required|numeric|min:0'),
+
                         Forms\Components\TextInput::make('funding_source')
                             ->label('Sumber Dana')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\TextInput::make('brand')
                             ->label('Merk')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\TextInput::make('book_value')
                             ->label('Nilai Buku')
                             ->required()
                             ->maxLength(255)
-                            ->prefix('Rp. '),
+                            ->prefix('Rp. ')
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\DatePicker::make('book_value_expiry')
                             ->label('Tanggal Habis Buku')
-                            ->required(),
+                            ->required()
+                            ->rules('required|date'),
+
                         Forms\Components\DatePicker::make('date_document_extension')
-                            ->label('Tanggal Perpanjangan Dokumen'),
+                            ->label('Tanggal Perpanjangan Dokumen')
+                            ->rules('required|date'),
+
                         Forms\Components\Textarea::make('desc')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->rules('nullable|string'),
+
                         Forms\Components\FileUpload::make('img')
                             ->directory('Assets')
-                            ->label('Gambar'),
+                            ->label('Gambar')
+                            ->rules('nullable|mimes:jpeg,png|max:10240'),
+
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+                            ->default(auth()->id())
+                            ->rules('required|exists:users,id'),
                     ])
             ]);
-    }
-
-    public static function validate(Form $form, array $data): array
-    {
-        $rules = [
-            'assets_number' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'status_id' => 'required|exists:assets_statuses,id',
-            'transaction_status_id' => 'required|exists:asset_transaction_statuses,id',
-            'purchase_date' => 'required|date',
-            'condition_id' => 'required|exists:conditions,id',
-            'price' => 'required|numeric|min:0',
-            'funding_source' => 'required|string|max:255',
-            'brand' => 'required|string|max:255',
-            'book_value' => 'required|string|max:255',
-            'book_value_expiry' => 'required|date',
-            'date_document_extension' => 'required|date',
-            'desc' => 'nullable|string',
-            'img' => 'nullable|mimes:jpeg,png|max:10240',
-            'users_id' => 'required|exists:users,id',
-        ];
-
-        $validator = Validator::make($data, $rules);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        return $validator->validated();
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->headerActions([
-                // BulkAction untuk export PDF (sudah ada sebelumnya)
                 Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
@@ -166,6 +165,22 @@ class AssetResource extends Resource
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
+
+                        // Cek apakah ada lokasi aset yang terkait dengan records
+                        $locationExists = $records->contains(function ($record) {
+                            return $record->AssetMutationLocation !== null; // Cek apakah AssetMutationLocation ada
+                        });
+
+                        if (!$locationExists) {
+                            // Jika tidak ada lokasi aset ditemukan, tampilkan notifikasi error
+                            Notification::make()
+                                ->title('Error')
+                                ->body('Periksa lagi aset yang dipilih. Ditemukan data yang belum memiliki Lokasi dan Sub Lokasi. Masukan pada Mutasi aset untuk menambahkan Lokasi dan Sub Lokasi')
+                                ->danger() // Menandakan notifikasi sebagai error
+                                ->send();
+
+                            return; // Hentikan eksekusi lebih lanjut
+                        }
 
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employee) {
@@ -279,7 +294,7 @@ class AssetResource extends Resource
 
                             return response()->streamDownload(function () use ($pdf) {
                                 echo $pdf->output();
-                            }, 'asset-' . $record->name . '.pdf');
+                            }, 'asset-' . ($record->name ?? 'unknown') . '.pdf');
                         }),
 
                     Action::make('print_label')
@@ -313,7 +328,7 @@ class AssetResource extends Resource
                                 margin: 5,
                                 roundBlockSizeMode: RoundBlockSizeMode::Margin
                             );
-                    
+
                             $result = $qrCode->build();
                             $qrCodeImage = $result->getString();
 
@@ -409,13 +424,13 @@ class AssetResource extends Resource
     public static function getRecordSubNavigation(Page $page): array
     {
         $recordId = $page->record->id; // Ambil ID dari aset yang sedang dilihat
-    
+
         // Ambil item navigasi standar
         $navigationItems = $page->generateNavigationItems([
             ViewAsset::class,
             EditAsset::class,
         ]);
-    
+
         // Tambahkan item navigasi kustom untuk CreateAssetMonitoring
         $navigationItems[] = NavigationItem::make()
             ->label('Create Asset Monitoring')
@@ -426,9 +441,9 @@ class AssetResource extends Resource
             ->label('Riwayat Mutasi Aset')
             ->url(url('/admin/asset-mutations?assets_id=' . $recordId)) // Pastikan ini mengarah ke rute yang benar
             ->icon('heroicon-o-clock');
-    
+
         return $navigationItems;
-    }  
+    }
 
     public static function getRelations(): array
     {

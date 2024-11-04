@@ -18,8 +18,6 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Validator; // Import Validator
-use Illuminate\Validation\ValidationException; // Import ValidationException
 
 
 class AssetPurchaseResource extends Resource
@@ -49,7 +47,7 @@ class AssetPurchaseResource extends Resource
                                     ->toArray()
                             )
                             ->afterStateUpdated(function ($set, $state) {
-                                $AssetRequest = AssetRequests::find($state);
+                                $AssetRequest = AssetRequestsResource::find($state);
                                 if ($AssetRequest) {
                                     $set('document_number', $AssetRequest->document_number);
                                     $set('asset_name', $AssetRequest->asset_name);
@@ -65,99 +63,89 @@ class AssetPurchaseResource extends Resource
                             ->live()
                             ->label('Nomor Permintaan')
                             ->required()
-                            ->validationAttribute('Nomor Permintaan'),
+                            ->validationAttribute('Nomor Permintaan')
+                            ->rules(['required', 'exists:assets_requests,id']),
                         Forms\Components\Hidden::make('document_number')
                             ->label('Nomor Permintaan')
                             ->required()
-                            ->validationAttribute('Nomor Permintaan'),
+                            ->validationAttribute('Nomor Permintaan')
+                            ->rules(['required', 'string', 'max:255']),
                         Forms\Components\TextInput::make('asset_name')
                             ->label('Nama Aset')
                             ->required()
                             ->readOnly()
                             ->reactive()
-                            ->validationAttribute('Nama Aset'),
+                            ->validationAttribute('Nama Aset')
+                            ->rules(['required', 'string', 'max:255']),
                         Forms\Components\Select::make('category_id')
                             ->relationship('category', 'name')
                             ->label('Kategori Barang')
                             ->required()
                             ->disabled()
                             ->reactive()
-                            ->validationAttribute('Kategori Barang'),
+                            ->validationAttribute('Kategori Barang')
+                            ->rules(['required', 'exists:categories,id']),
                         Forms\Components\Hidden::make('category_id')
                             ->label('Kategori Barang')
                             ->required()
-                            ->validationAttribute('Kategori Barang'),
+                            ->validationAttribute('Kategori Barang')
+                            ->rules(['required']),
                         Forms\Components\TextInput::make('brand')
                             ->label('Merk')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Merk'),
+                            ->validationAttribute('Merk')
+                            ->rules(['required', 'string', 'max:255']),
                         Forms\Components\TextInput::make('assets_number')
                             ->label('Nomor Aset')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Nomor Aset'),
+                            ->validationAttribute('Nomor Aset')
+                            ->rules(['required', 'string', 'max:255']),
                         Forms\Components\DatePicker::make('purchase_date')
                             ->label('Tanggal Pembelian')
                             ->required()
-                            ->validationAttribute('Tanggal Pembelian'),
+                            ->validationAttribute('Tanggal Pembelian')
+                            ->rules(['required', 'date']),
                         Forms\Components\Select::make('condition_id')
                             ->relationship('condition', 'name')
                             ->label('Kondisi Aset')
                             ->required()
-                            ->validationAttribute('Kondisi Aset'),
+                            ->validationAttribute('Kondisi Aset')
+                            ->rules(['required', 'exists:master_assets_condition,id']),
                         Forms\Components\TextInput::make('price')
                             ->label('Harga')
                             ->required()
                             ->numeric()
                             ->prefix('Rp. ')
-                            ->validationAttribute('Harga'),
+                            ->validationAttribute('Harga')
+                            ->rules(['required', 'numeric', 'min:0']),
                         Forms\Components\TextInput::make('funding_source')
                             ->label('Sumber Dana')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Sumber Dana'),
+                            ->validationAttribute('Sumber Dana')
+                            ->rules(['required', 'string', 'max:255'])
+                            ->helperText('RKAP/Hibah'),
                         Forms\Components\FileUpload::make('payment_receipt')
                             ->label('Bukti Pembelian')
                             ->directory('Asset_Payment_Receipt')
                             ->required()
-                            ->validationAttribute('Bukti Pembelian'),
+                            ->validationAttribute('Bukti Pembelian')
+                            ->rules(['required', 'mimes:jpeg,png', 'max:10240'])
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\FileUpload::make('img')
                             ->label('Gambar Barang')
                             ->directory('Asset_Purchase')
-                            ->validationAttribute('Gambar Barang'),
+                            ->validationAttribute('Gambar Barang')
+                            ->rules(['required', 'mimes:jpeg,png', 'max:10240'])
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id())
-                            ->validationAttribute('User ID'),
+                            ->validationAttribute('User  ID')
+                            ->rules(['required', 'exists:users,id']),
                     ])
             ]);
-    }
-
-    public static function validate(Form $form, array $data): array
-    {
-        $rules = [
-            'assetrequest_id' => 'required|exists:asset_requests,id',
-            'document_number' => 'required|string|max:255',
-            'asset_name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'brand' => 'required|string|max:255',
-            'assets_number' => 'required|string|max:255',
-            'purchase_date' => 'required|date',
-            'condition_id' => 'required|exists:master_assets_conditions,id',
-            'price' => 'required|numeric|min:0',
-            'funding_source' => 'required|string|max:255',
-            'payment_receipt' => 'required|mimes:jpeg,png|max:10240',
-            'img' => 'nullable|mimes:jpeg,png|max:10240',
-            'users_id' => 'required|exists:users,id',
-        ];
-
-        $validator = Validator::make($data, $rules);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
-        return $validator->validated();
     }
 
     public static function table(Table $table): Table
@@ -172,7 +160,7 @@ class AssetPurchaseResource extends Resource
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
-                        
+
                         // Cek apakah pegawai ditemukan
                         if (!$employee) {
                             // Menampilkan notifikasi kesalahan
