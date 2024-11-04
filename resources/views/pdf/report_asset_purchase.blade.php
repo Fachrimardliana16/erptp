@@ -41,6 +41,9 @@
         .no-col {
             text-align: center; /* Menyelaraskan teks kolom 'No.' ke tengah */
         }
+        .total-col {
+            text-align: center; /* Menyelaraskan teks kolom 'No.' ke tengah */
+        }
         .condition-col {
             text-align: center; /* Menyelaraskan teks kolom 'No.' ke tengah */
         }
@@ -107,7 +110,7 @@
             <!-- Baris total -->
             <tr>
                 <td colspan="8"></td> <!-- Kosongkan kolom sebelum kolom total -->
-                <td><strong>Total</strong></td> <!-- Merge sampai kolom sumber dana -->
+                <td class='total-col'><strong>Total</strong></td> <!-- Merge sampai kolom sumber dana -->
                 <td><strong>Rp {{ number_format($totalPrice, 0, ',','.') }}</strong></td> <!-- Total Pembelian -->
             </tr>
         </tbody>
