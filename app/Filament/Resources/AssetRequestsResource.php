@@ -143,7 +143,9 @@ class AssetRequestsResource extends Resource
                                 'records' => $records,
                                 'employee' => $employee
                             ]);
-                            echo Pdf::loadHTML($pdfContent)->stream();
+                            echo Pdf::loadHTML($pdfContent)
+                                ->setPaper('A4', 'landscape')
+                                ->stream();
                         }, 'request_assets.pdf');
                     }),
             ])

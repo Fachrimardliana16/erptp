@@ -28,12 +28,13 @@ class ListAssetMutations extends ListRecords
     }
     protected function getTableQuery(): Builder
     {
-        // Ambil ID aset dari query parameter
         $assetsId = request()->query('assets_id');
-
-        // Filter berdasarkan ID aset
-        return AssetMutation::query()->where('assets_id', $assetsId);
-    }
+    
+        // Jika assets_id ada di URL, tampilkan mutasi aset terkait, jika tidak tampilkan semua data
+        return $assetsId 
+            ? AssetMutation::query()->where('assets_id', $assetsId) 
+            : AssetMutation::query();
+    }   
 
     public function getTitle(): string
     {
