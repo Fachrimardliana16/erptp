@@ -77,6 +77,7 @@
                 <th>Jenis Barang</th>
                 <th>Jumlah</th>
                 <th>Keperluan</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -89,6 +90,7 @@
                     <td>{{ $record->category->name }}</td>
                     <td>{{ $record->quantity }}</td>
                     <td>{{ $record->purpose }}</td>
+                    <td>{{ $record->status_request == 1 ? 'Selesai' : 'Belum Selesai' }}</td>
                 </tr>
             @endforeach
         </tbody>
