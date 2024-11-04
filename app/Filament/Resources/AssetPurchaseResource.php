@@ -3,39 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AssetPurchaseResource\Pages;
-use App\Filament\Resources\AssetPurchaseResource\Pages\CreateAssetPurchase;
-use App\Filament\Resources\AssetPurchaseResource\Pages\EditAssetPurchase;
-use App\Filament\Resources\AssetPurchaseResource\Pages\ListAssetPurchases;
-use App\Filament\Resources\AssetPurchaseResource\Widgets\PurcasheOverview;
 use App\Models\AssetPurchase;
 use App\Models\AssetRequests;
 use App\Models\Employees;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Validator; // Import Validator
-use Illuminate\Validation\ValidationException; // Import ValidationException
-use App\Filament\Resources\AssetPurchaseResource\Widgets\PurchaseOverview;
 
 
 class AssetPurchaseResource extends Resource
@@ -65,7 +47,7 @@ class AssetPurchaseResource extends Resource
                                     ->toArray()
                             )
                             ->afterStateUpdated(function ($set, $state) {
-                                $AssetRequest = AssetRequests::find($state);
+                                $AssetRequest = AssetRequestsResource::find($state);
                                 if ($AssetRequest) {
                                     $set('document_number', $AssetRequest->document_number);
                                     $set('asset_name', $AssetRequest->asset_name);
@@ -82,7 +64,7 @@ class AssetPurchaseResource extends Resource
                             ->label('Nomor Permintaan')
                             ->required()
                             ->validationAttribute('Nomor Permintaan')
-                            ->rules(['required', 'exists:asset_requests,id']),
+                            ->rules(['required', 'exists:assets_requests,id']),
                         Forms\Components\Hidden::make('document_number')
                             ->label('Nomor Permintaan')
                             ->required()
@@ -130,7 +112,7 @@ class AssetPurchaseResource extends Resource
                             ->label('Kondisi Aset')
                             ->required()
                             ->validationAttribute('Kondisi Aset')
-                            ->rules(['required', 'exists:master_assets_conditions,id']),
+                            ->rules(['required', 'exists:master_assets_condition,id']),
                         Forms\Components\TextInput::make('price')
                             ->label('Harga')
                             ->required()
@@ -143,18 +125,21 @@ class AssetPurchaseResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->validationAttribute('Sumber Dana')
-                            ->rules(['required', 'string', 'max:255']),
+                            ->rules(['required', 'string', 'max:255'])
+                            ->helperText('RKAP/Hibah'),
                         Forms\Components\FileUpload::make('payment_receipt')
                             ->label('Bukti Pembelian')
                             ->directory('Asset_Payment_Receipt')
                             ->required()
                             ->validationAttribute('Bukti Pembelian')
-                            ->rules(['required', 'mimes:jpeg,png', 'max:10240']),
+                            ->rules(['required', 'mimes:jpeg,png', 'max:10240'])
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\FileUpload::make('img')
                             ->label('Gambar Barang')
                             ->directory('Asset_Purchase')
                             ->validationAttribute('Gambar Barang')
-                            ->rules(['nullable', 'mimes:jpeg,png', 'max:10240']),
+                            ->rules(['required', 'mimes:jpeg,png', 'max:10240'])
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id())
                             ->validationAttribute('User  ID')

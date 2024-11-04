@@ -15,7 +15,7 @@ class CreateAssetPurchasesTable extends Migration
     {
         Schema::create('asset_purchases', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('assetrequest_id');
+            $table->uuid('assetrequest_id')->index();
             $table->string('document_number');
             $table->string('assets_number');
             $table->string('asset_name');
@@ -29,6 +29,7 @@ class CreateAssetPurchasesTable extends Migration
             $table->string('brand');
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('assetrequest_id')->references('id')->on('assets_requests');

@@ -294,7 +294,7 @@ class AssetResource extends Resource
 
                             return response()->streamDownload(function () use ($pdf) {
                                 echo $pdf->output();
-                            }, 'asset-' . $record->name . '.pdf');
+                            }, 'asset-' . ($record->name ?? 'unknown') . '.pdf');
                         }),
 
                     Action::make('print_label')

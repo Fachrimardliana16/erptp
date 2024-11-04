@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('assets_requests', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('document_number');
+            $table->string('document_number')->index();
             $table->date('date')->default(now());
             $table->string('asset_name');
             $table->uuid('category_id');
@@ -31,6 +31,7 @@ return new class extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('master_assets_category');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

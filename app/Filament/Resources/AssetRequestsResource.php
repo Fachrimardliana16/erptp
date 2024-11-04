@@ -99,13 +99,13 @@ class AssetRequestsResource extends Resource
                             ->label('Direktur Utama')
                             ->validationAttribute('Direktur Utama'),
                         Forms\Components\FileUpload::make('docs')
-                            ->helperText('Foto atau scan dengan format ".jpeg atau . png".')
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.')
                             ->label('Bukti Lampiran')
                             ->directory('Assets_Request')
                             ->columnSpanFull()
                             ->required()
                             ->validationAttribute('Bukti Lampiran')
-                            ->rules('required|mimes:jpeg,png|max:5024'),
+                            ->rules('required|mimes:jpeg,png|max:10024'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id())
                             ->validationAttribute('User ID'),
