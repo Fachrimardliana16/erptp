@@ -37,17 +37,23 @@ class AssetMaintenanceResource extends Resource
                     ->schema([
                         Forms\Components\DatePicker::make('maintenance_date')
                             ->label('Tanggal Pemeliharaan')
-                            ->required(),
+                            ->required()
+                            ->rules('required|date'),
+
                         Forms\Components\TextInput::make('location_service')
                             ->label('Lokasi')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\Select::make('assets_id')
                             ->relationship('AssetMaintenance', 'name')
                             ->label('Nama Aset')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:assets,id'),
+
                         Forms\Components\Select::make('service_type')
                             ->options([
                                 'Perbaikian Ringan' => 'Perbaikian Ringan',
@@ -56,20 +62,30 @@ class AssetMaintenanceResource extends Resource
                                 'Pembaruan Dokumen' => 'Pembaruan Dokumen',
                             ])
                             ->label('Tipe Pemeliharaan')
-                            ->required(),
+                            ->required()
+                            ->rules('required|string|in:Perbaikian Ringan,Perbaikian Sedang,Perbaikian Berat,Pembaruan Dokumen'),
+
                         Forms\Components\TextInput::make('service_cost')
                             ->label('Total Biaya Pemeliharaan')
                             ->prefix('Rp. ')
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->rules('required|numeric|min:0'),
+
                         Forms\Components\FileUpload::make('invoice_file')
                             ->directory('Asset_Maintenance')
-                            ->label('Bukti Pembayaran Pemeliharaan '),
+                            ->label('Bukti Pembayaran Pemeliharaan')
+                            ->rules('nullable|file|mimes:jpeg,png,pdf|max:5048')
+                            ->helperText('Unggah bukti pembayaran dalam format JPEG, PNG, atau PDF. Maksimal ukuran file adalah 2MB.'),
+
                         Forms\Components\Textarea::make('desc')
                             ->label('Catatan Pemeliharaan')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->rules('nullable|string'),
+
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+                            ->default(auth()->id())
+                            ->rules('required|exists:users,id'),
                     ])
             ]);
     }

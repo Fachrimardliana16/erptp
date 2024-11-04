@@ -43,82 +43,123 @@ class AssetMutationResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('mutations_number')
                             ->label('Nomor Mutasi Aset')
-                            ->required(),
+                            ->required()
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\DatePicker::make('mutation_date')
                             ->label('Tanggal Mutasi')
-                            ->required(),
+                            ->required()
+                            ->rules('required|date'),
+
                         Forms\Components\Select::make('transaction_status_id')
                             ->relationship('AssetsMutationtransactionStatus', 'name')
                             ->label('Status Mutasi')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:asset_transaction_statuses,id'),
+
                         Forms\Components\Select::make('assets_id')
-                            ->options(
-                                Asset::query()
-                                    ->get()
-                                    ->mapWithKeys(function ($assets) {
-                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
-                                        return [$assets->id => $assets->assets_number . ' | ' . $assets->name];
-                                    })
-                                    ->toArray()
-                            )
-                            ->afterStateUpdated(function ($set, $state) {
-                                $aset = Asset::find($state);
-                                $set('assets_number', $aset->assets_number);
-                                $set('name', $aset->name);
-                                $set('condition_id', $aset->condition_id);
-                            })
                             ->label('Nomor Aset')
                             ->searchable()
-                            ->preload()
-                            ->live()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:assets,id')
+                            ->getOptionLabelUsing(function ($record) {
+                                return $record->assets_number . ' | ' . $record->name; // Format label yang ditampilkan
+                            })
+                            ->getOptionValueUsing(function ($record) {
+                                return $record->id; // Nilai yang disimpan
+                            })
+                            ->options(function ($search) {
+                                return Asset::query()
+                                    ->when($search, function ($query, $search) {
+                                        $query->where('assets_number', 'like', "%{$search}%")
+                                            ->orWhere('name', 'like', "%{$search}%");
+                                    })
+                                    ->limit(10) // Batasi jumlah hasil untuk menghindari beban berlebih
+                                    ->get();
+                            })
+                            ->afterStateUpdated(function ($set, $state) {
+                                $aset = Asset::find($state);
+                                if ($aset) {
+                                    $set('assets_number', $aset->assets_number);
+                                    $set(
+                                        'name',
+                                        $aset->name
+                                    );
+                                    $set('condition_id', $aset->condition_id);
+                                } else {
+                                    $set('assets_number', null);
+                                    $set(
+                                        'name',
+                                        null
+                                    );
+                                    $set('condition_id', null);
+                                }
+                            }),
+
                         Forms\Components\Hidden::make('assets_number')
                             ->default(function ($get) {
                                 $assets_id = $get('assets_id');
                                 $asset = Asset::find($assets_id);
                                 return $asset ? $asset->assets_number : null;
                             }),
+
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Aset')
                             ->required()
-                            ->readonly(),
+                            ->readonly()
+                            ->rules('required|string|max:255'),
+
                         Forms\Components\Select::make('condition_id')
                             ->relationship('MutationCondition', 'name')
                             ->label('Kondisi')
                             ->required()
-                            ->disabled(),
+                            ->disabled()
+                            ->rules('required|exists:conditions,id'),
+
                         Forms\Components\Hidden::make('condition_id')
                             ->default(function ($get) {
                                 return $get('condition_id');
                             }),
+
                         Forms\Components\Select::make('employees_id')
                             ->relationship('AssetsMutationemployee', 'name')
                             ->label('Pemegang')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:employees,id'),
+
                         Forms\Components\Select::make('location_id')
                             ->relationship('AssetsMutationlocation', 'name')
                             ->label('Lokasi')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:locations,id'),
+
                         Forms\Components\Select::make('sub_location_id')
                             ->relationship('AssetsMutationsubLocation', 'name')
                             ->label('Sub Lokasi')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->rules('required|exists:sub_locations,id'),
+
                         Forms\Components\FileUpload::make('scan_doc')
                             ->directory('Asset_Mutation')
-                            ->label('Scan Dokumen'),
+                            ->label('Scan Dokumen')
+                            ->rules('nullable|mimes:jpeg,png,pdf|max:10240'),
+
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->rules('nullable|string'),
+
                         Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id()),
+                            ->default(auth()->id())
+                            ->rules('required|exists:users,id'),
                     ])
             ]);
     }
@@ -135,7 +176,7 @@ class AssetMutationResource extends Resource
                         $employee = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kerumahtanggaan');
                         })->first();
-                        
+
                         // Cek apakah pegawai ditemukan
                         if (!$employee) {
                             // Menampilkan notifikasi kesalahan
@@ -291,5 +332,4 @@ class AssetMutationResource extends Resource
         $assetsId = request()->query('assets_id');
         return AssetMutation::query()->where('assets_id', $assetsId);
     }
-    
 }

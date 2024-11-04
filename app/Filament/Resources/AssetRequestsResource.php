@@ -18,8 +18,6 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
 
 class AssetRequestsResource extends Resource
@@ -68,7 +66,6 @@ class AssetRequestsResource extends Resource
                         Forms\Components\TextInput::make('quantity')
                             ->label('Jumlah Satuan')
                             ->required()
-                            ->placeholder('buah/pack/set/dll')
                             ->numeric()
                             ->validationAttribute('Jumlah Satuan')
                             ->rules('required|numeric|min:1'),

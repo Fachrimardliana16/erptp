@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->uuid('id')->unique();
-            $table->string('assets_number');
+            $table->string('assets_number')->index();
             $table->string('name');
             $table->uuid('category_id');
             $table->date('purchase_date');
