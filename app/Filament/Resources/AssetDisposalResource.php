@@ -71,7 +71,19 @@ class AssetDisposalResource extends Resource
                             ->required()
                             ->columnSpanFull(),
                         Forms\Components\Select::make('employee_id')
-                            ->relationship('employeeDisposals', 'name')
+                            ->options(
+                                Employees::query()
+                                    ->select(['employees.id', 'employees.name'])
+                                    ->join('master_employee_position', 'employees.employee_position_id', '=', 'master_employee_position.id')
+                                    ->where('master_employee_position.name', 'like', '%kepala bagian umum%')
+                                    ->get()
+                                    ->mapWithKeys(function ($employee) {
+                                        return [$employee->id => $employee->name];
+                                    })
+                                    ->toArray()
+                            )
+                            ->searchable()
+                            ->preload()
                             ->label('Pejabat Mengetahui')
                             ->required(),
                         Forms\Components\Textarea::make('disposal_notes')
@@ -79,7 +91,10 @@ class AssetDisposalResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\FileUpload::make('docs')
                             ->directory('Asset_Disposal')
-                            ->label('Lampiran Surat Keputusan'),
+                            ->required()
+                            ->label('Lampiran Surat Keputusan')
+                            ->rules(['required', 'mimes:pdf', 'max:5240'])
+                            ->helperText('Unggah dokumen (SK/Surat Tugas/Memo Direksi) dengan format ".pdf" maksimal ukuran file 5MB.'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
@@ -90,7 +105,7 @@ class AssetDisposalResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

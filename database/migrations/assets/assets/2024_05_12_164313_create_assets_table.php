@@ -22,7 +22,7 @@ return new class extends Migration
             $table->uuid('sub_location_id')->nullable();
             $table->uuid('location_id')->nullable();
             $table->string('img')->nullable();
-            $table->decimal('price', 10, 2);
+            $table->decimal('price', 18, 2);
             $table->string('funding_source');
             $table->string('brand');
             $table->string('book_value');

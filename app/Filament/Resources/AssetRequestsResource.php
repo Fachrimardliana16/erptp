@@ -29,6 +29,7 @@ class AssetRequestsResource extends Resource
     protected static ?string $navigationLabel = 'Permintaan Barang';
     protected static ?int $navigationSort = 1;
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -118,7 +119,7 @@ class AssetRequestsResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf')
+                Tables\Actions\BulkAction::make('Export Report')
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

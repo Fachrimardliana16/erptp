@@ -16,9 +16,9 @@ return new class extends Migration
             $table->date('disposal_date');
             $table->string('disposals_number')->unique();
             $table->uuid('assets_id');
-            $table->decimal('book_value', 15, 2);
+            $table->decimal('book_value', 18, 2);
             $table->text('disposal_reason');
-            $table->decimal('disposal_value', 15, 2);
+            $table->decimal('disposal_value', 18, 2);
             $table->text('disposal_process');
             $table->uuid('employee_id');
             $table->text('disposal_notes')->nullable();

@@ -17,10 +17,16 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->uuid('employee_id');
+            // Hapus follower_id karena akan menggunakan tabel pivot
             $table->string('destination');
+            $table->string('destination_detail');
+            $table->string('purpose_of_trip');
+            $table->string('business_trip_expenses');
+            $table->string('pasal');
             $table->text('description')->nullable();
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

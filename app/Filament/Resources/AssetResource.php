@@ -157,7 +157,7 @@ class AssetResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
@@ -240,19 +240,19 @@ class AssetResource extends Resource
                     ->label('Status Transaksi')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('book_value')
-                    ->label('Nilai Buku')
-                    ->sortable()
-                    ->money('Rp. ')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('book_value_expiry')
-                    ->label('Tanggal Habis Nilai Buku')
-                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('date_document_extension')
-                    ->label('Tanggal Perpanjangan Dokumen')
-                    ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('book_value')
+                //     ->label('Nilai Buku')
+                //     ->sortable()
+                //     ->money('Rp. ')
+                //     ->searchable(),
+                // Tables\Columns\TextColumn::make('book_value_expiry')
+                //     ->label('Tanggal Habis Nilai Buku')
+                //     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('date_document_extension')
+                //     ->label('Tanggal Perpanjangan Dokumen')
+                //     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('d/m/Y'))
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('AssetMutationLocation.name')
                     ->label('Lokasi')
                     ->searchable(),

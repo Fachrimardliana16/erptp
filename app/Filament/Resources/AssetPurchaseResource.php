@@ -47,7 +47,8 @@ class AssetPurchaseResource extends Resource
                                     ->toArray()
                             )
                             ->afterStateUpdated(function ($set, $state) {
-                                $AssetRequest = AssetRequestsResource::find($state);
+                                // Change AssetRequestsResource::find to AssetRequests::find
+                                $AssetRequest = AssetRequests::find($state);
                                 if ($AssetRequest) {
                                     $set('document_number', $AssetRequest->document_number);
                                     $set('asset_name', $AssetRequest->asset_name);
@@ -64,7 +65,10 @@ class AssetPurchaseResource extends Resource
                             ->label('Nomor Permintaan')
                             ->required()
                             ->validationAttribute('Nomor Permintaan')
-                            ->rules(['required', 'exists:assets_requests,id']),
+                            ->rules([
+                                'required',
+                                'exists:assets_requests,id'
+                            ]),
                         Forms\Components\Hidden::make('document_number')
                             ->label('Nomor Permintaan')
                             ->required()
@@ -137,6 +141,7 @@ class AssetPurchaseResource extends Resource
                         Forms\Components\FileUpload::make('img')
                             ->label('Gambar Barang')
                             ->directory('Asset_Purchase')
+                            ->required()
                             ->validationAttribute('Gambar Barang')
                             ->rules(['required', 'mimes:jpeg,png', 'max:10240'])
                             ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
@@ -152,7 +157,7 @@ class AssetPurchaseResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

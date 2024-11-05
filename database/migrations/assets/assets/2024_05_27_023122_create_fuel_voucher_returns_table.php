@@ -17,12 +17,12 @@ return new class extends Migration
             $table->string('voucher_number');
             $table->date('date_returns');
             $table->date('date');
-            $table->decimal('amount', 8, 2);
+            $table->decimal('amount', 18, 2);
             $table->uuid('fuel_type_id');
             $table->string('vehicle_number');
             $table->text('usage_description')->nullable();
             $table->uuid('employee_id');
-            $table->decimal('total_amount', 10, 2);
+            $table->decimal('total_amount', 18, 2);
             $table->string('docs');
             $table->string('docs_return');
             $table->uuid('users_id');

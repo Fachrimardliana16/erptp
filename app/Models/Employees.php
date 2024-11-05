@@ -156,6 +156,16 @@ class Employees extends Model
         return $this->hasMany(EmployeeBusinessTravelLetters::class, 'employee_id', 'id');
     }
 
+    public function businessTravelAsFollower()
+    {
+        return $this->belongsToMany(
+            EmployeeBusinessTravelLetters::class,
+            'travel_letter_followers',
+            'follower_id',
+            'travel_letter_id'
+        )->withTimestamps();
+    }
+
     public function basicSalary()
     {
         return $this->belongsTo(MasterEmployeeBasicSalary::class, 'basic_salary_id');

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('voucher_number');
             $table->date('date');
             $table->uuid('voucher_status_type_id');
-            $table->decimal('amount', 8, 2);
+            $table->decimal('amount', 18, 2);
             $table->uuid('fuel_type_id');
             $table->string('vehicle_number');
             $table->text('usage_description')->nullable();

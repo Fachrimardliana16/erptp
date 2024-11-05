@@ -21,7 +21,7 @@ use Carbon\Carbon;
 use Filament\Notifications\Notification; // Import Notification
 use Illuminate\Database\Eloquent\Builder;
 
-// library untuk export PDF
+// library untuk Export Report
 use App\Filament\Resources\AssetMutationResource\Pages;
 
 class AssetMutationResource extends Resource
@@ -86,32 +86,27 @@ class AssetMutationResource extends Resource
                             ->preload()
                             ->live()
                             ->required(),
-
                         Forms\Components\Hidden::make('assets_number')
                             ->default(function ($get) {
                                 $assets_id = $get('assets_id');
                                 $asset = Asset::find($assets_id);
                                 return $asset ? $asset->assets_number : null;
                             }),
-
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Aset')
                             ->required()
                             ->readonly()
                             ->rules('required|string|max:255'),
-
                         Forms\Components\Select::make('condition_id')
                             ->relationship('MutationCondition', 'name')
                             ->label('Kondisi')
                             ->required()
                             ->disabled()
                             ->rules('required|exists:conditions,id'),
-
                         Forms\Components\Hidden::make('condition_id')
                             ->default(function ($get) {
                                 return $get('condition_id');
                             }),
-
                         Forms\Components\Select::make('employees_id')
                             ->relationship('AssetsMutationemployee', 'name')
                             ->label('Pemegang')
@@ -119,7 +114,6 @@ class AssetMutationResource extends Resource
                             ->preload()
                             ->required()
                             ->rules('required|exists:employees,id'),
-
                         Forms\Components\Select::make('location_id')
                             ->relationship('AssetsMutationlocation', 'name')
                             ->label('Lokasi')
@@ -127,20 +121,17 @@ class AssetMutationResource extends Resource
                             ->preload()
                             ->required()
                             ->rules('required|exists:master_assets_locations,id'),
-
                         Forms\Components\Select::make('sub_location_id')
                             ->relationship('AssetsMutationsubLocation', 'name')
                             ->label('Sub Lokasi')
                             ->searchable()
                             ->preload()
-                            ->required()
-                            ->rules('required|exists:master_assets_sub_locations,id'),
-
+                            ->rules('exists:master_assets_sub_locations,id'),
                         Forms\Components\FileUpload::make('scan_doc')
                             ->directory('Asset_Mutation')
                             ->label('Scan Dokumen')
-                            ->rules('nullable|mimes:jpeg,png,pdf|max:10240'),
-
+                            ->rules('nullable|mimes:jpeg,png,pdf|max:10240')
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
                             ->columnSpanFull()
@@ -157,7 +148,7 @@ class AssetMutationResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
