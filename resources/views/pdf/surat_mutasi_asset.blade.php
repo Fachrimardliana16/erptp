@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,50 +11,66 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table, th, td {
+
+        table,
+        th,
+        td {
             border: 1px solid black;
         }
-        th, td {
+
+        th,
+        td {
             padding: 10px;
         }
+
         th {
             background-color: #f2f2f2;
             text-align: center;
             font-size: 12px;
         }
+
         td {
             text-align: center;
         }
-        h4, h5 {
+
+        h4,
+        h5 {
             text-align: center;
             margin-top: 20px;
         }
+
         p {
             text-align: justify;
         }
+
         .kop-surat {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .kop-surat img {
             max-width: 125%;
             height: auto;
         }
+
         /* Ukuran teks lebih kecil pada tabel detail aset */
         .detail-aset td {
             font-size: 12px;
         }
+
         /* Aturan untuk tabel tanda tangan tanpa border */
         .no-border-table {
             width: 100%;
             margin-top: 50px;
             border: none;
         }
+
         .no-border-table td {
             border: none;
             text-align: center;
@@ -61,15 +78,19 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Kop surat dengan gambar Base64 -->
     <div class="kop-surat">
-        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('storage/kop_surat.png'))) }}" alt="Kop Surat Perusahaan">
+        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('storage/kop_surat.png'))) }}"
+            alt="Kop Surat Perusahaan">
     </div>
 
     <h4><u></u>BERITA ACARA SERAH TERIMA ASET</u></h4>
     <br>
-    <p>Pada hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}, telah dierahkan Barang Inventaris sebagai berikut:</p>
+    <p>Pada hari ini, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }}, telah diserahkan Barang
+        Inventaris sebagai berikut:</p>
+
 
     <table class="detail-aset">
         <thead>
@@ -94,9 +115,12 @@
         </tbody>
     </table>
 
-    <p>Aset tersebut telah diserahkan oleh pihak yang menyerahkan dan diterima oleh pihak yang menerima dengan rincian sebagaimana di atas. Pihak yang menerima bertanggung jawab penuh atas penggunaan, pemeliharaan, dan keamanan aset tersebut sesuai dengan peraturan yang berlaku.</p>
+    <p>Aset tersebut telah diserahkan oleh pihak yang menyerahkan dan diterima oleh pihak yang menerima dengan rincian
+        sebagaimana di atas. Pihak yang menerima bertanggung jawab penuh atas penggunaan, pemeliharaan, dan keamanan
+        aset tersebut sesuai dengan peraturan yang berlaku.</p>
 
-    <p>Demikian berita acara serah terima ini dibuat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+    <p>Demikian berita acara serah terima ini dibuat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana
+        mestinya.</p>
 
     <div class="signatures">
         <table class="no-border-table">
@@ -115,4 +139,5 @@
         </table>
     </div>
 </body>
+
 </html>
