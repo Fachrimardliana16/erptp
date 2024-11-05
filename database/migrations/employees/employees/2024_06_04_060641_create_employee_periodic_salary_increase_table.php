@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('docs_letter')->nullable();
             $table->string('docs_archive')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

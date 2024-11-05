@@ -132,7 +132,8 @@ class EmployeeJobApplicationArchivesResource extends Resource
                             ->label('Berkas Lamaran')
                             ->required()
                             ->validationAttribute('Berkas Lamaran')
-                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan.'),
+                            ->rules('required|mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
                         Forms\Components\Textarea::make('notes')
                             ->label('Catatan')
                             ->columnSpanFull()
@@ -147,7 +148,7 @@ class EmployeeJobApplicationArchivesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
+            ->headerActions([
                 Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()

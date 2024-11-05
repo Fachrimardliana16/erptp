@@ -120,12 +120,15 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
 
                         Forms\Components\Hidden::make('total_basic_salary')
                             ->required(),
-
                         Forms\Components\FileUpload::make('docs_letter')
                             ->label('Lampiran Surat')
-                            ->required(), // Menambahkan validasi required jika diperlukan
+                            ->required()
+                            ->rules('required|mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
                         Forms\Components\FileUpload::make('docs_archive')
-                            ->label('Lampiran Dokumen Pendukung'),
+                            ->label('Lampiran Dokumen Pendukung')
+                            ->rules('mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
@@ -144,7 +147,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                         $employees = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kepegawaian');
                         })->first();
-            
+
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employees) {
                             $pdfContent = Blade::render('pdf.report_employee_periodic_salary_increase', [
@@ -198,7 +201,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('Nama Pegawai')
-                ->relationship('employeePeriodic', 'name'),
+                    ->relationship('employeePeriodic', 'name'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

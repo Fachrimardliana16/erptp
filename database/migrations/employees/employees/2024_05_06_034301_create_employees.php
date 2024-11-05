@@ -60,6 +60,7 @@ return new class extends Migration
             $table->uuid('departments_id')->nullable(); // Referensi ke departemen
             $table->uuid('sub_department_id')->nullable(); // Referensi ke sub-departemen
             $table->timestamps(); // Timestamps untuk created_at dan updated_at
+            $table->softDeletes();
 
             // Referensi ke tabel pengguna
             $table->uuid('users_id');

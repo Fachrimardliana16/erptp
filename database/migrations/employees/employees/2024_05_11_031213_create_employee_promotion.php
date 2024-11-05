@@ -20,7 +20,10 @@ return new class extends Migration
             $table->uuid('new_grade_id');
             $table->uuid('old_basic_salary');
             $table->uuid('new_basic_salary');
+            $table->string('doc_promotion');
+            $table->string('desc')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

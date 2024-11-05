@@ -93,6 +93,8 @@ class EmployeeAgreementResource extends Resource
                         Select::make('departments_id')
                             ->relationship('agreementDepartement', 'name')
                             ->label('Bagian')
+                            ->searchable()
+                            ->preload()
                             ->live() // Make it live to trigger updates
                             ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes
                             ->validationAttribute('Bagian'),
@@ -108,6 +110,8 @@ class EmployeeAgreementResource extends Resource
                                     )
                             )
                             ->label('Sub Bagian')
+                            ->searchable()
+                            ->preload()
                             ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected
                             ->validationAttribute('Sub Bagian'),
 
@@ -180,7 +184,10 @@ class EmployeeAgreementResource extends Resource
                         FileUpload::make('docs')
                             ->directory('Perjanjian Kontrak')
                             ->label('Lampiran Dokumen')
-                            ->validationAttribute('Lampiran Dokumen'),
+                            ->required()
+                            ->validationAttribute('Lampiran Dokumen')
+                            ->rules('required|mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
 
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),

@@ -30,6 +30,7 @@ return new class extends Migration
             $table->uuid('users_id');
             $table->boolean('application_status')->default(false);
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('employee_education_id')->references('id')->on('master_employee_education');

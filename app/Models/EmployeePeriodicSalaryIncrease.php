@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeePeriodicSalaryIncrease extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
 
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'employee_periodic_salary_increases';
     protected $fillable = [

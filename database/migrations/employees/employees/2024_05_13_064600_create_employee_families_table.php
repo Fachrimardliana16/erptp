@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('place_birth')->nullable();
             $table->date('date_birth')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
 
             $table->uuid('users_id');
