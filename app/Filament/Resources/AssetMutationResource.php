@@ -57,46 +57,35 @@ class AssetMutationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->rules('required|exists:asset_transaction_statuses,id'),
+                            ->rules('required|exists:master_assets_transaction_status,id'),
 
                         Forms\Components\Select::make('assets_id')
-                            ->label('Nomor Aset')
-                            ->searchable()
-                            ->required()
-                            ->rules('required|exists:assets,id')
-                            ->getOptionLabelUsing(function ($record) {
-                                return $record->assets_number . ' | ' . $record->name; // Format label yang ditampilkan
-                            })
-                            ->getOptionValueUsing(function ($record) {
-                                return $record->id; // Nilai yang disimpan
-                            })
-                            ->options(function ($search) {
-                                return Asset::query()
-                                    ->when($search, function ($query, $search) {
-                                        $query->where('assets_number', 'like', "%{$search}%")
-                                            ->orWhere('name', 'like', "%{$search}%");
+                            ->options(
+                                Asset::query()
+                                    ->get()
+                                    ->mapWithKeys(function ($assets) {
+                                        // Menggabungkan 'assets_number' dan 'name' dengan format yang diinginkan
+                                        return [$assets->id => $assets->assets_number . ' | ' . $assets->name];
                                     })
-                                    ->limit(10) // Batasi jumlah hasil untuk menghindari beban berlebih
-                                    ->get();
-                            })
+                                    ->toArray()
+                            )
                             ->afterStateUpdated(function ($set, $state) {
                                 $aset = Asset::find($state);
                                 if ($aset) {
                                     $set('assets_number', $aset->assets_number);
-                                    $set(
-                                        'name',
-                                        $aset->name
-                                    );
+                                    $set('name', $aset->name);
                                     $set('condition_id', $aset->condition_id);
                                 } else {
                                     $set('assets_number', null);
-                                    $set(
-                                        'name',
-                                        null
-                                    );
+                                    $set('name', null);
                                     $set('condition_id', null);
                                 }
-                            }),
+                            })
+                            ->label('Nomor Aset')
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->required(),
 
                         Forms\Components\Hidden::make('assets_number')
                             ->default(function ($get) {
@@ -137,7 +126,7 @@ class AssetMutationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->rules('required|exists:locations,id'),
+                            ->rules('required|exists:master_assets_locations,id'),
 
                         Forms\Components\Select::make('sub_location_id')
                             ->relationship('AssetsMutationsubLocation', 'name')
@@ -145,7 +134,7 @@ class AssetMutationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->rules('required|exists:sub_locations,id'),
+                            ->rules('required|exists:master_assets_sub_locations,id'),
 
                         Forms\Components\FileUpload::make('scan_doc')
                             ->directory('Asset_Mutation')
