@@ -22,7 +22,7 @@ class UsersTableSeeder extends Seeder
             'username' => 'superadmin',
             'firstname' => 'Super',
             'lastname' => 'Admin',
-            'email' => 'superadmin@starter-kit.com',
+            'email' => 'superadmin@pdampurbalingga.co.id',
             'email_verified_at' => now(),
             'password' => Hash::make('superadmin'),
             'created_at' => now(),
