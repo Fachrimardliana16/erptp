@@ -7,7 +7,9 @@ use App\Filament\Resources\EmployeeBusinessTravelLettersResource\RelationManager
 use App\Models\EmployeeBusinessTravelLetters;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -24,6 +26,14 @@ class EmployeeBusinessTravelLettersResource extends Resource
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Surat Perjalanan Dinas';
     protected static ?int $navigationSort = 9;
+
+    protected static function afterSave($record, $data)
+    {
+        // Mengaitkan followers setelah penyimpanan model
+        if (isset($data['followers'])) {
+            $record->followers()->sync($data['followers']);
+        }
+    }
 
     public static function form(Form $form): Form
     {
@@ -51,8 +61,32 @@ class EmployeeBusinessTravelLettersResource extends Resource
                             ->required()
                             ->searchable()
                             ->preload(),
+                        Select::make('followers')
+                            ->label('Pegawai Pengikut')
+                            ->multiple()
+                            ->relationship('followers', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->required()
+                            ->minItems(1),
                         Forms\Components\TextInput::make('destination')
                             ->label('Tujuan')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('destination_detail')
+                            ->label('Detail Tujuan')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('purpose_of_trip')
+                            ->label('Maksud Dinas')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('business_trip_expenses')
+                            ->label('Pembiayaan')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('pasal')
+                            ->label('Pasal')
                             ->required()
                             ->maxLength(255),
                         Forms\Components\Textarea::make('description')
@@ -71,19 +105,42 @@ class EmployeeBusinessTravelLettersResource extends Resource
                 Tables\Columns\TextColumn::make('registration_number')
                     ->label('Nomor Surat')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('businessTravelEmployee.name')
+                    ->label('Nama Pegawai')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('followerEmployees.name')
+                    ->label('Nama Pegawai')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Tanggal Mulai')
                     ->date()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Tanggal Selesai')
                     ->date()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('day_count')
+                    ->label('Lama Perjalanan')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('businessTravelEmployee.name')
                     ->label('Nama')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('destination')
                     ->label('Tujuan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('destination_detail')
+                    ->label('Detail Tujuan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('purpose_of_trip')
+                    ->label('Maksud Dinas')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('business_trip_expenses')
+                    ->label('Pembiayaan')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('pasal')
+                    ->label('Pasal')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Tugas')
