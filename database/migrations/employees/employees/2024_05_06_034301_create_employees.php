@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable(); // Email pegawai
             $table->string('password')->nullable(); // Kata sandi
             $table->string('image')->nullable(); // Gambar pegawai
+            $table->string('leave_balance')->nullable();
 
 
             // Kolom tambahan untuk pengelolaan pegawai
