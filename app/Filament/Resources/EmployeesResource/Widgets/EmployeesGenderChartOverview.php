@@ -9,6 +9,8 @@ class EmployeesGenderChartOverview extends ChartWidget
 {
     protected static ?string $heading = 'Gender Chart';
 
+    protected static ?int $sort = 3;
+
     protected function getData(): array
     {
         $totalEmployees = Employees::count();
@@ -41,4 +43,6 @@ class EmployeesGenderChartOverview extends ChartWidget
     {
         return 'doughnut';
     }
+
+    protected static ?string $maxHeight = '270px';
 }

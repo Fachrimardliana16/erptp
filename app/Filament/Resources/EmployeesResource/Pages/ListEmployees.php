@@ -24,14 +24,16 @@ class ListEmployees extends ListRecords
         ];
     }
 
-    protected function getHeaderWidgets(): array
+    protected function getFooterWidgets(): array
     {
         return [
-            // EmployeesChartOverview::class,
-            // EmployeesGenderChartOverview::class,
-            // EmployeesEducationOverview::class,
-            // EmployeesGradeOverview::class,
-            // EmployeesAgreementOverview::class,
+            //EmployeesChartOverview::class,
+            EmployeesAgreementOverview::class,
+            EmployeesOverview::class,
+            EmployeesGenderChartOverview::class,
+            EmployeesEducationOverview::class,
+            //EmployeesGradeOverview::class,
+
         ];
     }
 }

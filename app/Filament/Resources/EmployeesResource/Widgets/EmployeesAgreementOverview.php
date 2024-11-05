@@ -10,6 +10,7 @@ use App\Models\Employees;
 
 class EmployeesAgreementOverview extends BaseWidget
 {
+    protected static ?int $sort = 1;
     public $statusFilter = '';
 
     public function mount()

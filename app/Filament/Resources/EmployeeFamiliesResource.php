@@ -45,6 +45,11 @@ class EmployeeFamiliesResource extends Resource
                             ->required()
                             ->searchable()
                             ->preload(),
+                        Forms\Components\TextInput::make('id_number')
+                            ->label('Nomor Induk Kependudukan (NIK)')
+                            ->numeric()
+                            ->maxLength(16)
+                            ->columnspanfull(),
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Keluarga')
                             ->required()
@@ -63,11 +68,6 @@ class EmployeeFamiliesResource extends Resource
                             ->maxLength(255),
                         Forms\Components\DatePicker::make('date_birth')
                             ->label('Tanggal Lahir'),
-                        Forms\Components\TextInput::make('id_number')
-                            ->label('NIK')
-                            ->numeric()
-                            ->maxLength(16)
-                            ->columnspanfull(),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])->columns(2)
@@ -77,26 +77,26 @@ class EmployeeFamiliesResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
-                    $employees = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
-                    })->first();
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
 
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employees) {
-                        $pdfContent = Blade::render('pdf.report_employee_families', [
-                            'records' => $records,
-                            'employees' => $employees
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)->stream();
-                    }, 'report_employee_families_' . ($records->first()->employeeFamilies->name ?? 'unknown') . '.pdf');
-                }),
-        ])
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_families', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'report_employee_families_' . ($records->first()->employeeFamilies->name ?? 'unknown') . '.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
