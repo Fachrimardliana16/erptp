@@ -70,12 +70,15 @@ class EmployeeAssignmentLettersResource extends Resource
                             ->label('Detail Tugas')
                             ->required()
                             ->columnSpanFull(),
-                        Forms\Components\DatePicker::make('start_date')
-                            ->label('Tanggal Mulai')
-                            ->required(),
-                        Forms\Components\DatePicker::make('end_date')
-                            ->label('Tanggal Selesai')
-                            ->required(),
+                        Forms\Components\Group::make([
+                            Forms\Components\DatePicker::make('start_date')
+                                ->label('Tanggal Mulai')
+                                ->required(),
+                            Forms\Components\DatePicker::make('end_date')
+                                ->label('Tanggal Selesai')
+                                ->required(),
+                        ])
+                            ->columns(2),
                         Forms\Components\Textarea::make('description')
                             ->label('Deskripsi Tambahan')
                             ->columnSpanFull(),
@@ -161,7 +164,7 @@ class EmployeeAssignmentLettersResource extends Resource
                     ->action(function ($record) {
                         $pdf = app(abstract: DomPDF::class);
                         $pdf->loadView('pdf.employee_assignmentletter', ['surat_tugas' => $record]);
-            
+
                         // Ambil semua nama pegawai yang menerima tugas
                         $namaPegawai = $record->assignedEmployees->pluck('name')->join('_'); // Menggabungkan nama pegawai dengan '_' sebagai pemisah
                         // Konversi string tanggal menjadi objek Carbon dan format
@@ -169,12 +172,12 @@ class EmployeeAssignmentLettersResource extends Resource
                         $tanggalSelesai = Carbon::parse($record->end_date)->format('d-m-Y'); // Format tanggal selesai
                         // Format nama file
                         $fileName = "surat_tugas_{$tanggalMulai}_sd_{$tanggalSelesai}_{$namaPegawai}.pdf";
-            
+
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
                         }, $fileName);
                     }),
-            ])          
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

@@ -126,17 +126,13 @@ class EmployeeMutationsResource extends Resource
 
                         FileUpload::make('docs')
                             ->label('Lampiran Surat')
-                            ->required(),
-
-                        Hidden::make('users_id')
-                            ->default(auth()->id())
-                            ->required(),
-
-                        Hidden::make('users_id')
-                            ->default(auth()->id())
                             ->required()
-                            ->validationAttribute('Users ID') // Validasi atribut untuk error handling
-                            ->helperText('ID pengguna saat ini akan disimpan di sini.')
+                            ->rules('required|mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
+
+                        Hidden::make('users_id')
+                            ->default(auth()->id())
+                            ->required(),
                     ])
             ]);
     }
@@ -160,10 +156,10 @@ class EmployeeMutationsResource extends Resource
                                 'records' => $records,
                                 'employees' => $employees
                             ]);
-                            
+
                             // Load HTML ke dalam PDF dengan orientasi landscape
                             $pdf = Pdf::loadHTML($pdfContent)->setPaper('a4', 'landscape');
-                            
+
                             echo $pdf->stream();
                         }, 'report_employee_mutation.pdf');
                     }),
@@ -215,12 +211,12 @@ class EmployeeMutationsResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('Nama Pegawai')
-                ->relationship('employeeMutation', 'name'),
+                    ->relationship('employeeMutation', 'name'),
                 Filter::make('Tanggal')
-                ->form([
-                    DatePicker::make('Dari'),
-                    DatePicker::make('Sampai'),
-                ])
+                    ->form([
+                        DatePicker::make('Dari'),
+                        DatePicker::make('Sampai'),
+                    ])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

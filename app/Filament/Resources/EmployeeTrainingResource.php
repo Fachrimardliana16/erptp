@@ -35,22 +35,32 @@ class EmployeeTrainingResource extends Resource
                         Forms\Components\Select::make('employee_id')
                             ->relationship('employeeTraining', 'name')
                             ->label('Pegawai')
+                            ->required()
                             ->required(),
                         Forms\Components\TextInput::make('training_title')
                             ->label('Judul Pelatihan/Diklat')
+                            ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('training_location')
                             ->label('Lokasi')
+                            ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('organizer')
                             ->label('Penyelenggara')
+                            ->required()
                             ->maxLength(255),
                         Forms\Components\FileUpload::make('photo_training')
                             ->directory('Foto Pelatihan')
-                            ->label('Foto Pelaksanaan'),
+                            ->label('Bukti Foto Pelaksanaan')
+                            ->required()
+                            ->helperText('Unggah foto pelaksanaan pelatihan.')
+                            ->rules(['required', 'mimes:jpeg,jpg,png', 'max:5120']), // Allowing image formats and max 5MB
                         Forms\Components\FileUpload::make('docs_training')
                             ->directory('Dokumen Sertifikat')
-                            ->label('Lampiran Sertifikat'),
+                            ->label('Lampiran Sertifikat')
+                            ->required()
+                            ->helperText('Unggah dokumen sertifikat pelatihan.')
+                            ->rules(['required', 'mimes:pdf', 'max:5120']), // Only PDF and max 5MB
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])

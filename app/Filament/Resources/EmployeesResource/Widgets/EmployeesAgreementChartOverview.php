@@ -39,4 +39,6 @@ class EmployeesAgreementChartOverview extends ChartWidget
     {
         return 'pie';
     }
+
+    protected int | string | array $columnSpan = 'full';
 }
