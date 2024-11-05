@@ -208,7 +208,7 @@ class EmployeesResource extends Resource
                         Select::make('departments_id')
                             ->relationship('EmployeeDepartments', 'name')
                             ->label('Bagian')
-                            ->required()
+
                             ->live() // Make it live to trigger updates
                             ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes
                             ->validationAttribute('Bagian'),
@@ -224,7 +224,6 @@ class EmployeesResource extends Resource
                                     )
                             )
                             ->label('Sub Bagian')
-                            ->required()
                             ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected
                             ->validationAttribute('Sub Bagian'),
 

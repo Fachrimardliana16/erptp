@@ -36,6 +36,7 @@ return new class extends Migration
             $table->foreign('new_position_id')->references('id')->on('master_employee_position');
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

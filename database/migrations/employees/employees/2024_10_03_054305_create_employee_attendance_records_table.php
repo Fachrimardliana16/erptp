@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('device');
             $table->string('picture')->nullable(); // path to image if available
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

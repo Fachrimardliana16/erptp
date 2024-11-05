@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeePromotion extends Model
 {
-    use HasUuids, HasFactory;
+    use HasUuids, HasFactory, SoftDeletes;
 
     protected $table = 'employee_promotion';
 
@@ -20,6 +21,8 @@ class EmployeePromotion extends Model
         'new_grade_id',
         'old_basic_salary',
         'new_basic_salary',
+        'doc_promotion',
+        'desc',
         'users_id',
     ];
 

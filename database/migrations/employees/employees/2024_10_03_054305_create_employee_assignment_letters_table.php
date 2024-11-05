@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('assigning_employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->foreign('assigned_employee_id')->references('id')->on('employees')->onDelete('cascade');

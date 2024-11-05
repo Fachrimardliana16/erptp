@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeeAssignmentLetters extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'employee_assignment_letters';
 
@@ -41,7 +42,7 @@ class EmployeeAssignmentLetters extends Model
             'assignment_letter_id',
             'employee_id'
         )
-        ->using(EmployeeAssignmentLetterEmployee::class)
-        ->withTimestamps();
+            ->using(EmployeeAssignmentLetterEmployee::class)
+            ->withTimestamps();
     }
 }

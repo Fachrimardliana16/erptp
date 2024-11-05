@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('benefits_7', 15, 2)->nullable();
             $table->decimal('benefits_8', 15, 2)->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->decimal('amount', 15, 2)->nullable();
             $table->uuid('users_id');
 

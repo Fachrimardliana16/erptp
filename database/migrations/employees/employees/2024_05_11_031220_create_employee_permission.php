@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('permission_desc');
             $table->string('scan_doc');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

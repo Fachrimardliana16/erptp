@@ -23,9 +23,11 @@ class CreateEmployeeDailyReportsTable extends Migration
             $table->string('image')->nullable();
             $table->uuid('users_id');
 
+
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

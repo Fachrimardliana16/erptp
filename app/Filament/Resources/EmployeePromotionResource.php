@@ -112,6 +112,16 @@ class EmployeePromotionResource extends Resource
                         Forms\Components\Hidden::make('new_basic_salary_hidden') // Hidden field for saving the value
                             ->label('Gaji Pokok Baru (Hidden)')
                             ->dehydrated(), // Ensure it's submitted with the form
+
+                        Forms\Components\FileUpload::make('doc_promotion')
+                            ->directory('Employee_Promotion')
+                            ->label('Berkas Kenaikan Golongan')
+                            ->required()
+                            ->validationAttribute('Berkas Kenaikan Golongan')
+                            ->rules('required|mimes:pdf|max:5024')
+                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
+                        Forms\Components\TextArea::make('desc')
+                            ->label('Catatan Kenaikan Golongan'),
                         Forms\Components\Hidden::make('users_id')
                             ->default(auth()->id()),
                     ])
