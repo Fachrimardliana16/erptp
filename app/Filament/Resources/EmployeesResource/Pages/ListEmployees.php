@@ -24,12 +24,17 @@ class ListEmployees extends ListRecords
         ];
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            EmployeesAgreementOverview::class,
+            EmployeesOverview::class,
+        ];
+    }
     protected function getFooterWidgets(): array
     {
         return [
             //EmployeesChartOverview::class,
-            EmployeesAgreementOverview::class,
-            EmployeesOverview::class,
             EmployeesGenderChartOverview::class,
             EmployeesEducationOverview::class,
             //EmployeesGradeOverview::class,

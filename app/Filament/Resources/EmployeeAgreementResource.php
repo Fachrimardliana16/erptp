@@ -52,6 +52,7 @@ class EmployeeAgreementResource extends Resource
                         Select::make('job_application_archives_id')
                             ->options(function () {
                                 return EmployeeJobApplicationArchives::query()
+                                    ->where('application_status', false) // Menambahkan kondisi where
                                     ->get()
                                     ->mapWithKeys(function ($archive) {
                                         return [$archive->id => $archive->registration_number . ' | ' . $archive->name];
@@ -65,6 +66,8 @@ class EmployeeAgreementResource extends Resource
                                     $set('hidden_name', $archive->name); // Update hidden name field
                                 }
                             })
+                            ->searchable()
+                            ->preload()
                             ->reactive()
                             ->label('Nomor Registrasi Lamaran')
                             ->required()
