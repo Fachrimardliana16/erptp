@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('docs');
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('voucher_status_type_id')->references('id')->on('master_assets_voucher_status_type')->onDelete('cascade');
             $table->foreign('money_voucher_id')->references('id')->on('master_assets_money_voucher_type')->onDelete('cascade');

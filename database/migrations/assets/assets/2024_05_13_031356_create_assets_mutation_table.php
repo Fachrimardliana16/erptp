@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('scan_doc')->nullable();
             $table->text('desc')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
