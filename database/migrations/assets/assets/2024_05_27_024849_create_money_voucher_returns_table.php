@@ -27,6 +27,7 @@ return new class extends Migration
             $table->uuid('employee_id');
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             // Indexes
             $table->index('uuid');

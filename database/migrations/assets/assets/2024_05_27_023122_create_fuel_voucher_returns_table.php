@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('docs_return');
             $table->uuid('users_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('fuel_voucher_id')->references('id')->on('fuel_vouchers')->onDelete('cascade');
             $table->foreign('fuel_type_id')->references('id')->on('master_assets_fuel_type')->onDelete('cascade');

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('desc')->nullable();
             $table->string('invoice_file')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

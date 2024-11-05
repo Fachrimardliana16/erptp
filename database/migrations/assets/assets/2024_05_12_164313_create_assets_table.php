@@ -31,6 +31,7 @@ return new class extends Migration
             $table->date('date_document_extension')->nullable();
             $table->uuid('status_id');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');

@@ -26,6 +26,7 @@ class CreateAssetDocumentExtensionsTable extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('assets_id')->references('id')->on('assets');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
