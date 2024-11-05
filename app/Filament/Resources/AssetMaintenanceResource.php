@@ -75,8 +75,8 @@ class AssetMaintenanceResource extends Resource
                         Forms\Components\FileUpload::make('invoice_file')
                             ->directory('Asset_Maintenance')
                             ->label('Bukti Pembayaran Pemeliharaan')
-                            ->rules('nullable|file|mimes:jpeg,png,pdf|max:5048')
-                            ->helperText('Unggah bukti pembayaran dalam format JPEG, PNG, atau PDF. Maksimal ukuran file adalah 2MB.'),
+                            ->rules('nullable|file|mimes:jpeg,png,pdf|max:10048')
+                            ->helperText('Unggah bukti pembayaran dalam format JPEG, PNG, atau PDF. Maksimal ukuran file adalah 10MB.'),
 
                         Forms\Components\Textarea::make('desc')
                             ->label('Catatan Pemeliharaan')
@@ -94,7 +94,7 @@ class AssetMaintenanceResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

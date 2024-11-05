@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('location_service');
             $table->uuid('assets_id');
             $table->string('service_type');
-            $table->decimal('service_cost', 10, 2);
+            $table->decimal('service_cost', 18, 2);
             $table->text('desc')->nullable();
             $table->string('invoice_file')->nullable();
             $table->timestamps();

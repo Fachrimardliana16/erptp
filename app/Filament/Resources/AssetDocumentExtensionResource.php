@@ -86,7 +86,7 @@ class AssetDocumentExtensionResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

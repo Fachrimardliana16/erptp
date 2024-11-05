@@ -92,7 +92,10 @@ class AssetMonitoringResource extends Resource
                             ->validationAttribute('Kondisi Baru'),
                         Forms\Components\FileUpload::make('img')
                             ->directory('Asset_Monitoring')
-                            ->label('Foto Upload'),
+                            ->label('Foto Upload')
+                            ->required()
+                            ->rules('required|mimes:jpeg,png,pdf|max:10240')
+                            ->helperText('Unggah foto dengan format ".jpeg atau .png" maksimal ukuran file 10MB.'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan')
                             ->columnSpanFull()
@@ -107,7 +110,7 @@ class AssetMonitoringResource extends Resource
     {
         return $table
             ->headerActions([
-                Tables\Actions\BulkAction::make('Export Pdf') // Action untuk download PDF yang sudah difilter
+                Tables\Actions\BulkAction::make('Export Report') // Action untuk download PDF yang sudah difilter
                     ->icon('heroicon-m-arrow-down-tray')
                     ->deselectRecordsAfterCompletion()
                     ->action(function (\Illuminate\Database\Eloquent\Collection $records) {

@@ -19,7 +19,7 @@ class CreateAssetDocumentExtensionsTable extends Migration
             $table->string('document_type');
             $table->string('location');
             $table->uuid('assets_id');
-            $table->decimal('cost', 10, 2);
+            $table->decimal('cost', 18, 2);
             $table->date('next_expiry_date');
             $table->text('notes')->nullable();
             $table->uuid('users_id');

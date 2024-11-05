@@ -21,7 +21,7 @@ return new class extends Migration
             $table->uuid('condition_id');
             $table->uuid('employees_id');
             $table->uuid('location_id');
-            $table->uuid('sub_location_id');
+            $table->uuid('sub_location_id')->nullabel();
             $table->uuid('transaction_status_id');
             $table->string('scan_doc')->nullable();
             $table->text('desc')->nullable();

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('date');
             $table->uuid('voucher_status_type_id');
             $table->uuid('money_voucher_id');
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 18, 2);
             $table->text('usage_purpose');
             $table->text('description')->nullable();
             $table->uuid('employee_id');
