@@ -7,7 +7,7 @@ use Filament\Widgets\ChartWidget;
 
 class EmployeesGenderChartOverview extends ChartWidget
 {
-    protected static ?string $heading = 'Gender Chart';
+    protected static ?string $heading = 'Chart Jenis Kelamin';
 
     protected static ?int $sort = 3;
 
@@ -45,4 +45,25 @@ class EmployeesGenderChartOverview extends ChartWidget
     }
 
     protected static ?string $maxHeight = '270px';
+
+    protected static ?array $options = [
+        'scales' => [
+            'y' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+            'x' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+        ],
+    ];
 }

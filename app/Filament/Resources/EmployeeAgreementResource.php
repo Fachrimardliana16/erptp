@@ -21,6 +21,9 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
+
+use Closure;
+use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,13 +49,21 @@ class EmployeeAgreementResource extends Resource
                             ->label('Nomor Perjanjian Kontrak')
                             ->maxLength(255)
                             ->required()
+                            ->unique(ignoreRecord: true)
                             ->validationAttribute('Nomor Perjanjian Kontrak')
-                            ->rules(['string', 'max:255']),
+                            ->rules(['string', 'max:255', 'regex:/^[A-Za-z0-9\/-]+$/'])
+                            ->placeholder('Contoh: PK/2024/001')
+                            ->validationMessages([
+                                'required' => 'Nomor Perjanjian Kontrak wajib diisi',
+                                'max' => 'Nomor Perjanjian Kontrak tidak boleh lebih dari 255 karakter',
+                                'unique' => 'Nomor Perjanjian Kontrak sudah digunakan',
+                                'regex' => 'Format Nomor Perjanjian Kontrak tidak valid'
+                            ]),
 
                         Select::make('job_application_archives_id')
                             ->options(function () {
                                 return EmployeeJobApplicationArchives::query()
-                                    ->where('application_status', false) // Menambahkan kondisi where
+                                    ->where('application_status', false)
                                     ->get()
                                     ->mapWithKeys(function ($archive) {
                                         return [$archive->id => $archive->registration_number . ' | ' . $archive->name];
@@ -63,7 +74,7 @@ class EmployeeAgreementResource extends Resource
                                 $archive = EmployeeJobApplicationArchives::find($state);
                                 if ($archive) {
                                     $set('name', $archive->name);
-                                    $set('hidden_name', $archive->name); // Update hidden name field
+                                    $set('hidden_name', $archive->name);
                                 }
                             })
                             ->searchable()
@@ -71,19 +82,22 @@ class EmployeeAgreementResource extends Resource
                             ->reactive()
                             ->label('Nomor Registrasi Lamaran')
                             ->required()
-                            ->validationAttribute('Nomor Registrasi Lamaran'),
+                            ->exists('employee_job_application_archives', 'id')
+                            ->validationMessages([
+                                'required' => 'Nomor Registrasi Lamaran wajib dipilih',
+                                'exists' => 'Nomor Registrasi Lamaran tidak valid'
+                            ]),
 
                         TextInput::make('name')
                             ->label('Nama Pegawai')
                             ->disabled()
                             ->required()
-                            ->dehydrated(false)
-                            ->validationAttribute('Nama Pegawai'),
+                            ->dehydrated(false),
 
                         Hidden::make('name')
                             ->label('Nama Pegawai')
                             ->required()
-                            ->validationAttribute('Nama Pegawai'),
+                            ->rules(['string', 'max:255']),
 
                         Select::make('agreement_id')
                             ->relationship('agreement', 'name')
@@ -91,16 +105,25 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->validationAttribute('Status Kontrak'),
+                            ->exists('agreements', 'id')
+                            ->validationMessages([
+                                'required' => 'Status Kontrak wajib dipilih',
+                                'exists' => 'Status Kontrak tidak valid'
+                            ]),
 
                         Select::make('departments_id')
                             ->relationship('agreementDepartement', 'name')
                             ->label('Bagian')
                             ->searchable()
                             ->preload()
-                            ->live() // Make it live to trigger updates
-                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes
-                            ->validationAttribute('Bagian'),
+                            ->live()
+                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null))
+                            ->required()
+                            ->exists('departments', 'id')
+                            ->validationMessages([
+                                'required' => 'Bagian wajib dipilih',
+                                'exists' => 'Bagian tidak valid'
+                            ]),
 
                         Select::make('sub_department_id')
                             ->relationship(
@@ -115,8 +138,11 @@ class EmployeeAgreementResource extends Resource
                             ->label('Sub Bagian')
                             ->searchable()
                             ->preload()
-                            ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected
-                            ->validationAttribute('Sub Bagian'),
+                            ->disabled(fn(callable $get) => !$get('departments_id'))
+                            ->exists('sub_departments', 'id')
+                            ->validationMessages([
+                                'exists' => 'Sub Bagian tidak valid'
+                            ]),
 
                         Select::make('employee_position_id')
                             ->relationship('agreementPosition', 'name')
@@ -124,7 +150,11 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->validationAttribute('Jabatan'),
+                            ->exists('employee_positions', 'id')
+                            ->validationMessages([
+                                'required' => 'Jabatan wajib dipilih',
+                                'exists' => 'Jabatan tidak valid'
+                            ]),
 
                         Select::make('employment_status_id')
                             ->relationship('agreementStatus', 'name')
@@ -132,7 +162,11 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->validationAttribute('Status Pegawai'),
+                            ->exists('employment_statuses', 'id')
+                            ->validationMessages([
+                                'required' => 'Status Pegawai wajib dipilih',
+                                'exists' => 'Status Pegawai tidak valid'
+                            ]),
 
                         Select::make('basic_salary_id')
                             ->label('Pilih Golongan dan Gaji Pokok')
@@ -147,6 +181,14 @@ class EmployeeAgreementResource extends Resource
                                     });
                             })
                             ->reactive()
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->exists('master_employee_basic_salaries', 'id')
+                            ->validationMessages([
+                                'required' => 'Golongan dan Gaji Pokok wajib dipilih',
+                                'exists' => 'Golongan dan Gaji Pokok tidak valid'
+                            ])
                             ->afterStateUpdated(function ($state, Forms\Set $set) {
                                 if ($state) {
                                     $basicSalary = MasterEmployeeBasicSalary::with('employeeGrade')->find($state);
@@ -158,38 +200,60 @@ class EmployeeAgreementResource extends Resource
                                 }
                             }),
 
-                        // TextInput untuk menampilkan grade (readonly)
                         TextInput::make('grade_id')
                             ->label('Golongan Pegawai')
-                            ->validationAttribute('Golongan Pegawai')
                             ->disabled(),
 
-                        // TextInput untuk menampilkan amount (readonly)
                         TextInput::make('amount')
                             ->label('Gaji Pokok')
-                            ->validationAttribute('Gaji Pokok')
                             ->disabled(),
+
                         Group::make()
                             ->schema([
                                 DatePicker::make('agreement_date_start')
                                     ->label('Tanggal Mulai Perjanjian')
                                     ->required()
-                                    ->validationAttribute('Tanggal Mulai Perjanjian'),
+                                    ->rules(['date', 'after_or_equal:today'])
+                                    ->validationMessages([
+                                        'required' => 'Tanggal Mulai Perjanjian wajib diisi',
+                                        'date' => 'Format tanggal tidak valid',
+                                        'after_or_equal' => 'Tanggal Mulai Perjanjian minimal hari ini'
+                                    ]),
 
                                 DatePicker::make('agreement_date_end')
                                     ->label('Tanggal Akhir Perjanjian')
                                     ->required()
-                                    ->validationAttribute('Tanggal Akhir Perjanjian'),
+                                    ->rules([
+                                        'date',
+                                        'after:agreement_date_start',
+                                        function (string $attribute, $value, Closure $fail) {
+                                            $startDate = Carbon::parse(request('agreement_date_start'));
+                                            $endDate = Carbon::parse($value);
+
+                                            if ($startDate->diffInYears($endDate) > 2) {
+                                                $fail('Masa kontrak tidak boleh lebih dari 2 tahun');
+                                            }
+                                        },
+                                    ])
+                                    ->validationMessages([
+                                        'required' => 'Tanggal Akhir Perjanjian wajib diisi',
+                                        'date' => 'Format tanggal tidak valid',
+                                        'after' => 'Tanggal Akhir harus setelah Tanggal Mulai'
+                                    ]),
                             ])
                             ->columns(2),
-
 
                         FileUpload::make('docs')
                             ->directory('Perjanjian Kontrak')
                             ->label('Lampiran Dokumen')
                             ->required()
-                            ->validationAttribute('Lampiran Dokumen')
-                            ->rules('required|mimes:pdf|max:5024')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(5120) // 5MB in kilobytes
+                            ->validationMessages([
+                                'required' => 'Lampiran Dokumen wajib diunggah',
+                                'mimes' => 'File harus berformat PDF',
+                                'max' => 'Ukuran file tidak boleh lebih dari 5MB'
+                            ])
                             ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
 
                         Forms\Components\Hidden::make('users_id')

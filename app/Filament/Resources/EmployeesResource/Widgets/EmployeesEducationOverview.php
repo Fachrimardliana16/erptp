@@ -7,7 +7,7 @@ use App\Models\Employees;
 
 class EmployeesEducationOverview extends ChartWidget
 {
-    protected static ?string $heading = 'Pendidikan Karyawan';
+    protected static ?string $heading = 'Chart Pendidikan Karyawan';
     protected static ?int $sort = 4;
 
     protected function getData(): array
@@ -72,4 +72,25 @@ class EmployeesEducationOverview extends ChartWidget
     }
 
     protected static ?string $maxHeight = '270px';
+
+    protected static ?array $options = [
+        'scales' => [
+            'y' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+            'x' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+        ],
+    ];
 }

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EmployeeBusinessTravelLettersResource\Pages;
 
 use App\Filament\Resources\EmployeeBusinessTravelLettersResource;
+use App\Filament\Resources\EmployeeBusinessTravelLettersResource\Widgets\EmployeeBusinessTravelOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListEmployeeBusinessTravelLetters extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            EmployeeBusinessTravelOverview::class,
         ];
     }
 }

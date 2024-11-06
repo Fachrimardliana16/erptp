@@ -19,6 +19,8 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
+use Exception;
+use Illuminate\Database\QueryException;
 
 class EmployeeJobApplicationArchivesResource extends Resource
 {
@@ -40,109 +42,228 @@ class EmployeeJobApplicationArchivesResource extends Resource
                             ->label('Nomor Registrasi')
                             ->required()
                             ->maxLength(255)
-                            ->validationAttribute('Nomor Registrasi'),
+                            ->validationAttribute('Nomor Registrasi')
+                            ->unique('employee_job_application_archives', 'registration_number', ignoreRecord: true)
+                            ->rules('required|string|max:255')
+                            ->validationMessages([
+                                'required' => 'Nomor Registrasi wajib diisi',
+                                'string' => 'Nomor Registrasi harus berupa teks',
+                                'max' => 'Nomor Registrasi tidak boleh lebih dari :max karakter',
+                                'unique' => 'Nomor Registrasi :input sudah terdaftar dalam sistem'
+                            ]),
+
                         Forms\Components\DatePicker::make('registration_date')
                             ->label('Tanggal Registrasi Arsip')
                             ->required()
-                            ->validationAttribute('Tanggal Registrasi Arsip'),
-                    ]),
-                Section::make('Profil Pelamar Kerja')
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nama Pelamar')
-                            ->required()
-                            ->maxLength(255)
-                            ->validationAttribute('Nama Pelamar'),
-                        Forms\Components\TextInput::make('address')
-                            ->label('Alamat')
-                            ->required()
-                            ->maxLength(255)
-                            ->validationAttribute('Alamat'),
-                        Forms\Components\Select::make('gender')
-                            ->options([
-                                'laki-laki' => 'Laki-Laki',
-                                'perempuan' => 'Perempuan'
-                            ])
-                            ->label('Jenis Kelamin')
-                            ->required()
-                            ->validationAttribute('Jenis Kelamin'),
-                        Group::make()
+                            ->validationAttribute('Tanggal Registrasi Arsip')
+                            ->rules('required|date')
+                            ->validationMessages([
+                                'required' => 'Tanggal Registrasi Arsip wajib diisi',
+                                'date' => 'Format Tanggal Registrasi Arsip tidak valid',
+                            ]),
+
+                        Section::make('Profil Pelamar Kerja')
                             ->schema([
-                                Forms\Components\TextInput::make('place_of_birth')
-                                    ->label('Tempat Lahir')
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nama Pelamar')
                                     ->required()
                                     ->maxLength(255)
-                                    ->columnSpan(1)
-                                    ->validationAttribute('Tempat Lahir'),
-                                Forms\Components\DatePicker::make('date_of_birth')
-                                    ->label('Tanggal Lahir')
+                                    ->validationAttribute('Nama Pelamar')
+                                    ->rules('required|string|max:255')
+                                    ->validationMessages([
+                                        'required' => 'Nama Pelamar wajib diisi',
+                                        'string' => 'Nama Pelamar harus berupa teks',
+                                        'max' => 'Nama Pelamar tidak boleh lebih dari :max karakter',
+                                    ]),
+
+                                Forms\Components\TextInput::make('address')
+                                    ->label('Alamat')
                                     ->required()
-                                    ->columnSpan(1)
-                                    ->validationAttribute('Tanggal Lahir'),
-                            ])
-                            ->columns(2),
-                        Group::make()
+                                    ->maxLength(255)
+                                    ->validationAttribute('Alamat')
+                                    ->rules('required|string|max:255')
+                                    ->validationMessages([
+                                        'required' => 'Alamat wajib diisi',
+                                        'string' => 'Alamat harus berupa teks',
+                                        'max' => 'Alamat tidak boleh lebih dari :max karakter',
+                                    ]),
+
+                                Forms\Components\Select::make('gender')
+                                    ->options([
+                                        'laki-laki' => 'Laki-Laki',
+                                        'perempuan' => 'Perempuan'
+                                    ])
+                                    ->label('Jenis Kelamin')
+                                    ->required()
+                                    ->validationAttribute('Jenis Kelamin')
+                                    ->rules('required')
+                                    ->validationMessages([
+                                        'required' => 'Jenis Kelamin wajib dipilih',
+                                    ]),
+
+                                Group::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('place_of_birth')
+                                            ->label('Tempat Lahir')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->columnSpan(1)
+                                            ->validationAttribute('Tempat Lahir')
+                                            ->rules('required|string|max:255')
+                                            ->validationMessages([
+                                                'required' => 'Tempat Lahir wajib diisi',
+                                                'string' => 'Tempat Lahir harus berupa teks',
+                                                'max' => 'Tempat Lahir tidak boleh lebih dari :max karakter',
+                                            ]),
+
+                                        Forms\Components\DatePicker::make('date_of_birth')
+                                            ->label('Tanggal Lahir')
+                                            ->required()
+                                            ->columnSpan(1)
+                                            ->validationAttribute('Tanggal Lahir')
+                                            ->rules('required|date')
+                                            ->validationMessages([
+                                                'required' => 'Tanggal Lahir wajib diisi',
+                                                'date' => 'Format Tanggal Lahir tidak valid',
+                                            ]),
+                                    ])
+                                    ->columns(2),
+
+                                Group::make()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('email')
+                                            ->label('E-Mail')
+                                            ->email()
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->validationAttribute('e-Mail')
+                                            ->unique('employee_job_application_archives', 'email', ignoreRecord: true) // Tambahan rule unique
+                                            ->rules('required|email|max:255')
+                                            ->validationMessages([
+                                                'required' => 'E-Mail wajib diisi',
+                                                'email' => 'Format E-Mail tidak valid',
+                                                'max' => 'E-Mail tidak boleh lebih dari :max karakter',
+                                                'unique' => 'Email :input sudah terdaftar dalam sistem' // Pesan untuk unique validation
+                                            ]),
+
+                                        Forms\Components\TextInput::make('contact')
+                                            ->label('Kontak')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->validationAttribute('Kontak')
+                                            ->unique('employee_job_application_archives', 'contact', ignoreRecord: true)
+                                            ->rules('required|string|max:255')
+                                            ->validationMessages([
+                                                'required' => 'Kontak wajib diisi',
+                                                'string' => 'Kontak harus berupa teks',
+                                                'max' => 'Kontak tidak boleh lebih dari :max karakter',
+                                                'unique' => 'Nomor Kontak :input sudah terdaftar dalam sistem'
+                                            ]),
+                                    ])
+                                    ->columns(2),
+
+                                Forms\Components\Select::make('religion')
+                                    ->options([
+                                        'islam' => 'Islam',
+                                        'kristen' => 'Kristen',
+                                        'katholik' => 'Katholik',
+                                        'hindu' => 'Hindu',
+                                        'budha' => 'Budha',
+                                        'lainnya' => 'Lain-lain',
+                                    ])
+                                    ->label('Agama')
+                                    ->required()
+                                    ->validationAttribute('Agama')
+                                    ->rules('required')
+                                    ->validationMessages([
+                                        'required' => 'Agama wajib dipilih',
+                                    ]),
+
+                                Group::make()
+                                    ->schema([
+                                        Forms\Components\Select::make('employee_education_id')
+                                            ->label('Pendidikan Terakhir')
+                                            ->relationship('employeedu', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->validationAttribute('Pendidikan Terakhir')
+                                            ->rules('required')
+                                            ->validationMessages([
+                                                'required' => 'Pendidikan Terakhir wajib dipilih',
+                                            ]),
+
+                                        Forms\Components\TextInput::make('major')
+                                            ->label('Jurusan')
+                                            ->maxLength(255)
+                                            ->validationAttribute('Jurusan')
+                                            ->rules('required|string|max:255')
+                                            ->validationMessages([
+                                                'required' => 'Jurusan wajib diisi',
+                                                'string' => 'Jurusan harus berupa teks',
+                                                'max' => 'Jurusan tidak boleh lebih dari :max karakter',
+                                            ]),
+                                    ])
+                                    ->columns(2),
+                            ]),
+
+                        Section::make('Berkas dan Catatan')
                             ->schema([
-                                Forms\Components\TextInput::make('email')
-                                    ->label('E-Mail')
-                                    ->email()
+                                Forms\Components\FileUpload::make('archive_file')
+                                    ->directory('Employee_JobApplicationArchive')
+                                    ->label('Berkas Lamaran')
                                     ->required()
-                                    ->maxLength(255)
-                                    ->validationAttribute('E-Mail')
-                                    ->helperText('Pastikan format email benar'),
-                                Forms\Components\TextInput::make('contact')
-                                    ->label('Kontak')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->validationAttribute('Kontak')
-                                    ->helperText('Nomor telepon harus valid'),
+                                    ->validationAttribute('Berkas Lamaran')
+                                    ->rules('required|mimes:pdf|max:5024')
+                                    ->validationMessages([
+                                        'required' => 'Berkas Lamaran wajib diunggah',
+                                        'mimes' => 'Berkas Lamaran harus berformat PDF',
+                                        'max' => 'Ukuran Berkas Lamaran tidak boleh lebih dari 5MB',
+                                    ])
+                                    ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB.'),
+
+                                Forms\Components\Textarea::make('notes')
+                                    ->label('Catatan')
+                                    ->columnSpanFull()
+                                    ->validationAttribute('Catatan')
+                                    ->rules('nullable|string|max:1000')
+                                    ->validationMessages([
+                                        'string' => 'Catatan harus berupa teks',
+                                        'max' => 'Catatan tidak boleh lebih dari :max karakter',
+                                    ]),
+
+                                Forms\Components\Hidden::make('users_id')
+                                    ->default(auth()->id())
+                                    ->validationAttribute('ID Pengguna'),
                             ])
-                            ->columns(2),
-                        Forms\Components\Select::make('religion')
-                            ->options([
-                                'islam' => 'Islam',
-                                'kristen' => 'Kristen',
-                                'katholik' => 'Katholik',
-                                'hindu' => 'Hindu',
-                                'budha' => 'Budha',
-                                'lainnya' => 'Lain-lain',
-                            ])
-                            ->label('Agama')
-                            ->validationAttribute('Agama'),
-                        Group::make()
-                            ->schema([
-                                Forms\Components\Select::make('employee_education_id')
-                                    ->label('Pendidikan Terakhir')
-                                    ->relationship('employeedu', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->validationAttribute('Pendidikan Terakhir'),
-                                Forms\Components\TextInput::make('major')
-                                    ->label('Jurusan')
-                                    ->maxLength(255)
-                                    ->validationAttribute('Jurusan'),
-                            ])
-                            ->columns(2),
-                    ]),
-                Section::make('Berkas dan Catatan')
-                    ->schema([
-                        Forms\Components\FileUpload::make('archive_file')
-                            ->directory('Employee_JobApplicationArchive')
-                            ->label('Berkas Lamaran')
-                            ->required()
-                            ->validationAttribute('Berkas Lamaran')
-                            ->rules('required|mimes:pdf|max:5024')
-                            ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
-                        Forms\Components\Textarea::make('notes')
-                            ->label('Catatan')
-                            ->columnSpanFull()
-                            ->validationAttribute('Catatan'),
-                        Forms\Components\Hidden::make('users_id')
-                            ->default(auth()->id())
-                            ->validationAttribute('ID Pengguna'),
                     ])
             ]);
+    }
+
+    protected function onCreateFailed(Exception $exception): void
+    {
+        if ($exception instanceof QueryException && $exception->errorInfo[1] === 1062) {
+            // Mendapatkan nama kolom yang duplikat dari pesan error
+            $message = $exception->getMessage();
+            $fieldName = '';
+
+            if (str_contains($message, 'email_unique')) {
+                $fieldName = 'Email';
+            } elseif (str_contains($message, 'contact_unique')) {
+                $fieldName = 'Nomor Kontak';
+            } elseif (str_contains($message, 'registration_number_unique')) {
+                $fieldName = 'Nomor Registrasi';
+            }
+
+            Notification::make()
+                ->title('Data Gagal Disimpan')
+                ->body("{$fieldName} sudah terdaftar dalam sistem")
+                ->danger()
+                ->send();
+            return;
+        }
+
+        parent::onCreateFailed($exception);
     }
 
     public static function table(Table $table): Table

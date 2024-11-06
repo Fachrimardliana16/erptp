@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('employee_job_application_archives', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('registration_number');
+            $table->string('registration_number')->unique();
             $table->date('registration_date');
             $table->string('name');
             $table->string('gender');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('place_of_birth');
             $table->date('date_of_birth');
             $table->string('email')->unique();
-            $table->string('contact');
+            $table->string('contact')->unique();
             $table->string('religion')->nullable();
             $table->uuid('employee_education_id');
             $table->string('major');
