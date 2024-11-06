@@ -5,23 +5,24 @@ namespace App\Filament\Resources\EmployeesResource\Widgets;
 use Filament\Widgets\ChartWidget;
 use App\Models\Employees;
 use App\Models\MasterEmployeeBasicSalary; // Pastikan model ini ada
+use App\Models\MasterEmployeeGrade;
 
 class EmployeesGradeOverview extends ChartWidget
 {
-    protected static ?string $heading = 'Golongan Pegawai Overview';
+    protected static ?string $heading = 'Chart Golongan Pegawai';
 
     protected function getData(): array
     {
         // Ambil semua golongan dari master_employee_basic_salary
-        $basicSalaries = MasterEmployeeBasicSalary::all()->pluck('name');
+        $gradeEmployee = MasterEmployeeGrade::all()->pluck('name');
 
         // Inisialisasi array untuk menyimpan jumlah pegawai berdasarkan golongan
         $basicSalaryCounts = [];
 
         // Hitung pegawai berdasarkan golongan
-        foreach ($basicSalaries as $basicSalary) {
-            $basicSalaryCounts[$basicSalary] = Employees::where('basic_salary_id', function ($query) use ($basicSalary) {
-                $query->select('id')->from('master_employee_basic_salary')->where('name', $basicSalary);
+        foreach ($gradeEmployee as $grade) {
+            $basicSalaryCounts[$grade] = Employees::where('employee_grade_id', function ($query) use ($grade) {
+                $query->select('id')->from('master_employee_grade')->where('name', $grade);
             })->count();
         }
 
@@ -56,4 +57,28 @@ class EmployeesGradeOverview extends ChartWidget
     {
         return 'doughnut'; // Tipe chart yang digunakan
     }
+
+
+    protected static ?string $maxHeight = '270px';
+
+    protected static ?array $options = [
+        'scales' => [
+            'y' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+            'x' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+        ],
+    ];
 }
