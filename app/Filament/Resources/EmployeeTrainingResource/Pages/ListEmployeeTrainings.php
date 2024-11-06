@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\EmployeeTrainingResource\Pages;
 
 use App\Filament\Resources\EmployeeTrainingResource;
+use App\Filament\Resources\EmployeeTrainingResource\Widgets\TrainingOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListEmployeeTrainings extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            TrainingOverview::class,
         ];
     }
 }
