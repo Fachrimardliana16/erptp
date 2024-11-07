@@ -2,25 +2,29 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EmployeesResource\Pages;
-use App\Filament\Resources\EmployeesResource\RelationManagers;
-use App\Models\Employees;
-use App\Models\MasterEmployeeGrade;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\Employees;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
+use App\Models\MasterEmployeeGrade;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\fileUpload;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\EmployeesResource\Pages;
+use App\Filament\Resources\AssetResource\Pages\ViewAsset;
+use App\Filament\Resources\EmployeesResource\RelationManagers;
+use App\Filament\Resources\EmployeesResource\Pages\EditEmployees;
+use App\Filament\Resources\EmployeesResource\Pages\ViewEmployees;
 
 class EmployeesResource extends Resource
 {
@@ -886,6 +890,13 @@ class EmployeesResource extends Resource
             ]);
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewEmployees::class,
+            EditEmployees::class,
+        ]);
+    }
     public static function getRelations(): array
     {
         return [
@@ -899,6 +910,7 @@ class EmployeesResource extends Resource
             'index' => Pages\ListEmployees::route('/'),
             'create' => Pages\CreateEmployees::route('/create'),
             'edit' => Pages\EditEmployees::route('/{record}/edit'),
+            'view' => Pages\ViewEmployees::route('/{record}'),
         ];
     }
 }

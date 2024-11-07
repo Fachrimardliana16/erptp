@@ -6,18 +6,22 @@ use App\Filament\Resources\EmployeeBusinessTravelLettersResource\Pages;
 use App\Filament\Resources\EmployeeBusinessTravelLettersResource\RelationManagers;
 use App\Models\EmployeeBusinessTravelLetters;
 use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDF;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPDF;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -142,6 +146,38 @@ class EmployeeBusinessTravelLettersResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf')
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                    $employees = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                    })->first();
+                        // Cek apakah pegawai ditemukan
+                        if (!$employees) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employees) {
+                        $pdfContent = Blade::render('pdf.report_employee_business_travel', [
+                            'records' => $records,
+                            'employees' => $employees
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)
+                        ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
+                        ->stream();
+                    }, 'report_business_travel.pdf');
+                }),
+        ])
             ->columns([
                 Tables\Columns\TextColumn::make('registration_number')
                     ->label('Nomor Surat')
