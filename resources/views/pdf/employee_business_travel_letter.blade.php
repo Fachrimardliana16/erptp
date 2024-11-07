@@ -7,7 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             font-size: 11pt;
             line-height: 1.3;
         }
@@ -38,7 +38,7 @@
             /* Set to 100% to ensure it takes the full width of the container */
             height: auto;
             /* Maintain aspect ratio */
-            margin-top: -10px;
+            margin-top: 0px;
             /* Adjust this value to raise the image further */
         }
 
@@ -57,7 +57,7 @@
 
         th,
         td {
-            padding: 3px;
+            padding: 2px;
             /* Menambahkan padding di dalam sel tabel */
             text-align: left;
             /* Mengatur teks di dalam sel menjadi rata kiri */
@@ -68,6 +68,9 @@
         th {
             background-color: #f2f2f2;
             /* Warna latar belakang untuk header tabel */
+        }
+        .col-follower-list {
+            vertical-align: top;
         }
 
         .no-border td {
@@ -88,10 +91,30 @@
             vertical-align: middle;
         }
 
+        .travel-details2 {
+            border: 1px solid black;
+            margin: 10px 0;
+        }
+
+        .travel-details2 th {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+            min-height: 100px;
+            vertical-align: middle;
+        }
+        .travel-details2 td {
+            border: 1px solid black;
+            padding: 35px;
+            text-align: center;
+            min-height: 100px;
+            vertical-align: middle;
+        }
+
         .signature-container {
             display: table;
             width: 100%;
-            margin-top: 30px;
+            margin-top: 10px;
         }
 
         .signature-box {
@@ -100,7 +123,6 @@
             text-align: center;
             vertical-align: top;
         }
-
         .signature-box p {
             margin: 5px 0;
             text-align: center;
@@ -111,7 +133,11 @@
         }
 
         .signature-space-right {
-            height: 80px;
+            height: 105px;
+        }
+        .signature-place {
+            width: 92%;
+            text-align: right;
         }
 
         .follower-list {
@@ -149,24 +175,24 @@
                 <h4 style="margin: 2px 0; text-decoration: underline;">SURAT PERINTAH PERJALANAN DINAS</h4>
                 <p class="registration-number">No.: {{ $surat_tugas->registration_number }}</p>
             </div>
-
-            <p style="text-align: left; margin: 5px 0;">DIPERINTAHKAN KEPADA:</p>
+            <br>
+            <p style="text-align: left; margin: 5px 0;">DIPERINTAHKAN KEPADA</p>
             <table class="no-border" style="width: 100%;">
                 <tr>
-                    <td style="width: 5%">1.</td>
-                    <td style="width: 25%">NAMA</td>
-                    <td style="width: 5px">:</td>
+                    <td style="width: 2%">1.</td>
+                    <td style="width: 47%">NAMA</td>
+                    <td style="width: 2px">:</td>
                     <td>{{ $surat_tugas->businessTravelEmployee->name }}</td>
                 </tr>
                 <tr>
                     <td>2.</td>
-                    <td>JABATAN/PANGKAT</td>
+                    <td style="width: 47%">JABATAN/PANGKAT</td>
                     <td>:</td>
                     <td>{{ $surat_tugas->businessTravelEmployee->position ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td>3.</td>
-                    <td>NAMA TEMPAT YANG DITUJU</td>
+                    <td style="width: 47%">NAMA TEMPAT YANG DITUJU</td>
                     <td>:</td>
                     <td>{{ $surat_tugas->destination }}</td>
                 </tr>
@@ -175,30 +201,32 @@
             <table class="travel-details" style="width: 100%;">
                 <tr>
                     <th style="width: 50%">TEMPAT TUJUAN</th>
-                    <th>MAKSUD PERJALANAN</th>
+                    <th style="width: 50%">MAKSUD PERJALANAN</th>
                 </tr>
                 <tr>
                     <td>{{ $surat_tugas->destination_detail }}</td>
-                    <td>{{ $surat_tugas->travel_purpose }}</td>
+                    <td>{{ $surat_tugas->purpose_of_trip }}</td>
                 </tr>
             </table>
 
             <table class="no-border" style="width: 100%;">
                 <tr>
-                    <td style="width: 5%">4.</td>
-                    <td colspan="3">UNTUK SELAMA WAKTU:
-                        {{ \Carbon\Carbon::parse($surat_tugas->start_date)->diffInDays(\Carbon\Carbon::parse($surat_tugas->end_date)) + 1 }}
+                    <td style="width: 2%">4.</td>
+                    <td style="width: 47%">UNTUK SELAMA WAKTU</td>
+                    <td style="width: 2px">:</td>
+                    <td>{{ \Carbon\Carbon::parse($surat_tugas->start_date)->diffInDays(\Carbon\Carbon::parse($surat_tugas->end_date)) + 1 }}
                         hari</td>
                 </tr>
             </table>
 
-            <table class="travel-details" style="width: 100%;">
+            <table class="travel-details2" style="width: 100%;">
                 <tr>
-                    <th>BERANGKAT DAN KEMBALI TANGGAL</th>
-                    <th>CAP DAN TANDA TANGAN</th>
+                    <th style="width: 50%" >BERANGKAT DAN KEMBALI TANGGAL</th>
+                    <th style="width: 50%" >CAP DAN TANDA TANGAN</th>
                 </tr>
                 <tr>
-                    <td>{{ \Carbon\Carbon::parse($surat_tugas->start_date)->format('d F Y') }} -
+                    <td>{{ \Carbon\Carbon::parse($surat_tugas->start_date)->format('d F Y') }}
+                        <br>-<br>
                         {{ \Carbon\Carbon::parse($surat_tugas->end_date)->format('d F Y') }}</td>
                     <td></td>
                 </tr>
@@ -206,9 +234,9 @@
 
             <table class="no-border" style="width: 100%;">
                 <tr>
-                    <td style="width: 5%">5.</td>
-                    <td style="width: 25%">PERJALANAN DINAS DIBIAYAI</td>
-                    <td style="width: 5px">:</td>
+                    <td style="width: 2%">5.</td>
+                    <td style="width: 47%">PERJALANAN DINAS DIBIAYAI</td>
+                    <td style="width: 2px">:</td>
                     <td>{{ $surat_tugas->business_trip_expenses }}</td>
                 </tr>
                 <tr>
@@ -218,9 +246,9 @@
                     <td>{{ $surat_tugas->pasal }}</td>
                 </tr>
                 <tr>
-                    <td>7.</td>
-                    <td>PENGIKUT</td>
-                    <td>:</td>
+                    <td class="col-follower-list">7.</td>
+                    <td style="width: 47%" class="col-follower-list">PENGIKUT</td>
+                    <td class="col-follower-list">:</td>
                     <td>
                         <ol class="follower-list">
                             @foreach ($surat_tugas->followers as $index => $follower)
@@ -231,13 +259,14 @@
                 </tr>
                 <tr>
                     <td>8.</td>
-                    <td>KETERANGAN LAIN-LAIN</td>
+                    <td style="width: 47%" >KETERANGAN LAIN-LAIN</td>
                     <td>:</td>
                     <td>{{ $surat_tugas->description }}</td>
 
                 </tr>
             </table>
-
+            <br>
+            <div class="signature-place">Purbalingga, {{ \Carbon\Carbon::now()->format('d F Y') }}</div>
             <div class="signature-container">
                 <div class="signature-box">
                     <p>Tanda Tangan<br>Pemegang</p>
@@ -245,12 +274,11 @@
                     <p>{{ $surat_tugas->businessTravelEmployee->name }}</p>
                 </div>
                 <div class="signature-box">
-                    <p>Purbalingga, {{ \Carbon\Carbon::now()->format('d F Y') }}</p>
                     <p>Perumda Air Minum<br>
                         Tirta Perwira Kabupaten Purbalingga<br>
-                        {{ $surat_tugas->businessTravelEmployee->position }}</p>
+                        {{ $surat_tugas->employeeSignatory->position }}</p>
                     <div class="signature-space-right"></div>
-                    <p>{{ $surat_tugas->businessTravelEmployee->name }}</p>
+                    <p>{{ $surat_tugas->employeeSignatory->name }}</p>
                 </div>
             </div>
         </div>
