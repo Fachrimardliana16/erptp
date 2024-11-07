@@ -22,6 +22,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Controllers\RegistrationNumberController;
 
 class EmployeeBusinessTravelLettersResource extends Resource
 {
@@ -33,6 +37,21 @@ class EmployeeBusinessTravelLettersResource extends Resource
     protected static ?string $navigationLabel = 'Surat Perjalanan Dinas';
     protected static ?int $navigationSort = 9;
 
+    private $registrationNumberController;
+
+    public function __construct($resource)
+    {
+        parent::__construct($resource);
+        $this->registrationNumberController = new RegistrationNumberController();
+    }
+
+    public function toArray($request)
+    {
+        return [
+            'registration_number' => $this->registrationNumberController->generateRegistrationNumber(),
+            // ... other fields
+        ];
+    }
     protected static function afterSave($record, $data)
     {
         // Mengaitkan followers setelah penyimpanan model
@@ -43,6 +62,8 @@ class EmployeeBusinessTravelLettersResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        $registrationNumberController = new RegistrationNumberController();
         return $form
             ->schema([
                 Section::make('Form Input Surat Perjalanan Dinas')
@@ -51,7 +72,8 @@ class EmployeeBusinessTravelLettersResource extends Resource
                         Forms\Components\TextInput::make('registration_number')
                             ->label('Nomor Surat')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->default($registrationNumberController->generateRegistrationNumber()),
                         Group::make()
                             ->schema([
                                 Forms\Components\DatePicker::make('start_date')
