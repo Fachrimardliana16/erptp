@@ -35,19 +35,19 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->passwordReset(RequestPasswordReset::class)
             ->emailVerification(EmailVerification::class)
-            ->brandName(fn (GeneralSettings $settings) => $settings->brand_name)
-            ->colors(fn (GeneralSettings $settings) => $settings->site_theme)
+            ->brandName(fn(GeneralSettings $settings) => $settings->brand_name)
+            ->colors(fn(GeneralSettings $settings) => $settings->site_theme)
             ->databaseNotifications()->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->sidebarCollapsibleOnDesktop()
-            // ->viteTheme('resources/css/filament/admin/theme.css')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->resources([
                 config('filament-logger.activity_resource')
             ])
             ->renderHook(
                 PanelsRenderHook::FOOTER,
-                fn () => view('footer')
+                fn() => view('footer')
             )
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
