@@ -51,4 +51,16 @@ class EmployeeBusinessTravelLetters extends Model
             ->using(TravelLetterFollowers::class)
             ->withTimestamps();
     }
+    // untuk menghitung hari
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];   
+    public function getDayCountAttribute()
+    {
+        if ($this->start_date && $this->end_date) {
+            return $this->start_date->diffInDays($this->end_date) + 1;
+        }
+        return 0;
+    }
 }

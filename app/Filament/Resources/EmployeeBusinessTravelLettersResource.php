@@ -129,8 +129,9 @@ class EmployeeBusinessTravelLettersResource extends Resource
                 Tables\Columns\TextColumn::make('businessTravelEmployee.name')
                     ->label('Nama Pegawai')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('followerEmployees.name')
-                    ->label('Nama Pegawai')
+                Tables\Columns\TextColumn::make('followers.name')
+                    ->label('Pegawai Pengikut')
+                    ->listWithLineBreaks()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Tanggal Mulai')
@@ -144,10 +145,8 @@ class EmployeeBusinessTravelLettersResource extends Resource
 
                 Tables\Columns\TextColumn::make('day_count')
                     ->label('Lama Perjalanan')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('businessTravelEmployee.name')
-                    ->label('Nama')
-                    ->searchable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($record) => $record->day_count . ' hari'),
                 Tables\Columns\TextColumn::make('destination')
                     ->label('Tujuan')
                     ->searchable(),
@@ -155,7 +154,7 @@ class EmployeeBusinessTravelLettersResource extends Resource
                     ->label('Detail Tujuan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('purpose_of_trip')
-                    ->label('Maksud Dinas')
+                    ->label('Maksud Perjalanan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('business_trip_expenses')
                     ->label('Pembiayaan')
