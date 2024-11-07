@@ -25,6 +25,7 @@ class EmployeeBusinessTravelLetters extends Model
         'purpose_of_trip',
         'business_trip_expenses',
         'pasal',
+        'employee_signatory_id',
         'description',
         'users_id',
     ];
@@ -32,6 +33,11 @@ class EmployeeBusinessTravelLetters extends Model
     public function businessTravelEmployee()
     {
         return $this->belongsTo(Employees::class, 'employee_id', 'id');
+    }
+
+    public function employeeSignatory()
+    {
+        return $this->belongsTo(Employees::class, 'employee_signatory_id', 'id');
     }
 
     public function followers()
@@ -42,7 +48,7 @@ class EmployeeBusinessTravelLetters extends Model
             'travel_letter_id',
             'follower_id'
         )
-        ->using(TravelLetterFollowers::class)
-        ->withTimestamps();
+            ->using(TravelLetterFollowers::class)
+            ->withTimestamps();
     }
 }
