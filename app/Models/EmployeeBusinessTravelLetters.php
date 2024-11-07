@@ -41,6 +41,8 @@ class EmployeeBusinessTravelLetters extends Model
             'travel_letter_followers',
             'travel_letter_id',
             'follower_id'
-        )->withTimestamps();
+        )
+        ->using(TravelLetterFollowers::class)
+        ->withTimestamps();
     }
 }

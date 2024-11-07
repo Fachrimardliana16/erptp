@@ -13,9 +13,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\PDF as DomPDF;
 
 class EmployeeBusinessTravelLettersResource extends Resource
 {
@@ -159,7 +162,24 @@ class EmployeeBusinessTravelLettersResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ])
+                Action::make('download_pdf')
+                    ->label('Cetak Surat Perjalanan Dinas')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function ($record) {
+                        $pdf = app(DomPDF::class);
+                        $pdf->loadView('pdf.employee_business_travel_letter', ['surat_tugas' => $record]);
+            
+                        // Format nama file
+                        $namaPegawai = $record->businessTravelEmployee->name;
+                        $tanggalMulai = \Carbon\Carbon::parse($record->start_date)->format('d-m-Y');
+                        $tanggalSelesai = \Carbon\Carbon::parse($record->end_date)->format('d-m-Y');
+                        $fileName = "SPPD_{$namaPegawai}_{$tanggalMulai}_sd_{$tanggalSelesai}.pdf";
+            
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, $fileName);
+                    }),
+            ])           
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

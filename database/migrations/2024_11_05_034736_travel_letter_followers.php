@@ -34,6 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // Pastikan tabel dapat dihapus saat rollback
+        Schema::dropIfExists('travel_letter_followers');
     }
 };
