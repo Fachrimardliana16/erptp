@@ -69,6 +69,7 @@
             background-color: #f2f2f2;
             /* Warna latar belakang untuk header tabel */
         }
+
         .col-follower-list {
             vertical-align: top;
         }
@@ -103,6 +104,7 @@
             min-height: 100px;
             vertical-align: middle;
         }
+
         .travel-details2 td {
             border: 1px solid black;
             padding: 35px;
@@ -123,6 +125,7 @@
             text-align: center;
             vertical-align: top;
         }
+
         .signature-box p {
             margin: 5px 0;
             text-align: center;
@@ -135,6 +138,7 @@
         .signature-space-right {
             height: 105px;
         }
+
         .signature-place {
             width: 92%;
             text-align: right;
@@ -188,7 +192,7 @@
                     <td>2.</td>
                     <td style="width: 47%">JABATAN/PANGKAT</td>
                     <td>:</td>
-                    <td>{{ $surat_tugas->businessTravelEmployee->position ?? '-' }}</td>
+                    <td>{{ $surat_tugas->businessTravelEmployee->employeePosition->name ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td>3.</td>
@@ -221,13 +225,14 @@
 
             <table class="travel-details2" style="width: 100%;">
                 <tr>
-                    <th style="width: 50%" >BERANGKAT DAN KEMBALI TANGGAL</th>
-                    <th style="width: 50%" >CAP DAN TANDA TANGAN</th>
+                    <th style="width: 50%">BERANGKAT DAN KEMBALI TANGGAL</th>
+                    <th style="width: 50%">CAP DAN TANDA TANGAN</th>
                 </tr>
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($surat_tugas->start_date)->format('d F Y') }}
                         <br>-<br>
-                        {{ \Carbon\Carbon::parse($surat_tugas->end_date)->format('d F Y') }}</td>
+                        {{ \Carbon\Carbon::parse($surat_tugas->end_date)->format('d F Y') }}
+                    </td>
                     <td></td>
                 </tr>
             </table>
@@ -259,7 +264,7 @@
                 </tr>
                 <tr>
                     <td>8.</td>
-                    <td style="width: 47%" >KETERANGAN LAIN-LAIN</td>
+                    <td style="width: 47%">KETERANGAN LAIN-LAIN</td>
                     <td>:</td>
                     <td>{{ $surat_tugas->description }}</td>
 
@@ -276,7 +281,7 @@
                 <div class="signature-box">
                     <p>Perumda Air Minum<br>
                         Tirta Perwira Kabupaten Purbalingga<br>
-                        {{ $surat_tugas->employeeSignatory->position }}</p>
+                        {{ $surat_tugas->employeeSignatory->employeePosition->name }}</p>
                     <div class="signature-space-right"></div>
                     <p>{{ $surat_tugas->employeeSignatory->name }}</p>
                 </div>
