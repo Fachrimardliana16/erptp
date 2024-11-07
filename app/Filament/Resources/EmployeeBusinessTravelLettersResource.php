@@ -184,7 +184,7 @@ class EmployeeBusinessTravelLettersResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Action::make('download_pdf')
-                    ->label('Cetak Surat Perjalanan Dinas')
+                    ->label('Cetak SPPD')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function ($record) {
                         $pdf = app(DomPDF::class);
