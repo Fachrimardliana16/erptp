@@ -23,11 +23,13 @@ return new class extends Migration
             $table->string('purpose_of_trip');
             $table->string('business_trip_expenses');
             $table->string('pasal');
+            $table->uuid('employee_signatory_id');
             $table->text('description')->nullable();
             $table->uuid('users_id');
             $table->timestamps();
             $table->softDeletes();
 
+            $table->foreign('employee_signatory_id')->references('id')->on('employees')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
         });

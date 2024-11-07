@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeBusinessTravelLettersResource\Pages;
 use App\Filament\Resources\EmployeeBusinessTravelLettersResource\RelationManagers;
 use App\Models\EmployeeBusinessTravelLetters;
+use App\Models\Employees;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
@@ -92,6 +93,23 @@ class EmployeeBusinessTravelLettersResource extends Resource
                             ->label('Pasal')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\Select::make('employee_signatory_id')
+                            ->relationship('employeeSignatory', 'name')
+                            ->label('Pejabat Penandatangan')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->options(function () {
+                                return Employees::whereHas('employeePosition', function ($query) {
+                                    $query->where('name', 'like', '%direktur utama%')
+                                        ->orWhere('name', 'like', '%direktur umum%')
+                                        ->orWhere('name', 'like', '%kepala bagian umum%');
+                                })->get()->mapWithKeys(function ($employee) {
+                                    return [
+                                        $employee->id => $employee->name . ' | ' . $employee->employeePosition->name
+                                    ];
+                                });
+                            }),
                         Forms\Components\Textarea::make('description')
                             ->label('Detail Tugas')
                             ->columnSpanFull(),
@@ -145,6 +163,9 @@ class EmployeeBusinessTravelLettersResource extends Resource
                 Tables\Columns\TextColumn::make('pasal')
                     ->label('Pasal')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('employeeSignatory.name')
+                    ->label('Pejabat Penandatangan')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('description')
                     ->label('Tugas')
                     ->searchable(),
@@ -168,18 +189,18 @@ class EmployeeBusinessTravelLettersResource extends Resource
                     ->action(function ($record) {
                         $pdf = app(DomPDF::class);
                         $pdf->loadView('pdf.employee_business_travel_letter', ['surat_tugas' => $record]);
-            
+
                         // Format nama file
                         $namaPegawai = $record->businessTravelEmployee->name;
                         $tanggalMulai = \Carbon\Carbon::parse($record->start_date)->format('d-m-Y');
                         $tanggalSelesai = \Carbon\Carbon::parse($record->end_date)->format('d-m-Y');
                         $fileName = "SPPD_{$namaPegawai}_{$tanggalMulai}_sd_{$tanggalSelesai}.pdf";
-            
+
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->output();
                         }, $fileName);
                     }),
-            ])           
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

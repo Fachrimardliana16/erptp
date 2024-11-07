@@ -182,4 +182,9 @@ class Employees extends Model
     {
         return $this->hasMany(EmployeePeriodicSalaryIncrease::class, 'employee_id', 'id');
     }
+
+    public function employeeSignatory()
+    {
+        return $this->hasMany(EmployeeBusinessTravelLetters::class, 'employee_signatory_id', 'id');
+    }
 }
