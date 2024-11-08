@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Controllers\RegistrationNumberController;
+use Barryvdh\DomPDF\PDF as DomPDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EmployeeBusinessTravelLettersResource extends Resource
 {
