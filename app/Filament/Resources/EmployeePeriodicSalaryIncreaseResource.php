@@ -57,7 +57,11 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                         Forms\Components\TextInput::make('number_psi')
                             ->label('Nomor Surat Kenaikan Berkala')
                             ->maxLength(255)
-                            ->required(), // Menambahkan validasi required
+                            ->required()
+                            ->unique()
+                            ->validationMessages([
+                                'unique' => 'Nomor surat sudah ada. Perhatikan lagi nomor surat yang diinput.'
+                            ]),
                         Forms\Components\DatePicker::make('date_periodic_salary_increase')
                             ->label('Tanggal Berkala')
                             ->required(),
@@ -117,6 +121,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                             ->prefix('Rp. ')
                             ->numeric()
                             ->disabled()
+                            ->helperText('Form hitung otomatis.')
                             ->rules(['numeric', 'gt:0']),
 
                         Forms\Components\Hidden::make('total_basic_salary')
@@ -124,7 +129,16 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                         Forms\Components\FileUpload::make('docs_letter')
                             ->label('Lampiran Surat')
                             ->required()
-                            ->rules('required|mimes:pdf|max:5024')
+                            ->rules([
+                                'required',
+                                'mimes:pdf',
+                                'max:5024'
+                            ])
+                            ->validationMessages([
+                                'max' => 'File anda terlalu besar. Lakukan kompres file sebelum melakukan input data.',
+                                'mimes' => 'Hanya file PDF yang diperbolehkan',
+                                'required' => 'Lampiran surat wajib diunggah'
+                            ])
                             ->helperText('Hanya file dengan format .pdf yang diperbolehkan. Maksimal ukuran file 5MB'),
                         Forms\Components\FileUpload::make('docs_archive')
                             ->label('Lampiran Dokumen Pendukung')
@@ -148,7 +162,7 @@ class EmployeePeriodicSalaryIncreaseResource extends Resource
                         $employees = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kepegawaian');
                         })->first();
-                        
+
                         // Cek apakah pegawai ditemukan
                         if (!$employees) {
                             // Menampilkan notifikasi kesalahan

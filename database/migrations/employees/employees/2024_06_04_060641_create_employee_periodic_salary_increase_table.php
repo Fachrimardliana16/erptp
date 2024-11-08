@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('employee_periodic_salary_increases', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('number_psi')->nullable();
+            $table->string('number_psi')
+                ->unique()
+                ->index();
             $table->date('date_periodic_salary_increase')->nullable();
             $table->uuid('employee_id');
             $table->decimal('basic_salary', 15, 2);

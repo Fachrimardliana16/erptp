@@ -20,8 +20,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\ImageColumn;
-
 use Closure;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
@@ -105,7 +103,7 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->exists('agreements', 'id')
+                            ->exists('master_employee_agreement', 'id')
                             ->validationMessages([
                                 'required' => 'Status Kontrak wajib dipilih',
                                 'exists' => 'Status Kontrak tidak valid'
@@ -118,10 +116,8 @@ class EmployeeAgreementResource extends Resource
                             ->preload()
                             ->live()
                             ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null))
-                            ->required()
-                            ->exists('departments', 'id')
+                            ->exists('master_departments', 'id')
                             ->validationMessages([
-                                'required' => 'Bagian wajib dipilih',
                                 'exists' => 'Bagian tidak valid'
                             ]),
 
@@ -139,7 +135,7 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->disabled(fn(callable $get) => !$get('departments_id'))
-                            ->exists('sub_departments', 'id')
+                            ->exists('master_sub_departments', 'id')
                             ->validationMessages([
                                 'exists' => 'Sub Bagian tidak valid'
                             ]),
@@ -150,7 +146,7 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->exists('employee_positions', 'id')
+                            ->exists('master_employee_position', 'id')
                             ->validationMessages([
                                 'required' => 'Jabatan wajib dipilih',
                                 'exists' => 'Jabatan tidak valid'
@@ -162,7 +158,7 @@ class EmployeeAgreementResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->exists('employment_statuses', 'id')
+                            ->exists('master_employee_status_employement', 'id')
                             ->validationMessages([
                                 'required' => 'Status Pegawai wajib dipilih',
                                 'exists' => 'Status Pegawai tidak valid'
@@ -184,7 +180,7 @@ class EmployeeAgreementResource extends Resource
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->exists('master_employee_basic_salaries', 'id')
+                            ->exists('master_employee_basic_salary', 'id')
                             ->validationMessages([
                                 'required' => 'Golongan dan Gaji Pokok wajib dipilih',
                                 'exists' => 'Golongan dan Gaji Pokok tidak valid'
@@ -217,28 +213,31 @@ class EmployeeAgreementResource extends Resource
                                     ->validationMessages([
                                         'required' => 'Tanggal Mulai Perjanjian wajib diisi',
                                         'date' => 'Format tanggal tidak valid',
-                                        'after_or_equal' => 'Tanggal Mulai Perjanjian minimal hari ini'
+                                        'after_or_equal' =>
+                                        'Tanggal Mulai Perjanjian minimal hari ini',
                                     ]),
-
                                 DatePicker::make('agreement_date_end')
                                     ->label('Tanggal Akhir Perjanjian')
                                     ->required()
-                                    ->rules([
-                                        'date',
-                                        'after:agreement_date_start',
-                                        function (string $attribute, $value, Closure $fail) {
-                                            $startDate = Carbon::parse(request('agreement_date_start'));
-                                            $endDate = Carbon::parse($value);
-
-                                            if ($startDate->diffInYears($endDate) > 2) {
-                                                $fail('Masa kontrak tidak boleh lebih dari 2 tahun');
-                                            }
-                                        },
-                                    ])
-                                    ->validationMessages([
+                                    ->rules(['date', 'after:agreement_date_start'])
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        $startDate = $get('agreement_date_start');
+                                        if (empty($startDate) || empty($state)) {
+                                            return;
+                                        }
+                                        $startDate = Carbon::parse($startDate);
+                                        $endDate = Carbon::parse($state);
+                                        if ($startDate->diffInYears($endDate) > 2) {
+                                            Notification::make()->title('Error')
+                                                ->body('Masa kontrak tidak boleh lebih dari 2 tahun')
+                                                ->danger()
+                                                ->send();
+                                            $set('agreement_date_end', null);
+                                        }
+                                    })->validationMessages([
                                         'required' => 'Tanggal Akhir Perjanjian wajib diisi',
                                         'date' => 'Format tanggal tidak valid',
-                                        'after' => 'Tanggal Akhir harus setelah Tanggal Mulai'
+                                        'after' => 'Tanggal Akhir harus setelah Tanggal Mulai',
                                     ]),
                             ])
                             ->columns(2),
