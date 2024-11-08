@@ -6,8 +6,6 @@ use App\Filament\Resources\EmployeeBusinessTravelLettersResource\Pages;
 use App\Filament\Resources\EmployeeBusinessTravelLettersResource\RelationManagers;
 use App\Models\EmployeeBusinessTravelLetters;
 use App\Models\Employees;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Barryvdh\DomPDF\PDF as DomPDF;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
@@ -144,15 +142,15 @@ class EmployeeBusinessTravelLettersResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf')
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
-                    $employees = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
-                    })->first();
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
                         // Cek apakah pegawai ditemukan
                         if (!$employees) {
                             // Menampilkan notifikasi kesalahan
@@ -164,18 +162,18 @@ class EmployeeBusinessTravelLettersResource extends Resource
                                 ->send();
                             return;
                         }
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employees) {
-                        $pdfContent = Blade::render('pdf.report_employee_business_travel', [
-                            'records' => $records,
-                            'employees' => $employees
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)
-                        ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
-                        ->stream();
-                    }, 'report_business_travel.pdf');
-                }),
-        ])
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_business_travel', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)
+                                ->setPaper('A4', 'landscape') // Set ukuran kertas dan orientasi
+                                ->stream();
+                        }, 'report_business_travel.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('registration_number')
                     ->label('Nomor Surat')
@@ -200,7 +198,7 @@ class EmployeeBusinessTravelLettersResource extends Resource
                 Tables\Columns\TextColumn::make('day_count')
                     ->label('Lama Perjalanan')
                     ->sortable()
-                    ->formatStateUsing(fn ($record) => $record->day_count . ' hari'),
+                    ->formatStateUsing(fn($record) => $record->day_count . ' hari'),
                 Tables\Columns\TextColumn::make('destination')
                     ->label('Tujuan')
                     ->searchable(),
