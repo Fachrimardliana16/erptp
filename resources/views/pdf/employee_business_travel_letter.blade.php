@@ -7,7 +7,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 5px;
             font-size: 11pt;
             line-height: 1.3;
         }
@@ -132,7 +132,7 @@
         }
 
         .signature-space-left {
-            height: 105px;
+            height: 125px;
         }
 
         .signature-space-right {

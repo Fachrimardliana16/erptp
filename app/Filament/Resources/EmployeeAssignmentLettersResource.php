@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
 use App\Http\Controllers\AssignmentLetterNumberController;
+use Filament\Notifications\Notification;
 
 class EmployeeAssignmentLettersResource extends Resource
 {
@@ -119,7 +120,17 @@ class EmployeeAssignmentLettersResource extends Resource
                         $employees = Employees::whereHas('employeePosition', function ($query) {
                             $query->where('name', 'Kepala Sub Bagian Kepegawaian');
                         })->first();
-
+                        // Cek apakah pegawai ditemukan
+                        if (!$employees) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
                         // Render PDF dengan data records dan employee
                         return response()->streamDownload(function () use ($records, $employees) {
                             $pdfContent = Blade::render('pdf.report_employee_assignmentletter', [
