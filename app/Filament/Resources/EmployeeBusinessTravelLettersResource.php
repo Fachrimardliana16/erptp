@@ -22,8 +22,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Barryvdh\DomPDF\PDF as DomPDF;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Controllers\RegistrationNumberController;
 
