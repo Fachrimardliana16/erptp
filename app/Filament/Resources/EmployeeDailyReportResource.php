@@ -29,6 +29,7 @@ class EmployeeDailyReportResource extends Resource
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Log Laporan Harian Kerja (beta)';
     protected static ?int $navigationSort = 10;
+    protected static bool $shouldRegisterNavigation = false;
     public static function form(Form $form): Form
     {
         return $form

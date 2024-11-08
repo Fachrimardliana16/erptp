@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             // Kolom utama
             $table->uuid('id')->primary(); // ID unik pegawai
-            $table->string('nippam')->unique()->nullable(); // Nomor identifikasi pegawai
-            $table->string('name'); // Nama pegawai
+            $table->string('nippam')
+                ->unique()
+                ->nullable()
+                ->index(); // Nomor identifikasi pegawai
+            $table->string('name')->index(); // Nama pegawai
             $table->string('place_birth')->nullable(); // Tempat lahir
             $table->date('date_birth')->nullable(); // Tanggal lahir
             $table->string('gender')->nullable(); // Jenis kelamin
@@ -41,26 +44,33 @@ return new class extends Migration
 
 
             // Kolom tambahan untuk pengelolaan pegawai
-            $table->date('entry_date')->nullable(); // Tanggal masuk pegawai
-            $table->date('probation_appointment_date')->nullable(); // Tanggal penempatan probation
-            $table->integer('length_service')->nullable(); // Lama masa kerja
-            $table->date('retirement')->nullable(); // Tanggal pensiun
-            $table->uuid('employment_status_id')->nullable(); // Referensi ke status pekerjaan
-            $table->uuid('master_employee_agreement_id')->nullable(); // Referensi ke perjanjian pegawai
-            $table->date('agreement_date_start')->nullable(); // Tanggal mulai perjanjian
-            $table->date('agreement_date_end')->nullable(); // Tanggal akhir perjanjian
-            $table->uuid('employee_education_id')->nullable(); // Referensi ke pendidikan pegawai
-            $table->uuid('employee_grade_id')->nullable(); // Referensi ke golongan pegawai
-            $table->date('grade_date_start')->nullable(); // Tanggal mulai golongan
-            $table->date('grade_date_end')->nullable(); // Tanggal akhir golongan
-            $table->decimal('basic_salary', 15, 2)->nullable(); // Gaji pokok saat ini
-            $table->date('periodic_salary_date_start')->nullable(); // Tanggal mulai kenaikan gaji berkala
-            $table->date('periodic_salary_date_end')->nullable(); // Tanggal akhir kenaikan gaji berkala
-            $table->decimal('amount', 15, 2)->nullable(); // Jumlah gaji (jika diperlukan)
-            $table->uuid('employee_position_id')->nullable(); // Referensi ke posisi pegawai
-            $table->uuid('departments_id')->nullable(); // Referensi ke departemen
-            $table->uuid('sub_department_id')->nullable(); // Referensi ke sub-departemen
-            $table->timestamps(); // Timestamps untuk created_at dan updated_at
+            $table->date('entry_date')->nullable();
+            $table->date('probation_appointment_date')->nullable();
+            $table->integer('length_service')->nullable();
+            $table->date('retirement')->nullable();
+            $table->uuid('employment_status_id')->nullable();
+            $table->uuid('master_employee_agreement_id')->nullable();
+            $table->date('agreement_date_start')->nullable();
+            $table->date('agreement_date_end')->nullable();
+            $table->uuid('employee_education_id')->nullable();
+            $table->uuid('employee_grade_id')
+                ->nullable()
+                ->index();
+            $table->date('grade_date_start')->nullable();
+            $table->decimal('basic_salary', 15, 2)->nullable();
+            $table->date('periodic_salary_date_start')->nullable();
+            $table->date('periodic_salary_date_end')->nullable();
+            $table->decimal('amount', 15, 2)->nullable();
+            $table->uuid('employee_position_id')
+                ->nullable()
+                ->index();
+            $table->uuid('departments_id')
+                ->nullable()
+                ->index();
+            $table->uuid('sub_department_id')
+                ->nullable()
+                ->index();
+            $table->timestamps();
             $table->softDeletes();
 
             // Referensi ke tabel pengguna

@@ -26,6 +26,7 @@ class AssetDocumentExtensionResource extends Resource
     protected static ?string $navigationGroup = 'Asset';
     protected static ?string $navigationLabel = 'Perpanjangan Aset';
     protected static ?int $navigationSort = 7;
+    protected static bool $shouldRegisterNavigation = false;
 
 
 

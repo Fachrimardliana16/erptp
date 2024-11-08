@@ -21,6 +21,7 @@ class EmployeeAttendanceRecordsResource extends Resource
     protected static ?string $navigationGroup = 'Employee';
     protected static ?string $navigationLabel = 'Log Presensi (beta)';
     protected static ?int $navigationSort = 12;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {
