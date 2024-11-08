@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('employee_assignment_letters', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('registration_number');
-            $table->uuid('assigning_employee_id');
-            $table->uuid('employee_position_id');
-            $table->uuid('assigned_employee_id');
+            $table->string('registration_number')
+                ->index()
+                ->unique();
+            $table->uuid('assigning_employee_id')
+                ->index();
+            $table->uuid('employee_position_id')
+                ->index();
+            $table->uuid('assigned_employee_id')
+                ->index();
             $table->text('task');
             $table->date('start_date');
             $table->date('end_date');

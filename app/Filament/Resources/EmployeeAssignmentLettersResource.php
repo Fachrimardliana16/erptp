@@ -15,13 +15,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Blade;
+use App\Http\Controllers\AssignmentLetterNumberController;
 use Filament\Notifications\Notification;
 
 class EmployeeAssignmentLettersResource extends Resource
@@ -33,8 +33,26 @@ class EmployeeAssignmentLettersResource extends Resource
     protected static ?string $navigationLabel = 'Surat Tugas';
     protected static ?int $navigationSort = 8;
 
+    protected $assignmentLetterNumberController; // Properti ditulis dengan camelCase
+
+    public function __construct($resource)
+    {
+        parent::__construct($resource);
+        $this->assignmentLetterNumberController = new AssignmentLetterNumberController(); // Gunakan nama properti yang sama
+    }
+
+    public function toArray($request)
+    {
+        return [
+            'registration_number' => $this->assignmentLetterNumberController->generateRegistrationNumber(), // Gunakan nama properti yang sama
+        ];
+    }
+
     public static function form(Form $form): Form
     {
+
+        $assignmentLetterNumberController = new AssignmentLetterNumberController();
+
         return $form
             ->schema([
                 Section::make('Form Surat Tugas')
@@ -43,6 +61,7 @@ class EmployeeAssignmentLettersResource extends Resource
                         Forms\Components\TextInput::make('registration_number')
                             ->label('Nomor Surat')
                             ->required()
+                            ->default($assignmentLetterNumberController->generateRegistrationNumber())
                             ->maxLength(255),
                         Forms\Components\Select::make('assigning_employee_id')
                             ->options(Employees::query()->pluck('name', 'id'))

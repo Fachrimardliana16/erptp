@@ -10,6 +10,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            padding: 0 1.5cm;
         }
 
         .kop-surat {
@@ -56,6 +57,17 @@
             font-weight: bold;
         }
 
+        /* Menambahkan style untuk indentasi */
+        .indent-table td:first-child {
+            padding-left: 1cm;
+            /* Menjorokkan label ke dalam */
+        }
+
+        .indent-table td:nth-child(2) {
+            padding-left: 0.5cm;
+            /* Memberikan sedikit ruang setelah tanda : */
+        }
+
         .signature {
             text-align: center;
             margin-top: 20px;
@@ -86,7 +98,7 @@
 
     <!-- Pembuka -->
     <p>Yang bertanda tangan dibawah ini:</p>
-    <table style="width: 100%;">
+    <table class="indent-table" style="width: 100%;">
         <tr>
             <td style="width: 10%;">Nama</td>
             <td>: {{ $surat_tugas->aassigningEmployee->name }}</td>
@@ -97,11 +109,18 @@
         </tr>
     </table>
 
-    <br>Dengan ini menugaskan kepada:
-    <br>
-    @foreach ($surat_tugas->assignedEmployees as $index => $employee)
-        {{ $index + 1 }}. {{ $employee->name }}<br>
-    @endforeach
+    <p>Dengan ini menugaskan kepada:</p>
+    <table class="indent-table" style="width: 100%;">
+        <tr>
+            <td style="width: 10%;">Nama</td>
+            <td>: @foreach ($surat_tugas->assignedEmployees as $index => $employee)
+                    {{ $index + 1 }}. {{ $employee->name }}</td>
+            </td>
+            @endforeach
+        </tr>
+    </table>
+
+
     <!-- Isi Surat Tugas -->
     <br>
     <br>Untuk melaksanakan tugas {{ $surat_tugas->task }} mulai tanggal
