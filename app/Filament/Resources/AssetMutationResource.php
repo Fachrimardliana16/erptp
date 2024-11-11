@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use App\Models\Employees;
 use Filament\Tables\Table;
 use App\Models\AssetMutation;
+use App\Models\MasterAssetsSubLocation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Resources\Resource;
 use Barryvdh\DomPDF\PDF as DomPDF;
@@ -120,13 +121,26 @@ class AssetMutationResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->rules('required|exists:master_assets_locations,id'),
+                            ->rules('required|exists:master_assets_locations,id')
+                            ->afterStateUpdated(function ($set, $state) {
+                                // Clear the sub_location_id when location_id changes
+                                $set('sub_location_id', null);
+                            }),
+
                         Forms\Components\Select::make('sub_location_id')
                             ->relationship('AssetsMutationsubLocation', 'name')
                             ->label('Sub Lokasi')
                             ->searchable()
                             ->preload()
-                            ->rules('exists:master_assets_sub_locations,id'),
+                            ->rules('exists:master_assets_sub_locations,id')
+                            ->options(function ($get) {
+                                $locationId = $get('location_id'); // Get the selected location_id
+                                return MasterAssetsSubLocation::query() // Query the MasterAssetsSubLocation model
+                                    ->when($locationId, function ($query) use ($locationId) {
+                                        return $query->where('location_id', $locationId); // Filter by location_id
+                                    })
+                                    ->pluck('name', 'id'); // Return an array of id => name
+                            }),
                         Forms\Components\FileUpload::make('scan_doc')
                             ->directory('Asset_Mutation')
                             ->label('Scan Dokumen')

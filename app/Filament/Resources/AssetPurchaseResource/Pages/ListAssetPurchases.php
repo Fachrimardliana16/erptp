@@ -17,4 +17,11 @@ class ListAssetPurchases extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            PurchaseOverview::class,
+        ];
+    }
 }

@@ -40,6 +40,7 @@ class AssetPurchaseResource extends Resource
                         Forms\Components\Select::make('assetrequest_id')
                             ->options(
                                 AssetRequests::query()
+                                    ->where('status_request', false) // Add the filter here
                                     ->get()
                                     ->mapWithKeys(function ($assetrequest) {
                                         return [$assetrequest->id => $assetrequest->document_number . ' | ' . $assetrequest->asset_name];
