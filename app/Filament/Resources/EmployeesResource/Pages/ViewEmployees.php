@@ -187,6 +187,12 @@ class ViewEmployees extends ViewRecord
                                         TextEntry::make('periodic_salary_date_end')
                                             ->label('Tanggal Akhir Berkala')
                                             ->icon('heroicon-o-calendar'),
+                                        TextEntry::make('grade_date_start')
+                                            ->label('Tanggal Mulai Golongan')
+                                            ->icon('heroicon-o-calendar'),
+                                        TextEntry::make('grade_date_end')
+                                            ->label('Tanggal Akhir Golongan')
+                                            ->icon('heroicon-o-calendar'),
                                         TextEntry::make('amount')
                                             ->label('Berkala')
                                             ->money('Rp. {value}')
