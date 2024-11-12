@@ -8,15 +8,18 @@ use App\Models\EmployeePromotion;
 use App\Models\Employees;
 use App\Models\MasterEmployeeBasicSalary;
 use App\Models\MasterEmployeeGrade;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeePromotionResource extends Resource
 {
@@ -131,6 +134,38 @@ class EmployeePromotionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf')
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                    $employees = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                    })->first();
+        
+                    // Cek apakah pegawai ditemukan
+                    if (!$employees) {
+                        Notification::make()
+                            ->title('Kesalahan')
+                            ->danger()
+                            ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                            ->persistent()
+                            ->send();
+                        return;
+                    }
+        
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employees) {
+                        $pdfContent = Blade::render('pdf.report_employee_promotion', [
+                            'records' => $records,
+                            'employees' => $employees
+                        ]);
+                        echo Pdf::loadHTML($pdfContent)->stream();
+                    }, 'report_employee_promotion.pdf');
+                }),
+        ])
+        
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -143,7 +178,7 @@ class EmployeePromotionResource extends Resource
                     ->label('Tanggal Mutasi')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('employeePromotion.name')
+                Tables\Columns\TextColumn::make('employee.name')
                     ->label('Nama Pegawai')
                     ->sortable()
                     ->searchable(),
