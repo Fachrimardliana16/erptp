@@ -8,9 +8,7 @@
     <style>
         @page {
             size: A4 landscape;
-            /* Set the page size to landscape */
             margin: 0;
-            /* Remove default margin */
         }
 
         body {
@@ -21,13 +19,10 @@
 
         .container {
             width: 45%;
-            /* Lebar container menjadi 48% */
             margin: 0 auto;
             float: left;
-            /* Agar container berada di kiri */
             padding: 5px;
             border: 1px solid #000;
-            /* Border untuk container */
         }
 
         .title {
@@ -43,19 +38,11 @@
             margin-bottom: 10px;
         }
 
-        .section-title {
-            font-weight: bold;
-            margin-top: 10px;
-            text-decoration: underline;
-        }
-
         table {
             width: 100%;
-            /* Lebar tabel menjadi 46% */
             border-collapse: collapse;
             margin-bottom: 10px;
             border: 1px solid #000;
-            /* Border untuk tabel */
             padding: 10px;
         }
 
@@ -63,11 +50,10 @@
         td {
             padding-left: 10px;
             text-align: left;
-            /* Rata kiri untuk isi slip gaji */
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #ffffff;
         }
 
         .total {
@@ -83,7 +69,7 @@
 <body>
 
     <div class="container">
-        <div class="title">SLIP GAJI PEGAWAI<br>PERUMDAM TIRTA PERWIRA<br>KAB. PURBALINGGA<br>Periode:
+        <div class="title">SLIP GAJI PEGAWAI<br>PERUMDAM TIRTA PERWIRA<br>KABUPATEN PURBALINGGA<br>Periode:
             {{ $payroll->periode }}</div>
 
         <!-- Upper section: Employee identity and salary -->
@@ -144,22 +130,22 @@
                     <th>Lain-lain</th>
                     <td class="align-right">Rp {{ number_format($payroll->benefits_7, 0, ',', '.') }}</td>
                 </tr>
-                <tr>
+                < tr>
                     <th>Pembulatan</th>
                     <td class="align-right">Rp {{ number_format($payroll->rounding, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Insentif</th>
-                    <td class="align-right">Rp {{ number_format($payroll->incentive, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Rapel</th>
-                    <td class="align-right">Rp {{ number_format($payroll->backpay, 0, ',', '.') }}</td>
-                </tr>
-                <tr class="total">
-                    <th>Total Bruto</th>
-                    <td class="align-right">Rp {{ number_format($payroll->gross_amount, 0, ',', '.') }}</td>
-                </tr>
+                    </tr>
+                    <tr>
+                        <th>Insentif</th>
+                        <td class="align-right">Rp {{ number_format($payroll->incentive, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rapel</th>
+                        <td class="align-right">Rp {{ number_format($payroll->backpay, 0, ',', '.') }}</td>
+                    </tr>
+                    <tr class="total">
+                        <th>Total Gaji dan Tunjangan (Bruto)</th>
+                        <td class="align-right">Rp {{ number_format($payroll->gross_amount, 0, ',', '.') }}</td>
+                    </tr>
             </table>
         </div>
 
@@ -174,48 +160,14 @@
                     <th>Absen</th>
                     <td class="align-right">{{ $payroll->absence_count }} Hari</td>
                 </tr>
-                <tr>
-                    <th>Tabungan Daging</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_1, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Rokok</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_2, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Arisan Sumber</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_3, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Cendera Mata</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_4, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>ASTEK</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_5, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>BPJS</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_6, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Tabungan Koperasi</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_7, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Dapenma</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_8, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Dana Sosial Koperasi</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_9, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <th>Potongan Absensi</th>
-                    <td class="align-right">Rp {{ number_format($payroll->paycut_10, 0, ',', '.') }}</td>
-                </tr>
+                @foreach ($payroll->paycuts as $paycut)
+                    <tr>
+                        <td><strong>{{ $paycut['cuts_name'] }}</strong></td>
+                        <td class="align-right">Rp. {{ number_format($paycut['amount'], 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
                 <tr class="total">
-                    <th>Jumlah Potongan</th>
+                    <th>Total Potongan</th>
                     <td class="align-right">Rp {{ number_format($payroll->cut_amount, 0, ',', '.') }}</td>
                 </tr>
             </table>
@@ -225,7 +177,7 @@
                     <td class="align-right">{{ $payroll->desc }}</td>
                 </tr>
                 <tr class="total">
-                    <th>TOTAL PENERIMAAN</th>
+                    <th>Total Penerimaan (Netto)</th>
                     <td class="align-right">Rp {{ number_format($payroll->netto, 0, ',', '.') }}</td>
                 </tr>
             </table>
