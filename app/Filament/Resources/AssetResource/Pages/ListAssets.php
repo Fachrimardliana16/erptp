@@ -3,14 +3,17 @@
 namespace App\Filament\Resources\AssetResource\Pages;
 
 use App\Filament\Resources\AssetResource;
+use App\Filament\Resources\AssetResource\Widgets\AssetOverview;
 use App\Filament\Resources\AssetResource\Widgets\AssetsOverview;
+use App\Filament\Resources\AssetResource\Widgets\AssetStatusChartOverview;
+use App\Filament\Resources\AssetResource\Widgets\AssetStatusOverview;
 use App\Filament\Widgets\TotalWidget;
 use App\Models\Asset;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
-use Illuminate\Support\Facades\DB;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 
 class ListAssets extends ListRecords
 {
@@ -54,7 +57,15 @@ class ListAssets extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            AssetsOverview::class
+            AssetStatusOverview::class,
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            AssetStatusChartOverview::class,
+            AssetOverview::class,
         ];
     }
 }
