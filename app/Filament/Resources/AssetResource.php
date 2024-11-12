@@ -380,8 +380,11 @@ class AssetResource extends Resource
 
                             // Loop untuk setiap record yang dipilih
                             foreach ($records as $record) {
+                                // Ambil APP_URL dari .env
+                                $appUrl = env('APP_URL', 'http://127.0.0.1:8000'); // Menggunakan default jika APP_URL tidak ada
+
                                 // Generate URL untuk detail aset
-                                $assetDetailUrl = 'http://127.0.0.1:8000/admin/assets/' . $record->id;
+                                $assetDetailUrl = $appUrl . '/admin/assets/' . $record->id;
 
                                 // Generate QR code dengan URL aset
                                 $qrCode = new Builder(
