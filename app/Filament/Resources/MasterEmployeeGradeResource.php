@@ -33,6 +33,10 @@ class MasterEmployeeGradeResource extends Resource
                             ->label('Nama')
                             ->required()
                             ->maxLength(255),
+                        Forms\Components\TextInput::make('service_grade')
+                            ->label('Nama')
+                            ->required()
+                            ->maxLength(255),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan'),
                         Forms\Components\Hidden::make('users_id')
@@ -51,6 +55,10 @@ class MasterEmployeeGradeResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('service_grade')
+                    ->label('MKG')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('desc')
