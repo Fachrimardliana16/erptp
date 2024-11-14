@@ -40,7 +40,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable(); // Email pegawai
             $table->string('password')->nullable(); // Kata sandi
             $table->string('image')->nullable(); // Gambar pegawai
-            $table->string('leave_balance')->nullable();
+            $table->integer('leave_balance')->nullable();
 
 
             // Kolom tambahan untuk pengelolaan pegawai
@@ -73,7 +73,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Referensi ke tabel pengguna
+            // Referensi ke tabel paengguna
             $table->uuid('users_id');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
 

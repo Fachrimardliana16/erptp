@@ -11,7 +11,7 @@ class MasterEmployeeBasicSalary extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'master_employee_basic_salary';
-    protected $fillable = ['employee_grade_id', 'name', 'amount', 'desc', 'users_id'];
+    protected $fillable = ['employee_grade_id', 'amount', 'desc', 'users_id'];
 
     public $timestamps = true;
 

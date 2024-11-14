@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('master_employee_basic_salary', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('employee_grade_id');
-            $table->string('name');
             $table->decimal('amount', 10, 2);
             $table->text('desc')->nullable();
             $table->timestamps();

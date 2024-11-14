@@ -172,7 +172,7 @@ class EmployeeAgreementResource extends Resource
                                     ->get()
                                     ->mapWithKeys(function ($basicSalary) {
                                         return [
-                                            $basicSalary->id => "Golongan: {$basicSalary->employeeGrade->name} - Gaji Pokok: Rp " . number_format($basicSalary->amount, 0, ',', '.')
+                                            $basicSalary->id => "Golongan: {$basicSalary->employeeGrade->name} | MKG: {$basicSalary->employeeGrade->service_grade} - Gaji Pokok: Rp " . number_format($basicSalary->amount, 0, ',', '.')
                                         ];
                                     });
                             })

@@ -32,22 +32,38 @@ class MasterEmployeeBasicSalaryResource extends Resource
                     ->schema([
 
                         Forms\Components\Select::make('employee_grade_id')
-                            ->options(MasterEmployeeGrade::query()->pluck('name', 'id'))
+                            ->options(MasterEmployeeGrade::query()->pluck('name', 'id')->map(function ($name, $id) {
+                                $serviceGrade = MasterEmployeeGrade::find($id)->service_grade; // Assuming 'service_grade' is a field in your model
+                                return "{$name} - {$serviceGrade}"; // Concatenate name and service grade
+                            }))
                             ->afterStateUpdated(function ($set, $state) {
                                 $data = MasterEmployeeGrade::find($state);
                                 $set('name', $data->name);
+                                $set('service_grade', $data->service_grade); // Assuming you want to set the service grade too
                             })
                             ->label('Golongan')
                             ->searchable()
                             ->preload()
                             ->live()
                             ->required(),
-                        Forms\Components\Hidden::make('name')
+                        Forms\Components\Hidden::make('employee_grade_id')
                             ->default(function ($get) {
                                 $employee_grade_id = $get('employee_grade_id');
-                                $data = MasterEmployeeGrade::find($employee_grade_id);
-                                return $data ? $data->name : null;
+                                return $employee_grade_id;
                             }),
+
+                        Forms\Components\TextInput::make('service_grade')
+                            ->default(function ($get) {
+                                $employee_grade_id = $get('employee_grade_id');
+                                $data = \App\Models\MasterEmployeeGrade::find($employee_grade_id);
+                                return $data ? $data->service_grade : null;
+                            })
+                            ->label('MKG')
+                            ->disabled(),  // Disabled untuk memastikan tidak bisa diedit
+
+                        Forms\Components\TextInput::make('amount')
+                            ->label('Amount')
+                            ->required(),
                         Forms\Components\TextInput::make('amount')
                             ->label('Jumlah')
                             ->required()
@@ -71,6 +87,10 @@ class MasterEmployeeBasicSalaryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('gradeSalary.name')
                     ->label('Golongan')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('gradeSalary.service_grade')
+                    ->label('MKG')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
