@@ -13,38 +13,12 @@ class EmployeeBenefit extends Model
 
     protected $table = 'employee_benefits';
 
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     *
-     * @var bool
-     */
-    public $incrementing = false;
-
-    /**
-     * The data type of the auto-incrementing ID.
-     *
-     * @var string
-     */
     protected $keyType = 'string';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-
-    /**
-     * Get the employee that owns the benefit.
-     */
     protected $fillable = [
         'employee_grade_benefit_id',
         'employee_id',
         'description',
-    ];
-
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
     ];
 
     public function employeeGradeBenefit()

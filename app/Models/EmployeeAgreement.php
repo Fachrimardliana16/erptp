@@ -21,6 +21,7 @@ class EmployeeAgreement extends Model
         'employee_position_id',
         'employment_status_id',
         'basic_salary_id',
+        'basic_salary',
         'agreement_date_start',
         'agreement_date_end',
         'departments_id',

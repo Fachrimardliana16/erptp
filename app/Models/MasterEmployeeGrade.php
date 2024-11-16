@@ -15,9 +15,24 @@ class MasterEmployeeGrade extends Model
 
     public $timestamps = true;
 
+    public function basicSalaries()
+    {
+        return $this->hasMany(MasterEmployeeBasicSalary::class, 'employee_grade_id');
+    }
+
+    public function serviceGrades()
+    {
+        return $this->hasMany(MasterEmployeeServiceGrade::class, 'employee_grade_id', 'id');
+    }
+
+    public function employeeGrades()
+    {
+        return $this->belongsToMany(MasterEmployeeServiceGrade::class, 'employee_grade_service', 'employee_grade_id', 'service_grade_id');
+    }
+
     public function gradeBenefits()
     {
-        return $this->hasMany(MasterEmployeeGradeBenefit::class);
+        return $this->hasMany(MasterEmployeeGradeBenefit::class, 'grade_id');
     }
 
     public function gradeCuts()

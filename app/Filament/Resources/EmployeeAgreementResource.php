@@ -168,11 +168,16 @@ class EmployeeAgreementResource extends Resource
                             ->label('Pilih Golongan dan Gaji Pokok')
                             ->options(function () {
                                 return MasterEmployeeBasicSalary::query()
-                                    ->with('employeeGrade')
+                                    ->with(['employeeGrade', 'serviceGrade'])
+                                    ->join('master_employee_grade', 'master_employee_basic_salary.employee_grade_id', '=', 'master_employee_grade.id')
+                                    ->join('master_employee_service_grade', 'master_employee_basic_salary.employee_service_grade_id', '=', 'master_employee_service_grade.id')
+                                    ->orderBy('master_employee_grade.name')
+                                    ->orderBy('master_employee_service_grade.service_grade')
+                                    ->select('master_employee_basic_salary.*')
                                     ->get()
                                     ->mapWithKeys(function ($basicSalary) {
                                         return [
-                                            $basicSalary->id => "Golongan: {$basicSalary->employeeGrade->name} | MKG: {$basicSalary->employeeGrade->service_grade} - Gaji Pokok: Rp " . number_format($basicSalary->amount, 0, ',', '.')
+                                            $basicSalary->id => "Golongan: {$basicSalary->employeeGrade->name} | MKG: {$basicSalary->serviceGrade->service_grade} - Gaji Pokok: Rp " . number_format($basicSalary->amount, 0, ',', '.')
                                         ];
                                     });
                             })
@@ -187,42 +192,60 @@ class EmployeeAgreementResource extends Resource
                             ])
                             ->afterStateUpdated(function ($state, Forms\Set $set) {
                                 if ($state) {
-                                    $basicSalary = MasterEmployeeBasicSalary::with('employeeGrade')->find($state);
-                                    $set('grade_id', $basicSalary->employeeGrade->name);
+                                    $basicSalary = MasterEmployeeBasicSalary::with(['employeeGrade', 'serviceGrade'])->find($state);
+                                    $set('employee_grade_id', $basicSalary->employeeGrade->name);
+                                    $set('employee_service_grade_id', $basicSalary->serviceGrade->service_grade);
                                     $set('amount', number_format($basicSalary->amount, 0, ',', '.'));
+                                    $set('basic_salary', $basicSalary->amount);
                                 } else {
-                                    $set('grade_id', null);
+                                    $set('employee_grade_id', null);
+                                    $set('employee_service_grade_id', null);
                                     $set('amount', null);
+                                    $set('basic_salary', null);
                                 }
                             }),
 
-                        TextInput::make('grade_id')
+                        TextInput::make('employee_grade_id')
                             ->label('Golongan Pegawai')
+                            ->disabled(),
+
+                        TextInput::make('employee_service_grade_id')
+                            ->label('MKG (Masa Golongan Kerja')
                             ->disabled(),
 
                         TextInput::make('amount')
                             ->label('Gaji Pokok')
                             ->disabled(),
 
+                        Hidden::make('basic_salary'),
                         Group::make()
                             ->schema([
                                 DatePicker::make('agreement_date_start')
                                     ->label('Tanggal Mulai Perjanjian')
                                     ->required()
                                     ->rules(['date', 'after_or_equal:today'])
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if (!empty($state)) {
+                                            // Otomatis set tanggal akhir 2 tahun setelah tanggal mulai
+                                            $endDate = Carbon::parse($state)->addYears(2);
+                                            $set('agreement_date_end', $endDate->format('Y-m-d'));
+                                        }
+                                    })
                                     ->validationMessages([
                                         'required' => 'Tanggal Mulai Perjanjian wajib diisi',
                                         'date' => 'Format tanggal tidak valid',
-                                        'after_or_equal' =>
-                                        'Tanggal Mulai Perjanjian minimal hari ini',
+                                        'after_or_equal' => 'Tanggal Mulai Perjanjian minimal hari ini',
                                     ]),
+
                                 DatePicker::make('agreement_date_end')
                                     ->label('Tanggal Akhir Perjanjian')
                                     ->required()
                                     ->rules(['date', 'after:agreement_date_start'])
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         $startDate = $get('agreement_date_start');
-                                        if (empty($startDate) || empty($state)) {
+                                        if (
+                                            empty($startDate) || empty($state)
+                                        ) {
                                             return;
                                         }
                                         $startDate = Carbon::parse($startDate);
@@ -234,7 +257,8 @@ class EmployeeAgreementResource extends Resource
                                                 ->send();
                                             $set('agreement_date_end', null);
                                         }
-                                    })->validationMessages([
+                                    })
+                                    ->validationMessages([
                                         'required' => 'Tanggal Akhir Perjanjian wajib diisi',
                                         'date' => 'Format tanggal tidak valid',
                                         'after' => 'Tanggal Akhir harus setelah Tanggal Mulai',

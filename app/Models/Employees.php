@@ -49,6 +49,8 @@ class Employees extends Model
         'employee_grade_id',
         'grade_date_start',
         'grade_date_end',
+        'basic_salary_id',
+        'employee_service_grade_id',
         'basic_salary',
         'periodic_salary_date_start',
         'periodic_salary_date_end',
@@ -85,6 +87,8 @@ class Employees extends Model
     {
         return $this->belongsTo(MasterEmployeeGrade::class, 'employee_grade_id', 'id');
     }
+
+
 
     public function employeePosition()
     {
