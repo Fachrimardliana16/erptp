@@ -20,6 +20,7 @@ return new class extends Migration
             $table->uuid('employee_position_id');
             $table->uuid('employment_status_id');
             $table->uuid('basic_salary_id')->nullable();
+            $table->string('basic_salary', 15, 2);
             $table->date('agreement_date_start');
             $table->date('agreement_date_end');
             $table->uuid('departments_id')->nullable();

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class EmployeeReterimentResource extends Resource
 {
     protected static ?string $model = EmployeeReteriment::class;
+    protected static ?string $navigationLabel = 'Registrasi Purna Tugas';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

@@ -7,6 +7,8 @@ use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Support\Facades\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Enable query logging
+        DB::listen(function ($query) {
+            Log::info('Query Executed: ' . $query->sql);
+            Log::info('Bindings: ' . json_encode($query->bindings));
+            Log::info('Time: ' . $query->time . 'ms');
+        });
 
         Table::configureUsing(function (Table $table): void {
             $table

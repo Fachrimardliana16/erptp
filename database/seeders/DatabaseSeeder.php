@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             EmployeeBasicSalarySeeder::class,
             EmployeeBenefitSeeder::class,
             EmployeeSalaryCutsSeeder::class,
+            EmployeeServiceGradeSeeder::class,
             DepartmentsSeeder::class,
             SubDepartmentsSeeder::class,
             AssetLocationSeeder::class,

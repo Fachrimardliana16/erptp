@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_employee_grade', function (Blueprint $table) {
+        Schema::create('master_employee_basic_salary', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('service_grade');
+            $table->uuid('employee_service_grade_id');
+            $table->uuid('employee_grade_id');
+            $table->decimal('amount', 10, 2);
             $table->text('desc')->nullable();
             $table->timestamps();
-
             $table->uuid('users_id');
+
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('employee_service_grade_id')->references('id')->on('master_employee_service_grade')->onDelete('cascade');
+            $table->foreign('employee_grade_id')->references('id')->on('master_employee_grade')->onDelete('cascade');
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_employee_grade');
+        Schema::dropIfExists('master_employee_basic_salary');
     }
 };

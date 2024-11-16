@@ -6,6 +6,7 @@ use App\Filament\Resources\MasterEmployeeBasicSalaryResource\Pages;
 use App\Filament\Resources\MasterEmployeeBasicSalaryResource\RelationManagers;
 use App\Models\MasterEmployeeBasicSalary;
 use App\Models\MasterEmployeeGrade;
+use App\Models\MasterEmployeeServiceGrade;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -21,7 +22,7 @@ class MasterEmployeeBasicSalaryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-wallet';
     protected static ?string $navigationGroup = 'Master Employee';
-    protected static ?string $navigationLabel = 'Gaji Pokok';
+    protected static ?string $navigationLabel = 'Tabel Gaji Pokok';
 
     public static function form(Form $form): Form
     {
@@ -30,45 +31,54 @@ class MasterEmployeeBasicSalaryResource extends Resource
                 Section::make('Form Gaji Pokok')
                     ->description('Input gaji pokok pada form di bawah ini.')
                     ->schema([
-
-                        Forms\Components\Select::make('employee_grade_id')
-                            ->options(MasterEmployeeGrade::query()->pluck('name', 'id')->map(function ($name, $id) {
-                                $serviceGrade = MasterEmployeeGrade::find($id)->service_grade; // Assuming 'service_grade' is a field in your model
-                                return "{$name} - {$serviceGrade}"; // Concatenate name and service grade
-                            }))
-                            ->afterStateUpdated(function ($set, $state) {
-                                $data = MasterEmployeeGrade::find($state);
-                                $set('name', $data->name);
-                                $set('service_grade', $data->service_grade); // Assuming you want to set the service grade too
+                        Forms\Components\Select::make('employee_service_grade_id')
+                            ->options(function () {
+                                return MasterEmployeeServiceGrade::query()
+                                    ->with('employeeGrade')
+                                    ->select([
+                                        'master_employee_service_grade.id',
+                                        'master_employee_service_grade.service_grade',
+                                        'master_employee_grade.name as grade_name'
+                                    ])
+                                    ->join(
+                                        'master_employee_grade',
+                                        'master_employee_service_grade.employee_grade_id',
+                                        '=',
+                                        'master_employee_grade.id'
+                                    )
+                                    ->orderBy('master_employee_grade.name')
+                                    ->orderBy('master_employee_service_grade.service_grade')
+                                    ->get()
+                                    ->mapWithKeys(function ($serviceGrade) {
+                                        return [
+                                            $serviceGrade->id => "Golongan {$serviceGrade->grade_name} - MKG: {$serviceGrade->service_grade}"
+                                        ];
+                                    });
                             })
-                            ->label('Golongan')
+                            ->afterStateUpdated(function ($set, $state) {
+                                $serviceGrade = MasterEmployeeServiceGrade::with('employeeGrade')
+                                    ->find($state);
+
+                                if ($serviceGrade) {
+                                    $set('employee_grade_id', $serviceGrade->employee_grade_id);
+                                    $set('service_grade', $serviceGrade->service_grade);
+                                }
+                            })
+                            ->label('Pilih Golongan beserta MKG..')
                             ->searchable()
                             ->preload()
                             ->live()
                             ->required(),
-                        Forms\Components\Hidden::make('employee_grade_id')
-                            ->default(function ($get) {
-                                $employee_grade_id = $get('employee_grade_id');
-                                return $employee_grade_id;
-                            }),
+
+                        Forms\Components\Hidden::make('employee_grade_id'),
 
                         Forms\Components\TextInput::make('service_grade')
-                            ->default(function ($get) {
-                                $employee_grade_id = $get('employee_grade_id');
-                                $data = \App\Models\MasterEmployeeGrade::find($employee_grade_id);
-                                return $data ? $data->service_grade : null;
-                            })
                             ->label('MKG')
-                            ->disabled(),  // Disabled untuk memastikan tidak bisa diedit
+                            ->disabled(),
 
                         Forms\Components\TextInput::make('amount')
                             ->label('Amount')
                             ->required(),
-                        Forms\Components\TextInput::make('amount')
-                            ->label('Jumlah')
-                            ->required()
-                            ->numeric('IDR')
-                            ->prefix('Rp'),
                         Forms\Components\Textarea::make('desc')
                             ->label('Keterangan'),
                         Forms\Components\Hidden::make('users_id')
@@ -85,11 +95,13 @@ class MasterEmployeeBasicSalaryResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('gradeSalary.name')
+                Tables\Columns\TextColumn::make('serviceGrade.employeeGrade.name')
                     ->label('Golongan')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('gradeSalary.service_grade')
+                    ->sortable(['master_employee_grade.name'])
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => "Golongan {$state}"),
+
+                Tables\Columns\TextColumn::make('serviceGrade.service_grade')
                     ->label('MKG')
                     ->sortable()
                     ->searchable(),

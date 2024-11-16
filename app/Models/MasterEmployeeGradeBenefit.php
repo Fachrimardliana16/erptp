@@ -15,48 +15,18 @@ class MasterEmployeeGradeBenefit extends Model
 
     public $timestamps = true;
 
-    public function GradeBenefit()
+    public function gradeBenefits()
     {
         return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id');
     }
 
-    public function BenefitGrade()
+    public function benefit()
     {
         return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
     }
 
-
-    public function benefit1()
+    public function employeeGradeBenefit()
     {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_1');
-    }
-    public function benefit2()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_2');
-    }
-    public function benefit3()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_3');
-    }
-    public function benefit4()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_4');
-    }
-
-    public function benefit5()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_5');
-    }
-    public function benefit6()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_6');
-    }
-    public function benefit7()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_7');
-    }
-    public function benefit8()
-    {
-        return $this->belongsTo(EmployeeSalary::class, 'benefitsid_8');
+        return $this->hasMany(EmployeeBenefit::class, 'employee_grade_benefit_id');
     }
 }

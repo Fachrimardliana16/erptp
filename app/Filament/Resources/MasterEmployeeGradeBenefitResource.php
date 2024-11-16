@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\MasterEmployeeGradeBenefitResource\Pages;
 use App\Filament\Resources\MasterEmployeeGradeBenefitResource\RelationManagers;
+use App\Models\MasterEmployeeGrade;
 use App\Models\MasterEmployeeGradeBenefit;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
@@ -29,13 +30,27 @@ class MasterEmployeeGradeBenefitResource extends Resource
                 Section::make('Form Golongan Tunjangan')
                     ->description('Input Kecamatan pada form di bawah ini.')
                     ->schema([
-                        Forms\Components\Select::make('benefit_id')
-                            ->relationship('BenefitGrade', 'name')
-                            ->label('Tunjangan')
-                            ->required(),
                         Forms\Components\Select::make('grade_id')
-                            ->relationship('GradeBenefit', 'name')
+                            ->options(
+                                MasterEmployeeGrade::all()
+                                    ->sortBy(function ($grade) {
+                                        // Mengembalikan array dengan dua kriteria untuk pengurutan
+                                        return [
+                                            $grade->name, // Urutkan berdasarkan name
+                                            (int) $grade->service_grade // Urutkan berdasarkan service_grade sebagai integer
+                                        ];
+                                    })
+                                    ->mapWithKeys(function ($grade) {
+                                        return [$grade->id => "Golongan = {$grade->name}"];
+                                    })
+                            )
                             ->label('Golongan')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Forms\Components\Select::make('benefit_id')
+                            ->relationship('gradeBenefits', 'name')
+                            ->label('Tunjangan')
                             ->required(),
                         Forms\Components\TextInput::make('amount')
                             ->label('Jumlah')
@@ -58,12 +73,12 @@ class MasterEmployeeGradeBenefitResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('BenefitGrade.name')
-                    ->label('Tunjangan')
+                Tables\Columns\TextColumn::make('gradeBenefits.name')
+                    ->label('Golongan')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('GradeBenefit.name')
-                    ->label('Golongan')
+                Tables\Columns\TextColumn::make('benefit.name')
+                    ->label('Tunjangan')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
