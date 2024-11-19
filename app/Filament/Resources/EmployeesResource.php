@@ -21,10 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\fileUpload;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\EmployeesResource\Pages;
-use App\Filament\Resources\AssetResource\Pages\ViewAsset;
 use App\Filament\Resources\EmployeesResource\RelationManagers;
-use App\Filament\Resources\EmployeesResource\Pages\EditEmployees;
-use App\Filament\Resources\EmployeesResource\Pages\ViewEmployees;
 
 class EmployeesResource extends Resource
 {
@@ -35,325 +32,6 @@ class EmployeesResource extends Resource
     protected static ?string $navigationLabel = 'Data Pegawai';
     protected static ?int $navigationSort = 3;
 
-    //     public static function form(Form $form): Form 
-    // {
-    //     return $form
-    //         ->schema([
-    //             Section::make('Form Biodata Pegawai')
-    //                 ->description('Form Biodata Pegawai')
-    //                 ->collapsed(true)
-    //                 ->schema([
-    //                     TextInput::make('nippam')
-    //                         ->label('NIPPAM')
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages(['max' => 'NIPPAM tidak boleh melebihi 255 karakter']),
-    //                     TextInput::make('name')
-    //                         ->label('Nama Pegawai')
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages([
-    //                             'max' => 'Nama Pegawai tidak boleh melebihi 255 karakter'
-    //                         ]),
-    //                     TextInput::make('place_birth')
-    //                         ->label('Tempat Lahir')
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages(['max' => 'Tempat Lahir tidak boleh melebihi 255 karakter']),
-    //                     DatePicker::make('date_birth')
-    //                         ->label('Tanggal Lahir')
-    //                         ->live()
-    //                         ->afterStateUpdated(function ($set, $state) {
-    //                             if ($state) {
-    //                                 $dateOfBirth = Carbon::createFromFormat('Y-m-d', $state);
-    //                                 $age = $dateOfBirth->age;
-    //                                 $set('age', $age);
-    //                             }
-    //                         })
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('age')
-    //                         ->label('Umur')
-    //                         ->live()
-    //                         ->readOnly(),
-    //                     Select::make('gender')
-    //                         ->options(['Laki-laki' => 'Laki-laki', 'Perempuan' => 'Perempuan',])
-    //                         ->label('Jenis Kelamin')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('religion')
-    //                         ->options([
-    //                             'Islam' => 'Islam',
-    //                             'Kristen' => 'Kristen',
-    //                             'Katholik' => 'Katholik',
-    //                             'Budha' => 'Budha',
-    //                             'Hindu' => 'Hindu',
-    //                         ])
-    //                         ->label('Agama')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('address')
-    //                         ->label('Alamat')
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages(['max' => 'Alamat tidak boleh melebihi 255 karakter']),
-    //                     Select::make('blood_type')
-    //                         ->label('Golongan Darah')
-    //                         ->options([
-    //                             'A' => 'A',
-    //                             'B' => 'B',
-    //                             'AB' => 'AB',
-    //                             'O' => 'O',
-    //                         ])
-    //                         ->searchable()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('marital_status')
-    //                         ->label('Status Menikah')
-    //                         ->options([
-    //                             'Menikah' => 'Menikah',
-    //                             'Belum Menikah' => 'Belum Menikah',
-    //                         ])
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('phone_number')
-    //                         ->label('Nomor Telp')
-    //                         ->tel()
-    //                         ->prefix('+62')
-    //                         ->maxLength(13)
-    //                         ->rules(['max:13', 'regex:/^\+628[1-9][0-9]{6,9}$/'])
-    //                         ->validationMessages([
-    //                             'max' => 'Nomor Telp tidak boleh melebihi 13 karakter',
-    //                             'regex' => 'Nomor Telp wajib berformat +62'
-    //                         ]),
-    //                     Select::make('employee_education_id')
-    //                         ->relationship('employeeEducation', 'name')
-    //                         ->label('Pendidikan Terakhir')
-    //                         ->searchable()
-    //                         ->preload()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('id_number')
-    //                         ->label('Nomor NIK')
-    //                         ->numeric()
-    //                         ->maxLength(16)
-    //                         ->helperText('Isikan nomor KTP Anda, pastikan terdiri dari 16 digit.')
-    //                         ->rules(['digits:16'])
-    //                         ->validationMessages([
-    //                             'digits' => 'Nomor NIK harus berupa angka 16 digit'
-    //                         ]),
-    //                     TextInput::make('familycard_number')
-    //                         ->label('Nomor KK')
-    //                         ->numeric()
-    //                         ->maxLength(16)
-    //                         ->helperText('Isikan nomor KK Anda, pastikan terdiri dari 16 digit.')
-    //                         ->rules(['digits:16'])
-    //                         ->validationMessages([
-    //                             'digits' => ' Nomor KK harus berupa angka 16 digit'
-    //                         ]),
-    //                     TextInput::make('npwp_number')
-    //                         ->label('Nomor NPWP')
-    //                         ->numeric()
-    //                         ->maxLength(20)
-    //                         ->helperText('Isikan nomor NPWP Anda, pastikan terdiri dari 16 digit.')
-    //                         ->rules(['digits_between:15,20'])
-    //                         ->validationMessages([
-    //                             'digits_between' => 'Nomor NPWP harus berupa angka hingga 20 digit'
-    //                         ]),
-    //                     TextInput::make('bank_account_number')
-    //                         ->label('Nomor Rekening')
-    //                         ->numeric()
-    //                         ->maxLength(17)
-    //                         ->rules(['digits_between:1,17'])
-    //                         ->validationMessages([
-    //                             'digits_between' => 'Nomor Rekening harus berupa angka hingga 17 digit'
-    //                         ]),
-    //                     TextInput::make('bpjs_tk_number')
-    //                         ->label('Nomor BPJS TK')
-    //                         ->numeric()
-    //                         ->maxLength(16)
-    //                         ->rules(['digits:16'])
-    //                         ->validationMessages([
-    //                             'digits' => 'Nomor BPJS TK harus berupa angka 16 digit'
-    //                         ]),
-    //                     TextInput::make('bpjs_kes_number')
-    //                         ->label('Nomor BPJS Kesehatan')
-    //                         ->numeric()
-    //                         ->maxLength(13)
-    //                         ->rules(['digits:13'])
-    //                         ->validationMessages([
-    //                             'digits' => 'Nomor BPJS Kesehatan harus berupa angka 13 digit'
-    //                         ]),
-    //                     TextInput::make('rek_dplk_pribadi')
-    //                         ->label('Rekening DPLK Pribadi')
-    //                         ->numeric()
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages([
-    //                             'max' => 'Rekening DPLK Pribadi tidak boleh melebihi 255 karakter'
-    //                         ]),
-    //                     TextInput::make('rek_dplk_bersama')
-    //                         ->label('Rekening DPLK Bersama')
-    //                         ->numeric()
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages([
-    //                             'max' => 'Rekening DPLK Bersama tidak boleh melebihi 255 karakter'
-    //                         ]),
-    //                 ])->columns(3),
-
-    //             Section::make('Form Info Kepegawaian')
-    //                 ->description('Form Info Kepegawaiaan')
-    //                 ->collapsed(false)
-    //                 ->schema([
-    //                     DatePicker::make('entry_date')
-    //                         ->label('Tanggal Masuk')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('probation_appointment_date')
-    //                         ->label('Pengangkatan Capeg')
-    //                         ->live()
-    //                         ->afterStateUpdated(function ($set, $state) {
-    //                             if ($state) {
-    //                                 $dateOfAppointment = Carbon::createFromFormat('Y-m-d', $state);
-    //                                 $lengthService = $dateOfAppointment
-    //                                     ->diffInYears(Carbon::now());
-    //                                 $set('length_service', $lengthService);
-    //                             }
-    //                         })
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('length_service')
-    //                         ->label('Masa Kerja')
-    //                         ->live()
-    //                         ->readOnly(),
-    //                     DatePicker::make('retirement')
-    //                         ->label('Tahun Pensiun')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('employment_status_id')
-    //                         ->relationship('employmentStatus', 'name')
-    //                         ->label('Status')
-    //                         ->searchable()
-    //                         ->preload()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('master_employee_agreement_id')
-    //                         ->relationship('employeeAgreement', 'name')
-    //                         ->label('Kontrak Kerja')
-    //                         ->searchable()
-    //                         ->preload()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('agreement_date_start')
-    //                         ->label('Tanggal Mulai Perjanjian Kontrak')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('agreement_date_end')
-    //                         ->label('Tanggal Akhir Perjanjian Kontrak')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('employee_grade_id')
-    //                         ->relationship('employeeGrade', 'name')
-    //                         ->label('Golongan')
-    //                         ->searchable()
-    //                         ->preload()
-    //                         ->live()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('basic_salary')
-    //                         ->label('Gaji Pokok')
-    //                         ->prefix('Rp. ')
-    //                         ->readOnly()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('grade_date_start')
-    //                         ->label('Tanggal Mulai Golongan')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('grade_date_end')
-    //                         ->label('Tanggal Akhir Golongan')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     TextInput::make('amount')
-    //                         ->label('Total Berkala')
-    //                         ->prefix('Rp. ')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('periodic_salary_date_start')
-    //                         ->label('Tanggal Awal Berkala')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     DatePicker::make('periodic_salary_date_end')
-    //                         ->label('Tanggal Akhir Berkala')
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('employee_position_id')
-    //                         ->relationship('employeePosition', 'name')
-    //                         ->label('Jabatan')
-    //                         ->searchable()
-    //                         ->preload()
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('departments_id')
-    //                         ->relationship('EmployeeDepartments', 'name')
-    //                         ->label('Bagian')
-    //                         ->live() // Make it live to trigger updates 
-    //                         ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes 
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                     Select::make('sub_department_id')
-    //                         ->relationship('EmployeeSubDepartments', 'name', fn(Builder $query, callable $get) => $query
-    //                             ->when($get('departments_id'), fn(Builder $q, $departmentId) => $q
-    //                                 ->where('departments_id', $departmentId)))->label('Sub Bagian')
-    //                         ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected 
-    //                         ->rules([]) // Menghilangkan required
-    //                         ->validationMessages([]),
-    //                 ])->columns(2),
-
-    //             Section::make('Form Akun Pegawai')
-    //                 ->description('Form Akun Pegawai')
-    //                 ->collapsed(false)
-    //                 ->schema([
-    //                     TextInput::make('username')
-    //                         ->label('Username')
-    //                         ->maxLength(255)
-    //                         ->rules(['max:255'])
-    //                         ->validationMessages(['max' => 'Username tidak boleh melebihi 255 karakter']),
-    //                     TextInput::make('email')
-    //                         ->label('E-Mail')
-    //                         ->email()
-    //                         ->maxLength(255)
-    //                         ->rules(['email', 'max:255'])
-    //                         ->validationMessages([
-    //                             'email' => 'E-Mail harus berupa format email yang valid',
-    //                             'max' => 'E-Mail tidak boleh melebihi 255 karakter'
-    //                         ]),
-    //                     TextInput::make('password')
-    //                         ->label('Password')
-    //                         ->password()
-    //                         ->maxLength(255)
-    //                         ->rules(['min:8', 'max:255'])
-    //                         ->validationMessages([
-    //                             'min' => 'Password tidak boleh kurang dari 8 karakter',
-    //                             'max' => 'Password tidak boleh melebihi 255 karakter'
-    //                         ]),
-    //                     FileUpload::make('image')
-    //                         ->directory('Pegawai')
-    //                         ->label('Foto')
-    //                         ->image()
-    //                         ->rules(['image', 'mimes:jpg,jpeg,png', 'max:2048'])
-    //                         ->validationMessages([
-    //                             'image' => 'File harus berupa gambar',
-    //                             'mimes' => 'Foto harus dalam format jpg, jpeg, atau png',
-    //                             'max' => 'Ukuran foto tidak boleh lebih dari 2MB'
-    //                         ]),
-    //                 ])->columns(2),
-    //                 Forms\Components\Hidden::make('users_id')
-    //                 ->default(auth()->id())
-    //                 ->rules('required|exists:users,id'),
-    //         ]);
-    // }
     public static function form(Form $form): Form
     {
         return $form
@@ -373,17 +51,21 @@ class EmployeesResource extends Resource
                             ->maxLength(255)
                             ->rules(['required', 'max:255'])
                             ->validationMessages([
-                                '
-                            required' => 'Nama Pegawai wajib diisi',
+                                'required' => 'Nama Pegawai wajib diisi',
                                 'max' => 'Nama Pegawai tidak boleh melebihi 255 karakter'
                             ]),
                         TextInput::make('place_birth')
                             ->label('Tempat Lahir')
+                            ->required()
                             ->maxLength(255)
-                            ->rules(['max:255'])
-                            ->validationMessages(['max' => 'Tempat Lahir tidak boleh melebihi 255 karakter']),
+                            ->rules(['required', 'max:255'])
+                            ->validationMessages([
+                                'required' => 'Tempat Lahir wajib diisi',
+                                'max' => 'Tempat Lahir tidak boleh melebihi 255 karakter'
+                            ]),
                         DatePicker::make('date_birth')
                             ->label('Tanggal Lahir')
+                            ->required()
                             ->live()
                             ->afterStateUpdated(function ($set, $state) {
                                 if ($state) {
@@ -392,16 +74,15 @@ class EmployeesResource extends Resource
                                     $set('age', $age);
                                 }
                             })
-                            ->rules(['required'])
                             ->validationMessages(['required' => 'Tanggal Lahir wajib diisi']),
                         TextInput::make('age')
                             ->label('Umur')
                             ->live()
                             ->readOnly(),
                         Select::make('gender')
-                            ->options(['Laki-laki' => 'Laki-laki', 'Perempuan' => 'Perempuan',])
+                            ->options(['Laki-laki' => 'Laki-laki', 'Perempuan' => 'Perempuan'])
                             ->label('Jenis Kelamin')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Jenis Kelamin wajib dipilih']),
                         Select::make('religion')
                             ->options([
@@ -412,13 +93,24 @@ class EmployeesResource extends Resource
                                 'Hindu' => 'Hindu',
                             ])
                             ->label('Agama')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Agama wajib dipilih']),
                         TextInput::make('address')
                             ->label('Alamat')
+                            ->required()
                             ->maxLength(255)
-                            ->rules(['max:255'])
-                            ->validationMessages(['max' => 'Alamat tidak boleh melebihi 255 karakter']),
+                            ->rules(['required', 'max:255'])
+                            ->validationMessages([
+                                'required' => 'Alamat wajib diisi',
+                                'max' => 'Alamat tidak boleh melebihi 255 karakter'
+                            ]),
+                        Select::make('employee_education_id')
+                            ->relationship('employeeEducation', 'name')
+                            ->label('Pendidikan Terakhir')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->validationMessages(['required' => 'Pendidikan Terakhir wajib dipilih']),
                         Select::make('blood_type')
                             ->label('Golongan Darah')
                             ->options([
@@ -428,271 +120,196 @@ class EmployeesResource extends Resource
                                 'O' => 'O',
                             ])
                             ->searchable()
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Golongan Darah wajib dipilih']),
+
                         Select::make('marital_status')
-                            ->label('Status Menikah')
+                            ->label('Status Pernikahan')
                             ->options([
                                 'Menikah' => 'Menikah',
                                 'Belum Menikah' => 'Belum Menikah',
                             ])
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Status Menikah wajib dipilih']),
+                            ->required()
+                            ->validationMessages(['required' => 'Status Pernikahan wajib dipilih']),
+
                         TextInput::make('phone_number')
-                            ->label('Nomor Telp')
+                            ->label('Nomor Telepon')
                             ->tel()
-                            ->prefix('+62')
-                            ->maxLength(13)
-                            ->rules(['required', 'max:13', 'regex:/^\+628[1-9][0-9]{6,9}$/'])
-                            ->validationMessages([
-                                'required' => 'Nomor Telp wajib diisi',
-                                'max' => 'Nomor Telp tidak boleh melebihi 13 karakter',
-                                'regex' => 'Nomor Telp wajib berformat +62'
-                            ]),
-                        Select::make('employee_education_id')
-                            ->relationship('employeeEducation', 'name')
-                            ->label('Pendidikan Terakhir')
-                            ->searchable()
-                            ->preload()
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Pendidikan Terakhir wajib dipilih']),
+                            ->required()
+                            ->validationMessages(['required' => 'Nomor Telepon wajib diisi']),
+
                         TextInput::make('id_number')
-                            ->label('Nomor NIK')
-                            ->numeric()
+                            ->label('NIK')
+                            ->required()
                             ->maxLength(16)
-                            ->helperText('Isikan nomor KTP Anda, pastikan terdiri dari 16 digit.')
-                            ->rules(['required', 'digits:16'])
-                            ->validationMessages([
-                                'required' => 'Nomor NIK wajib diisi',
-                                'digits' => 'Nomor NIK harus berupa angka 16 digit'
-                            ]),
+                            ->validationMessages(['required' => 'NIK wajib diisi']),
+
                         TextInput::make('familycard_number')
                             ->label('Nomor KK')
-                            ->numeric()
+                            ->required()
                             ->maxLength(16)
-                            ->helperText('Isikan nomor KK Anda, pastikan terdiri dari 16 digit.')
-                            ->rules(['required', 'digits:16'])
-                            ->validationMessages([
-                                'required' => 'Nomor KK wajib diisi',
-                                'digits' => 'Nomor KK harus berupa angka 16 digit'
-                            ]),
+                            ->validationMessages(['required' => 'Nomor KK wajib diisi']),
+
                         TextInput::make('npwp_number')
-                            ->label('Nomor NPWP')
-                            ->numeric()
-                            ->maxLength(20)
-                            ->helperText('Isikan nomor NPWP Anda, pastikan terdiri dari 16 digit.')
-                            ->rules(['required', 'digits_between:15,20'])
-                            ->validationMessages([
-                                'required' => 'Nomor NPWP wajib diisi',
-                                'digits_between' => 'Nomor NPWP harus berupa angka hingga 20 digit'
-                            ]),
+                            ->label('NPWP')
+                            ->required()
+                            ->validationMessages(['required' => 'NPWP wajib diisi']),
+
                         TextInput::make('bank_account_number')
                             ->label('Nomor Rekening')
-                            ->numeric()
-                            ->maxLength(17)
-                            ->rules(['required', 'digits_between:1,17'])
-                            ->validationMessages([
-                                'required' => 'Nomor Rekening wajib diisi',
-                                'digits_between' => 'Nomor Rekening harus berupa angka hingga 17 digit'
-                            ]),
-                        TextInput::make('bpjs_tk_number')
-                            ->label('Nomor BPJS TK')
-                            ->numeric()
-                            ->maxLength(16)
-                            ->rules(['required', 'digits:16'])
-                            ->validationMessages([
-                                'required' => 'Nomor BPJS TK wajib diisi',
-                                'digits' => 'Nomor BPJS TK harus berupa angka 16 digit'
-                            ]),
-                        TextInput::make('bpjs_kes_number')
-                            ->label('Nomor BPJS Kesehatan')
-                            ->numeric()
-                            ->maxLength(13)
-                            ->rules(['required', 'digits:13'])
-                            ->validationMessages([
-                                'required' => 'Nomor BPJS Kesehatan wajib diisi',
-                                'digits' => 'Nomor BPJS Kesehatan harus berupa angka 13 digit'
-                            ]),
-                        TextInput::make('rek_dplk_pribadi')
-                            ->label('Rekening DPLK Pribadi')
-                            ->numeric()
-                            ->maxLength(255)
-                            ->rules(['required', 'max:255'])
-                            ->validationMessages([
-                                'required' => 'Rekening DPLK Pribadi wajib diisi',
-                                'max' => 'Rekening DPLK Pribadi tidak boleh melebihi 255 karakter'
-                            ]),
-                        TextInput::make('rek_dplk_bersama')
-                            ->label('Rekening DPLK Bersama')
-                            ->numeric()
-                            ->maxLength(255)
-                            ->rules(['required', 'max:255'])
-                            ->validationMessages([
-                                'required' => 'Rekening DPLK Bersama wajib diisi',
-                                'max' => 'Rekening DPLK Bersama tidak boleh melebihi 255 karakter'
-                            ]),
-                    ])->columns(3),
+                            ->required()
+                            ->validationMessages(['required' => 'Nomor Rekening wajib diisi']),
 
+                        TextInput::make('bpjs_tk_number')
+                            ->label('BPJS TK')
+                            ->required()
+                            ->validationMessages(['required' => 'BPJS TK wajib diisi']),
+
+                        TextInput::make('bpjs_kes_number')
+                            ->label('BPJS Kesehatan')
+                            ->required()
+                            ->validationMessages(['required' => 'BPJS Kesehatan wajib diisi']),
+
+                        TextInput::make('rek_dplk_pribadi')
+                            ->label('DPLK Pribadi')
+                            ->required()
+                            ->validationMessages(['required' => 'DPLK Pribadi wajib diisi']),
+
+                        TextInput::make('rek_dplk_bersama')
+                            ->label('DPLK Bersama')
+                            ->required()
+                            ->validationMessages(['required' => 'DPLK Bersama wajib diisi']),
+                    ])->columns(3),
 
                 Section::make('Form Info Kepegawaian')
                     ->description('Form Info Kepegawaiaan')
-                    ->collapsed(false)
                     ->schema([
                         DatePicker::make('entry_date')
                             ->label('Tanggal Masuk')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Masuk wajib diisi']),
-                        DatePicker::make('probation_appointment_date')
-                            ->label('Pengangkatan Capeg')
-                            ->live()
-                            ->afterStateUpdated(function ($set, $state) {
-                                if ($state) {
-                                    $dateOfAppointment = Carbon::createFromFormat('Y-m-d', $state);
-                                    $lengthService = $dateOfAppointment
-                                        ->diffInYears(Carbon::now());
-                                    $set('length_service', $lengthService);
-                                }
-                            })
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Pengangkatan Capeg wajib diisi']),
-                        TextInput::make('length_service')
-                            ->label('Masa Kerja')
-                            ->live()
-                            ->readOnly(),
-                        DatePicker::make('retirement')
-                            ->label('Tahun Pensiun')
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Tahun Pensiun wajib diisi']),
+
                         Select::make('employment_status_id')
                             ->relationship('employmentStatus', 'name')
                             ->label('Status')
                             ->searchable()
                             ->preload()
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Status wajib dipilih']),
+
                         Select::make('master_employee_agreement_id')
                             ->relationship('employeeAgreement', 'name')
                             ->label('Kontrak Kerja')
                             ->searchable()
                             ->preload()
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Kontrak Kerja wajib dipilih']),
+
                         DatePicker::make('agreement_date_start')
                             ->label('Tanggal Mulai Perjanjian Kontrak')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Mulai Perjanjian Kontrak wajib diisi']),
+
                         DatePicker::make('agreement_date_end')
                             ->label('Tanggal Akhir Perjanjian Kontrak')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Akhir Perjanjian Kontrak wajib diisi']),
-                        Select::make('employee_grade_id')
-                            ->relationship('employeeGrade', 'name')
-                            ->label('Golongan')
+
+                        Select::make('basic_salary_id')
+                            ->relationship('basicSalary', function ($query) {
+                                return $query->with(['employeeGrade', 'serviceGrade'])
+                                    ->select('master_employee_basic_salary.*')
+                                    ->join('master_employee_grade', 'master_employee_basic_salary.employee_grade_id', '=', 'master_employee_grade.id')
+                                    ->join('master_employee_service_grade', 'master_employee_basic_salary.employee_service_grade_id', '=', 'master_employee_service_grade.id')
+                                    ->orderBy('master_employee_grade.name')
+                                    ->orderBy('master_employee_service_grade.service_grade');
+                            })
+                            ->getOptionLabelFromRecordUsing(
+                                fn($record) =>
+                                "Golongan: {$record->employeeGrade->name} | MKG: {$record->serviceGrade->service_grade} - Gaji Pokok: Rp " .
+                                    number_format($record->amount, 0, ',', '.')
+                            )
+                            ->label('Golongan dan Gaji Pokok')
                             ->searchable()
                             ->preload()
-                            ->live()
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Golongan wajib dipilih']),
-                        TextInput::make('service_grade')
-                            ->label('MKG')
-                            ->readOnly()
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'MKG wajib diisi']),
-                        TextInput::make('basic_salary')
-                            ->label('Gaji Pokok')
-                            ->prefix('Rp. ')
-                            ->readOnly()
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Gaji Pokok wajib diisi']),
+                            ->required()
+                            ->validationMessages([
+                                'required' => 'Golongan dan Gaji Pokok wajib dipilih'
+                            ]),
+
                         DatePicker::make('grade_date_start')
                             ->label('Tanggal Mulai Golongan')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Mulai Golongan wajib diisi']),
+
                         DatePicker::make('grade_date_end')
                             ->label('Tanggal Akhir Golongan')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Akhir Golongan wajib diisi']),
-                        TextInput::make('amount')
-                            ->label('Total Berkala')
-                            ->prefix('Rp. ')
-                            ->rules(['required'])
-                            ->validationMessages(['required' => 'Total Berkala wajib diisi']),
+
                         DatePicker::make('periodic_salary_date_start')
                             ->label('Tanggal Awal Berkala')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Awal Berkala wajib diisi']),
+
                         DatePicker::make('periodic_salary_date_end')
                             ->label('Tanggal Akhir Berkala')
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Tanggal Akhir Berkala wajib diisi']),
+
                         Select::make('employee_position_id')
                             ->relationship('employeePosition', 'name')
                             ->label('Jabatan')
                             ->searchable()
                             ->preload()
-                            ->rules(['required'])
+                            ->required()
                             ->validationMessages(['required' => 'Jabatan wajib dipilih']),
+
                         Select::make('departments_id')
                             ->relationship('EmployeeDepartments', 'name')
                             ->label('Bagian')
-                            ->live() // Make it live to trigger updates 
-                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null)) // Reset sub department when department changes 
-                            ->rules(['required'])
+                            ->live()
+                            ->afterStateUpdated(fn(callable $set) => $set('sub_department_id', null))
+                            ->required()
                             ->validationMessages(['required' => 'Bagian wajib dipilih']),
+
                         Select::make('sub_department_id')
                             ->relationship('EmployeeSubDepartments', 'name', fn(Builder $query, callable $get) => $query
                                 ->when($get('departments_id'), fn(Builder $q, $departmentId) => $q
-                                    ->where('departments_id', $departmentId)))->label('Sub Bagian')
-                            ->disabled(fn(callable $get) => ! $get('departments_id')) // Disable until department is selected 
-                            ->rules(['required'])
+                                    ->where('departments_id', $departmentId)))
+                            ->label('Sub Bagian')
+                            ->disabled(fn(callable $get) => !$get('departments_id'))
+                            ->required()
                             ->validationMessages(['required' => 'Sub Bagian wajib dipilih']),
                     ])->columns(2),
-
-                Section::make('Form Akun Pegawai')
-                    ->description('Form Akun Pegawai')
-                    ->collapsed(false)
+                Section::make('Form Akun')
                     ->schema([
                         TextInput::make('username')
-                            ->label('Username')
-                            ->maxLength(255)
-                            ->rules(['required', 'max:255'])
-                            ->validationMessages(['required' => 'Username wajib diisi', 'max' => 'Username tidak boleh melebihi 255 karakter']),
+                            ->required()
+                            ->validationMessages(['required' => 'Username wajib diisi']),
+
                         TextInput::make('email')
-                            ->label('E-Mail')
                             ->email()
-                            ->maxLength(255)
-                            ->rules(['required', 'email', 'max:255'])
-                            ->validationMessages([
-                                'required' => 'E-Mail wajib diisi',
-                                'email' => 'E-Mail harus berupa format email yang valid',
-                                'max' => 'E-Mail tidak boleh melebihi 255 karakter'
-                            ]),
+                            ->required()
+                            ->validationMessages(['required' => 'Email wajib diisi']),
+
                         TextInput::make('password')
-                            ->label('Password')
                             ->password()
-                            ->maxLength(255)
-                            ->rules(['required', 'min:8', 'max:255'])
-                            ->validationMessages([
-                                'required' => 'Password wajib diisi',
-                                'min' => 'Password tidak boleh kurang dari 8 karakter',
-                                'max' => 'Password tidak boleh melebihi 255 karakter'
-                            ]),
+                            ->required()
+                            ->validationMessages(['required' => 'Password wajib diisi']),
+
                         FileUpload::make('image')
-                            ->directory('Pegawai')
-                            ->label('Foto')
                             ->image()
-                            ->rules(['image', 'mimes:jpg,jpeg,png', 'max:2048'])
-                            ->validationMessages([
-                                'image' => 'File harus berupa gambar',
-                                'mimes' => 'Foto harus dalam format jpg, jpeg, atau png',
-                                'max' => 'Ukuran foto tidak boleh lebih dari 2MB'
-                            ]),
+                            ->directory('employees')
+                            ->label('Foto'),
                     ])->columns(2),
+
                 Forms\Components\Hidden::make('users_id')
                     ->default(auth()->id())
                     ->rules('required|exists:users,id'),
             ]);
     }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -701,191 +318,289 @@ class EmployeesResource extends Resource
                     ->rowIndex(),
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Foto'),
-                Tables\Columns\TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('nippam')
+                    ->label('NIPPAM')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('nippam')
-                    ->label('Nippam')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('place_birth')
                     ->label('Tempat Lahir')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('date_birth')
                     ->label('Tanggal Lahir')
-                    ->date()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('gender')
                     ->label('Jenis Kelamin')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('religion')
-                    ->label('Agama')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('age')
                     ->label('Umur')
                     ->numeric()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('religion')
+                    ->label('Agama')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('address')
                     ->label('Alamat')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('blood_type')
-                    ->label('Golongan Darah')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('employeeEducation.name')
                     ->label('Pendidikan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('blood_type')
+                    ->label('Golongan Darah')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('marital_status')
-                    ->label('Status Menikah')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Status Pernikahan')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('phone_number')
-                    ->label('No Telp')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Nomor Telepon')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('id_number')
-                    ->label('Nomor KTP')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('NIK')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('familycard_number')
                     ->label('Nomor KK')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('npwp_number')
-                    ->label('Nomor NPWP')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('NPWP')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('bank_account_number')
                     ->label('Nomor Rekening')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('bpjs_tk_number')
-                    ->label('Rekening BPJS TK')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('BPJS TK')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('bpjs_kes_number')
-                    ->label('Rekening BPJS Kesehatan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('BPJS Kesehatan')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('rek_dplk_pribadi')
-                    ->label('Rekening DPLK Pribadi')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('DPLK Pribadi')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('rek_dplk_bersama')
-                    ->label('Rekening DPLK Bersama')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('DPLK Bersama')
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('entry_date')
                     ->label('Tanggal Masuk')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('probation_appointment_date')
-                    ->label('Tanggal Calon Pegawai')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('length_service')
-                    ->label('Masa Kerja')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('retirement')
-                    ->label('Tahun Pensiun')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('employmentStatus.name')
                     ->label('Status')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('employeeAgreement.name')
                     ->label('Kontrak Kerja')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('agreement_date_start')
-                    ->label('Tanggal Mulai Perjanjian Kontrak')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Mulai Kontrak')
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('agreement_date_end')
-                    ->label('Tanggal Akhir Perjanjian Kontrak')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeeGrade.name')
+                    ->label('Akhir Kontrak')
+                    ->date('d F Y')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('basicSalary.employeeGrade.name')
                     ->label('Golongan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('grade_date_start')
-                    ->label('Tanggal Mulai Golongan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('grade_date_end')
-                    ->label('Tanggal Akhir Golongan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('basic_salary')
-                    ->Money('Rp. ')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('basicSalary.serviceGrade.service_grade')
+                    ->label('MKG')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('basicSalary.amount')
                     ->label('Gaji Pokok')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->money('IDR')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('grade_date_start')
+                    ->label('Mulai Golongan')
+                    ->date('d F Y')
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('grade_date_end')
+                    ->label('Akhir Golongan')
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('periodic_salary_date_start')
-                    ->label('Tanggal Mulai Berkala')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Mulai Berkala')
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('periodic_salary_date_end')
-                    ->label('Tanggal Akhir Berkala')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('amount')
-                    ->Money('Rp. ')
-                    ->label('Berkala')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('place_birth')
-                    ->label('Tempat Lahir')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->label('Akhir Berkala')
+                    ->date('d F Y')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('employeePosition.name')
                     ->label('Jabatan')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('employeeDepartments.name')
                     ->label('Bagian')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
-                Tables\Columns\TextColumn::make('employeesubDepartments.name')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('employeeSubDepartments.name')
                     ->label('Sub Bagian')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('username')
-                    ->label('Username')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('Golongan')
+                    ->form([
+                        Select::make('basic_salary_id')
+                            ->relationship('basicSalary', function ($query) {
+                                return $query->with(['employeeGrade', 'serviceGrade'])
+                                    ->select('master_employee_basic_salary.*')
+                                    ->join('master_employee_grade', 'master_employee_basic_salary.employee_grade_id', '=', 'master_employee_grade.id')
+                                    ->join('master_employee_service_grade', 'master_employee_basic_salary.employee_service_grade_id', '=', 'master_employee_service_grade.id')
+                                    ->orderBy('master_employee_grade.name')
+                                    ->orderBy('master_employee_service_grade.service_grade');
+                            })
+                            ->getOptionLabelFromRecordUsing(
+                                fn($record) =>
+                                "Golongan: {$record->employeeGrade->name} | MKG: {$record->serviceGrade->service_grade}"
+                            )
+                            ->label('Golongan dan MKG')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['basic_salary_id'])) {
+                            $query->whereHas('basicSalary', function (Builder $q) use ($data) {
+                                $q->where('id', $data['basic_salary_id']);
+                            });
+                        }
+                    }),
+
+                Tables\Filters\Filter::make('Status')
+                    ->form([
+                        Select::make('employment_status_id')
+                            ->relationship('employmentStatus', 'name')
+                            ->label('Status')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['employment_status_id'])) {
+                            $query->whereHas('employmentStatus', function (Builder $q) use ($data) {
+                                $q->where('id', $data['employment_status_id']);
+                            });
+                        }
+                    }),
+
+                Tables\Filters\Filter::make('Jabatan')
+                    ->form([
+                        Select::make('employee_position_id')
+                            ->relationship('employeePosition', 'name')
+                            ->label('Jabatan')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['employee_position_id'])) {
+                            $query->whereHas('employeePosition', function (Builder $q) use ($data) {
+                                $q->where('id', $data['employee_position_id']);
+                            });
+                        }
+                    }),
+
+                Tables\Filters\Filter::make('Kontrak Kerja')
+                    ->form([
+                        Select::make('master_employee_agreement_id')
+                            ->relationship('employeeAgreement', 'name')
+                            ->label('Kontrak Kerja')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['master_employee_agreement_id'])) {
+                            $query->whereHas('employeeAgreement', function (Builder $q) use ($data) {
+                                $q->where('id', $data['master_employee_agreement_id']);
+                            });
+                        }
+                    }),
+
+                Tables\Filters\Filter::make('Bagian')
+                    ->form([
+                        Select::make('departments_id')
+                            ->relationship('EmployeeDepartments', 'name')
+                            ->label('Bagian')
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['departments_id'])) {
+                            $query->whereHas('EmployeeDepartments', function (Builder $q) use ($data) {
+                                $q->where('id', $data['departments_id']);
+                            });
+                        }
+                    }),
+
+                Tables\Filters\Filter::make('Sub Bagian')
+                    ->form([
+                        Select::make('sub_department_id')
+                            ->relationship('EmployeeSubDepartments', 'name', fn(Builder $query, callable $get) => $query
+                                ->when($get('departments_id'), fn(Builder $q, $departmentId) => $q
+                                    ->where('departments_id', $departmentId)))
+                            ->label('Sub Bagian')
+                            ->disabled(fn(callable $get) => !$get('departments_id'))
+                            ->searchable()
+                            ->preload()
+                            ->columnSpan(2),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (isset($data['sub_department_id'])) {
+                            $query->whereHas('EmployeeSubDepartments', function (Builder $q) use ($data) {
+                                $q->where('id', $data['sub_department_id']);
+                            });
+                        }
+                    }),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
@@ -898,13 +613,6 @@ class EmployeesResource extends Resource
             ]);
     }
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewEmployees::class,
-            EditEmployees::class,
-        ]);
-    }
     public static function getRelations(): array
     {
         return [

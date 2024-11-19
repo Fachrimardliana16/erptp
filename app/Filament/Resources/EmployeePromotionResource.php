@@ -44,78 +44,84 @@ class EmployeePromotionResource extends Resource
                             ->label('Tanggal Kenaikan Golongan')
                             ->required(),
                         Forms\Components\Select::make('employee_id')
-                            ->options(Employees::query()->pluck('name', 'id'))
-                            ->afterStateUpdated(function ($set, $state) {
-                                $employees = Employees::find($state);
-                                $set('name', $employees->name);
-                                $set('old_grade_id', $employees->employee_grade_id);
-                                $set('old_basic_salary', $employees->basic_salary);
-                            })
+                            ->relationship('employee', 'name') // Menggunakan relasi untuk mendapatkan nama pegawai
                             ->label('Nama Pegawai')
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->required(),
-                        Forms\Components\Hidden::make('employee_id')
-                            ->label('Nama Pegawai')
-                            ->required(),
-                        Forms\Components\Select::make('old_grade_id')
-                            ->relationship('oldGrade', 'name')
-                            ->label('Golongan Lama')
-                            ->searchable()
-                            ->preload()
-                            ->required() // Keep this required
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // Set the hidden field value to the selected old_grade_id
-                                $set('old_grade_id_hidden', $state);
+                            ->required()
+                            ->afterStateUpdated(function ($set, $state) {
+                                if ($state) {
+                                    // Mengambil data pegawai beserta basic salary dan grade
+                                    $employee = Employees::with('employeeBasic.employeeGrade')->find($state);
+
+                                    if ($employee && $employee->employeeBasic) {
+                                        // Set data dari basic salary yang ada di employees
+                                        $set('old_basic_salary_id', $employee->employeeBasic->id);
+                                        $set('old_basic_salary', $employee->employeeBasic->amount); // Mengambil gaji pokok
+                                        $set('employee_grade', $employee->employeeBasic->employeeGrade->name); // Menyimpan nama golongan
+                                    } else {
+                                        // Jika tidak ada data, set null
+                                        $set('old_basic_salary_id', null);
+                                        $set('old_basic_salary', null);
+                                        $set('employee_grade', null);
+                                    }
+                                }
                             }),
 
-                        Forms\Components\Hidden::make('old_grade_id_hidden') // Hidden field for saving the value
-                            ->label('Old Grade ID (Hidden)')
-                            ->dehydrated(),
+                        // Hidden field untuk menyimpan old_basic_salary_id
+                        Forms\Components\Hidden::make('old_basic_salary_id'), // Jika Anda ingin menyimpan ID gaji pokok
 
-                        Forms\Components\Select::make('old_basic_salary')
-                            ->relationship('oldBasicSalary', 'amount')
-                            ->label('Gaji Pokok Lama')
+                        // Form untuk menampilkan data (disabled/readonly)
+                        Forms\Components\TextInput::make('employee_grade')
+                            ->label('Golongan')
+                            ->disabled(), // Menonaktifkan field agar tidak bisa diedit
+
+                        Forms\Components\TextInput::make('old_basic_salary')
+                            ->label('Gaji Pokok Saat Ini')
                             ->prefix('Rp. ')
-                            ->searchable()
-                            ->preload()
-                            ->required(), // Keep this required
-
-                        Forms\Components\Hidden::make('old_basic_salary') // Hidden field for saving the value
-                            ->label('Gaji Pokok Lama (Hidden)')
-                            ->dehydrated(),
-
-                        Forms\Components\Select::make('new_grade_id')
+                            ->disabled() // Menonaktifkan field agar tidak bisa diedit
+                            ->numeric()
+                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')), // Format untuk menampilkan uang
+                        Forms\Components\Select::make('new_basic_salary_id')
                             ->label('Golongan Baru')
+                            ->options(function () {
+                                return MasterEmployeeGrade::query()
+                                    ->whereIn('master_employee_grade.name', ['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4', 'C1', 'C2', 'C3', 'C4'])
+                                    ->leftJoin('master_employee_basic_salary', 'master_employee_grade.id', '=', 'master_employee_basic_salary.employee_grade_id')
+                                    ->leftJoin('master_employee_service_grade', 'master_employee_basic_salary.employee_service_grade_id', '=', 'master_employee_service_grade.id')
+                                    ->where(function ($query) {
+                                        $query->where('master_employee_service_grade.service_grade', '0')
+                                            ->orWhere('master_employee_service_grade.service_grade', '3');
+                                    })
+                                    ->selectRaw("CONCAT('Golongan: ', master_employee_grade.name, ' | MKG: ', master_employee_service_grade.service_grade, ' | Gaji Pokok: Rp. ', COALESCE(FORMAT(master_employee_basic_salary.amount, 0), 'N/A')) AS grade_amount, master_employee_basic_salary.id AS basic_salary_id, master_employee_basic_salary.amount AS basic_salary_amount, master_employee_grade.name AS grade_name")
+                                    ->orderBy('grade_name')
+                                    ->orderBy('master_employee_service_grade.service_grade')
+                                    ->pluck('grade_amount', 'basic_salary_id');
+                            })
                             ->searchable()
-                            ->options(MasterEmployeeBasicSalary::query()->pluck('name', 'id'))  // Kembalikan ke id
                             ->required()
                             ->live()
                             ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state) {
-                                    $basicSalary = MasterEmployeeBasicSalary::find($state);  // Query tetap menggunakan id
+                                    $basicSalary = MasterEmployeeBasicSalary::find($state);
+                                    $set('new_basic_salary_id', $basicSalary?->id);
                                     $set('new_basic_salary', $basicSalary?->amount);
-                                    $set('new_basic_salary_hidden', $basicSalary?->amount);
                                 } else {
+                                    $set(
+                                        'new_basic_salary_id',
+                                        null
+                                    );
                                     $set('new_basic_salary', null);
-                                    $set('new_basic_salary_hidden', null);
                                 }
                             }),
-
+                        Forms\Components\hidden::make('new_basic_salary_id'),
                         Forms\Components\TextInput::make('new_basic_salary')
-                            ->label('Gaji Pokok Baru')
+                            ->label('Gaji Pokok')
                             ->prefix('Rp. ')
+                            ->disabled() // Menonaktifkan field agar tidak bisa diedit
                             ->numeric()
-                            ->required()
-                            ->live()
-                            ->disabled()
-                            ->dehydrated(),
-
-                        Forms\Components\Hidden::make('new_basic_salary_hidden') // Hidden field for saving the value
-                            ->label('Gaji Pokok Baru (Hidden)')
-                            ->dehydrated(), // Ensure it's submitted with the form
-
+                            ->formatStateUsing(fn($state) => number_format($state, 0, ',', '.')), // Format untuk menampilkan uang
                         Forms\Components\FileUpload::make('doc_promotion')
                             ->directory('Employee_Promotion')
                             ->label('Berkas Kenaikan Golongan')
@@ -134,38 +140,37 @@ class EmployeePromotionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            Tables\Actions\BulkAction::make('Export Pdf')
-                ->icon('heroicon-m-arrow-down-tray')
-                ->deselectRecordsAfterCompletion()
-                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
-                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
-                    $employees = Employees::whereHas('employeePosition', function ($query) {
-                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
-                    })->first();
-        
-                    // Cek apakah pegawai ditemukan
-                    if (!$employees) {
-                        Notification::make()
-                            ->title('Kesalahan')
-                            ->danger()
-                            ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
-                            ->persistent()
-                            ->send();
-                        return;
-                    }
-        
-                    // Render PDF dengan data records dan employee
-                    return response()->streamDownload(function () use ($records, $employees) {
-                        $pdfContent = Blade::render('pdf.report_employee_promotion', [
-                            'records' => $records,
-                            'employees' => $employees
-                        ]);
-                        echo Pdf::loadHTML($pdfContent)->stream();
-                    }, 'report_employee_promotion.pdf');
-                }),
-        ])
-        
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+
+                        // Cek apakah pegawai ditemukan
+                        if (!$employees) {
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger()
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                                ->persistent()
+                                ->send();
+                            return;
+                        }
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_promotion', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+                            echo Pdf::loadHTML($pdfContent)->stream();
+                        }, 'report_employee_promotion.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

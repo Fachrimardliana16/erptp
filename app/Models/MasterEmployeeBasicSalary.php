@@ -45,4 +45,9 @@ class MasterEmployeeBasicSalary extends Model
     {
         return $this->belongsTo(MasterEmployeeServiceGrade::class, 'employee_service_grade_id');
     }
+
+    public function employeePeriodicSalaryIncreases()
+    {
+        return $this->hasMany(EmployeePeriodicSalaryIncrease::class, 'new_basic_salary_id');
+    }
 }
