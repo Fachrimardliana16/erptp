@@ -18,10 +18,10 @@ return new class extends Migration
                 ->index();
             $table->date('date_periodic_salary_increase')->nullable();
             $table->uuid('employee_id');
-            $table->decimal('basic_salary', 15, 2);
-            $table->decimal('salary_increase', 15, 2)->nullable();
-            $table->decimal('total_basic_salary', 15, 2)->nullable();
-            $table->string('docs_letter')->nullable();
+            $table->uuid('old_basic_salary_id');
+            $table->uuid('new_basic_salary_id');
+            $table->uuid('total_basic_salary', 15, 2)->nullable();
+            $table->uuid('docs_letter')->nullable();
             $table->string('docs_archive')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -30,6 +30,8 @@ return new class extends Migration
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
+            $table->foreign('old_basic_salary_id')->references('id')->on('master_employee_basic_salary')->onDelete('cascade');
+            $table->foreign('new_basic_salary_id')->references('id')->on('master_employee_basic_salary')->onDelete('cascade');
         });
     }
 

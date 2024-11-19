@@ -17,8 +17,8 @@ class EmployeePeriodicSalaryIncrease extends Model
         'number_psi',
         'date_periodic_salary_increase',
         'employee_id',
-        'basic_salary',
-        'salary_increase',
+        'old_basic_salary_id',
+        'new_basic_salary_id',
         'total_basic_salary',
         'docs_letter',
         'docs_archive',
@@ -53,5 +53,15 @@ class EmployeePeriodicSalaryIncrease extends Model
     public function employeePeriodic()
     {
         return $this->belongsTo(Employees::class, 'employee_id', 'id');
+    }
+
+    public function oldBasicSalary()
+    {
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'old_basic_salary_id');
+    }
+
+    public function newBasicSalary()
+    {
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_basic_salary_id');
     }
 }

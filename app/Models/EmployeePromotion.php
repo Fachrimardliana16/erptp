@@ -17,10 +17,8 @@ class EmployeePromotion extends Model
         'decision_letter_number',
         'promotion_date',
         'employee_id',
-        'old_grade_id',
-        'new_grade_id',
-        'old_basic_salary',
-        'new_basic_salary',
+        'old_basic_salary_id',
+        'new_basic_salary_id',
         'doc_promotion',
         'desc',
         'users_id',
@@ -31,23 +29,38 @@ class EmployeePromotion extends Model
         return $this->belongsTo(Employees::class, 'employee_id', 'id');
     }
 
-    public function oldGrade()
-    {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'old_grade_id', 'id');
-    }
-
-    public function newGrade()
-    {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'new_grade_id', 'id'); // Perbaikan
-    }
-
     public function oldBasicSalary()
     {
-        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'old_basic_salary', 'id'); // Perbaikan
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'old_basic_salary_id', 'id');
     }
 
     public function newBasicSalary()
     {
-        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_basic_salary', 'id'); // Pastikan ini juga benar
+        return $this->belongsTo(MasterEmployeeBasicSalary::class, 'new_basic_salary_id', 'id');
+    }
+
+    // Tambahkan relasi untuk mengakses grade melalui basic salary
+    public function oldGrade()
+    {
+        return $this->hasOneThrough(
+            MasterEmployeeGrade::class,
+            MasterEmployeeBasicSalary::class,
+            'id', // Foreign key di MasterEmployeeBasicSalary
+            'id', // Foreign key di MasterEmployeeGrade
+            'old_basic_salary_id', // Local key di EmployeePromotion
+            'employee_grade_id' // Local key di MasterEmployeeBasicSalary
+        );
+    }
+
+    public function newGrade()
+    {
+        return $this->hasOneThrough(
+            MasterEmployeeGrade::class,
+            MasterEmployeeBasicSalary::class,
+            'id', // Foreign key di MasterEmployeeBasicSalary
+            'id', // Foreign key di MasterEmployeeGrade
+            'new_basic_salary_id', // Local key di EmployeePromotion
+            'employee_grade_id' // Local key di MasterEmployeeBasicSalary
+        );
     }
 }
