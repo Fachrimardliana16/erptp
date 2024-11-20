@@ -16,14 +16,6 @@ class EmployeeSalary extends Model
     protected $fillable = [
         'employee_id',
         'basic_salary',
-        'benefits_1',
-        'benefits_2',
-        'benefits_3',
-        'benefits_4',
-        'benefits_5',
-        'benefits_6',
-        'benefits_7',
-        'benefits_8',
         'amount',
         'users_id'
     ];
@@ -37,51 +29,6 @@ class EmployeeSalary extends Model
     {
         return $this->belongsTo(User::class, 'users_id');
     }
-
-    // public function basicSalary()
-    // {
-    //     return $this->belongsTo(MasterEmployeeBasicSalary::class, 'basic_salary_id');
-    // }
-
-    // public function benefit1()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_1');
-    // }
-
-    // public function benefit2()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_2');
-    // }
-
-    // public function benefit3()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_3');
-    // }
-
-    // public function benefit4()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_4');
-    // }
-
-    // public function benefit5()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_5');
-    // }
-
-    // public function benefit6()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_6');
-    // }
-
-    // public function benefit7()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_7');
-    // }
-
-    // public function benefit8()
-    // {
-    //     return $this->belongsTo(MasterEmployeeGradeBenefit::class, 'benefitsid_8');
-    // }
 
     public static function boot()
     {

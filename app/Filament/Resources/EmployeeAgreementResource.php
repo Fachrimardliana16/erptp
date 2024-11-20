@@ -26,6 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeAgreementResource extends Resource
 {
@@ -172,7 +173,7 @@ class EmployeeAgreementResource extends Resource
                                     ->join('master_employee_grade', 'master_employee_basic_salary.employee_grade_id', '=', 'master_employee_grade.id')
                                     ->join('master_employee_service_grade', 'master_employee_basic_salary.employee_service_grade_id', '=', 'master_employee_service_grade.id')
                                     ->orderBy('master_employee_grade.name')
-                                    ->orderBy('master_employee_service_grade.service_grade')
+                                    ->orderByRaw('CAST(master_employee_service_grade.service_grade AS UNSIGNED)') // Modified this line
                                     ->select('master_employee_basic_salary.*')
                                     ->get()
                                     ->mapWithKeys(function ($basicSalary) {
@@ -204,7 +205,6 @@ class EmployeeAgreementResource extends Resource
                                     $set('basic_salary', null);
                                 }
                             }),
-
                         TextInput::make('employee_grade_id')
                             ->label('Golongan Pegawai')
                             ->disabled(),
@@ -223,12 +223,18 @@ class EmployeeAgreementResource extends Resource
                                 DatePicker::make('agreement_date_start')
                                     ->label('Tanggal Mulai Perjanjian')
                                     ->required()
+                                    ->format('Y-m-d')
+                                    ->displayFormat('d/m/Y')
                                     ->rules(['date', 'after_or_equal:today'])
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if (!empty($state)) {
-                                            // Otomatis set tanggal akhir 2 tahun setelah tanggal mulai
-                                            $endDate = Carbon::parse($state)->addYears(2);
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                        if ($state) {
+                                            $endDate = Carbon::parse($state)->addYears(2)->subDay();
                                             $set('agreement_date_end', $endDate->format('Y-m-d'));
+                                            $set('hidden_agreement_date_end', $endDate->format('Y-m-d')); // Set hidden value
+                                        } else {
+                                            $set('agreement_date_end', null);
+                                            $set('hidden_agreement_date_end', null);
                                         }
                                     })
                                     ->validationMessages([
@@ -239,30 +245,10 @@ class EmployeeAgreementResource extends Resource
 
                                 DatePicker::make('agreement_date_end')
                                     ->label('Tanggal Akhir Perjanjian')
-                                    ->required()
-                                    ->rules(['date', 'after:agreement_date_start'])
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $startDate = $get('agreement_date_start');
-                                        if (
-                                            empty($startDate) || empty($state)
-                                        ) {
-                                            return;
-                                        }
-                                        $startDate = Carbon::parse($startDate);
-                                        $endDate = Carbon::parse($state);
-                                        if ($startDate->diffInYears($endDate) > 2) {
-                                            Notification::make()->title('Error')
-                                                ->body('Masa kontrak tidak boleh lebih dari 2 tahun')
-                                                ->danger()
-                                                ->send();
-                                            $set('agreement_date_end', null);
-                                        }
-                                    })
-                                    ->validationMessages([
-                                        'required' => 'Tanggal Akhir Perjanjian wajib diisi',
-                                        'date' => 'Format tanggal tidak valid',
-                                        'after' => 'Tanggal Akhir harus setelah Tanggal Mulai',
-                                    ]),
+                                    ->format('Y-m-d')
+                                    ->displayFormat('d/m/Y')
+                                    ->disabled()
+                                    ->dehydrated(true),
                             ])
                             ->columns(2),
 
@@ -362,9 +348,25 @@ class EmployeeAgreementResource extends Resource
                     ->label('Tanggal Akhir Perjanjian Kontrak')
                     ->date()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('docs')
+                Tables\Columns\TextColumn::make('docs')
                     ->label('Lampiran Dokumen')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        if ($state) {
+                            return '<a href="' . Storage::url($state) . '" target="_blank" class="inline-flex items-center justify-center gap-1 font-medium rounded-lg border transition-colors focus:outline-none focus:ring-offset-2 focus:ring-2 focus:ring-inset filament-button px-3 py-2 hover:bg-success-600 focus:bg-success-700 focus:ring-offset-success-700 text-white shadow focus:ring-white border-transparent bg-success-500">
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Lihat Dokumen
+            </a>';
+                        }
+                        return '-';
+                    })
+                    ->html(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -12,27 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employee_benefits', function (Blueprint $table) {
-            // Primary key
             $table->uuid('id')->primary();
-
-            // Foreign keys
             $table->uuid('employee_id');
-            $table->uuid('employee_grade_benefit_id');
+            $table->json('benefits'); // Mengubah menjadi kolom JSON
             $table->uuid('users_id');
-
-
-            // Timestamps
             $table->timestamps();
-            $table->softDeletes(); // Menambahkan deleted_at untuk soft delete
+            $table->softDeletes();
 
-            // Foreign key constraints
             $table->foreign('employee_id')->references('id')->on('employees');
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('employee_grade_benefit_id')->references('id')->on('master_employee_grade_banefit')->onDelete('cascade');
 
-            // Indexes
             $table->index('employee_id');
-            $table->index('employee_grade_benefit_id');
         });
     }
 
