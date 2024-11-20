@@ -16,30 +16,17 @@ use Filament\Tables\Table;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class EmployeeBenefitResource extends Resource
 {
     protected static ?string $model = EmployeeBenefit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-
     protected static ?string $navigationLabel = 'Tunjangan Pegawai';
-
     protected static ?string $modelLabel = 'Tunjangan Pegawai';
-
     protected static ?string $pluralModelLabel = 'Tunjangan Pegawai';
-
     protected static ?string $navigationGroup = 'Employee';
-
     protected static ?int $navigationSort = 3;
-
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
 
     public static function form(Form $form): Form
     {
@@ -53,82 +40,97 @@ class EmployeeBenefitResource extends Resource
                             ->relationship(
                                 name: 'employee',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn($query) => $query->with(['grade', 'basicSalary'])
+                                modifyQueryUsing: fn($query) => $query->with(['grade'])
                             )
                             ->label('Nama Pegawai')
                             ->required()
                             ->live()
                             ->searchable()
                             ->preload()
-                            ->afterStateUpdated(function (Set $set) {
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                $employee = Employees::with('grade')->find($state);
+                                if (!$employee || !$employee->grade) {
+                                    $set('available_benefits', []);
+                                    $set('benefits', []);
+                                    return;
+                                }
+
+                                $gradeBenefits = MasterEmployeeGradeBenefit::where('grade_id', $employee->grade->id)
+                                    ->first();
+
+                                if (!$gradeBenefits || !is_array($gradeBenefits->benefits)) {
+                                    $set('available_benefits', []);
+                                    $set('benefits', []);
+                                    return;
+                                }
+
+                                // Set available benefits dengan nominal
+                                $benefits = collect($gradeBenefits->benefits)->map(function ($benefit) {
+                                    $masterBenefit = MasterEmployeeBenefit::find($benefit['benefit_id']);
+                                    return [
+                                        'value' => $benefit['benefit_id'],
+                                        'label' => $masterBenefit ? sprintf(
+                                            '%s - Rp %s',
+                                            $masterBenefit->name,
+                                            number_format($benefit['amount'], 0, ',', '.')
+                                        ) : '',
+                                        'amount' => $benefit['amount']
+                                    ];
+                                })->toArray();
+
+                                $set('available_benefits', $benefits);
                                 $set('benefits', []);
                             })
-                            ->validationMessages([
-                                'required' => 'Silakan pilih pegawai terlebih dahulu',
-                            ])
                             ->helperText('Pilih pegawai untuk melihat tunjangan yang tersedia'),
+
+                        Forms\Components\Hidden::make('available_benefits'),
 
                         Forms\Components\Repeater::make('benefits')
                             ->schema([
                                 Forms\Components\Select::make('benefit_id')
                                     ->label('Tunjangan')
+                                    ->options(function (Get $get) {
+                                        $availableBenefits = collect($get('../../available_benefits'));
+                                        $currentBenefits = collect($get('../../benefits'));
+                                        $currentValue = $get('benefit_id');
+
+                                        $selectedValues = $currentBenefits
+                                            ->pluck('benefit_id')
+                                            ->filter()
+                                            ->reject(function ($value) use ($currentValue) {
+                                                return $value === $currentValue;
+                                            })
+                                            ->toArray();
+
+                                        return $availableBenefits
+                                            ->whereNotIn('value', $selectedValues)
+                                            ->pluck('label', 'value');
+                                    })
                                     ->required()
                                     ->searchable()
                                     ->preload()
-                                    ->options(function (Get $get) {
-                                        $employeeId = $get('../../employee_id');
-
-                                        if (!$employeeId) {
-                                            return [];
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                        $availableBenefits = collect($get('../../available_benefits'));
+                                        $selectedBenefit = $availableBenefits->firstWhere('value', $state);
+                                        if ($selectedBenefit) {
+                                            $set('amount', $selectedBenefit['amount']);
                                         }
-
-                                        $employee = Employees::with(['grade', 'basicSalary'])
-                                            ->find($employeeId);
-
-                                        if (!$employee?->grade?->id) {
-                                            return [];
-                                        }
-
-                                        $benefits = MasterEmployeeGradeBenefit::query()
-                                            ->where('grade_id', $employee->grade->id)
-                                            ->with(['gradeBenefits', 'benefit'])
-                                            ->get();
-
-                                        if ($benefits->isEmpty()) {
-                                            return [];
-                                        }
-
-                                        return $benefits->mapWithKeys(function ($gradeBenefit) {
-                                            $gradeName = $gradeBenefit->gradeBenefits?->name ?? 'N/A';
-                                            $benefitName = $gradeBenefit->benefit?->name ?? 'N/A';
-                                            $amount = number_format($gradeBenefit->amount, 0, ',', '.');
-
-                                            return [
-                                                $gradeBenefit->id => "{$benefitName} - {$gradeName} - Rp {$amount}"
-                                            ];
-                                        })->toArray();
                                     })
-                                    ->disabled(fn(Get $get): bool => !$get('../../employee_id'))
-                                    ->validationMessages([
-                                        'required' => 'Silakan pilih tunjangan yang sesuai',
-                                    ]),
+                                    ->disabled(fn(Get $get): bool => empty($get('../../employee_id'))),
+
+                                Forms\Components\Hidden::make('amount')
                             ])
                             ->columns(1)
-                            ->itemLabel(
-                                fn(array $state): ?string =>
-                                $state['benefit_id']
-                                    ? MasterEmployeeGradeBenefit::find($state['benefit_id'])?->benefit?->name ?? 'Tunjangan'
-                                    : 'Tunjangan'
-                            )
-                            ->addActionLabel('Tambah Tunjangan')
+                            ->columnSpanFull()
                             ->defaultItems(0)
-                            ->reorderableWithButtons()
+                            ->addActionLabel('Tambah Tunjangan')
+                            ->reorderable()
                             ->collapsible()
-                            ->cloneable()
-                            ->maxItems(5),
+                            ->live(),
 
                         Forms\Components\Hidden::make('users_id')
-                            ->default(fn() => auth()->id())
+                            ->default(auth()->id())
                             ->required(),
                     ]),
             ]);
@@ -136,15 +138,8 @@ class EmployeeBenefitResource extends Resource
 
     public static function table(Table $table): Table
     {
-        // Dapatkan semua jenis tunjangan yang unik
-        $benefitTypes = MasterEmployeeGradeBenefit::with('benefit')
-            ->get()
-            ->pluck('benefit.name')
-            ->unique()
-            ->values()
-            ->toArray();
+        $masterBenefits = MasterEmployeeBenefit::all(['id', 'name']);
 
-        // Buat kolom dasar
         $columns = [
             Tables\Columns\TextColumn::make('employee.name')
                 ->label('Nama Pegawai')
@@ -160,50 +155,23 @@ class EmployeeBenefitResource extends Resource
                 ->color('success'),
         ];
 
-        // Tambahkan kolom untuk setiap jenis tunjangan
-        foreach ($benefitTypes as $benefitType) {
-            $columns[] = Tables\Columns\TextColumn::make("benefit_{$benefitType}")
-                ->label($benefitType)
-                ->alignRight()
+        // Add columns for each benefit type
+        foreach ($masterBenefits as $benefit) {
+            $columns[] = Tables\Columns\TextColumn::make('benefit_' . $benefit->id)
+                ->label($benefit->name)
                 ->money('IDR')
-                ->state(function (EmployeeBenefit $record) use ($benefitType): int {
-                    if (!is_array($record->benefits)) {
-                        return 0;
-                    }
-
-                    return collect($record->benefits)
-                        ->map(function ($benefit) use ($benefitType) {
-                            $masterBenefit = MasterEmployeeGradeBenefit::find($benefit['benefit_id']);
-                            if (!$masterBenefit || $masterBenefit->benefit->name !== $benefitType) {
-                                return 0;
-                            }
-                            return $masterBenefit->amount ?? 0;
-                        })
-                        ->sum();
-                });
+                ->state(fn(EmployeeBenefit $record): int => $record->getBenefitAmount($benefit->id));
         }
 
-        // Tambahkan kolom total di akhir
+        // Add total column
         $columns[] = Tables\Columns\TextColumn::make('total_amount')
             ->label('Total')
             ->money('IDR')
-            ->alignRight()
-            ->state(function (EmployeeBenefit $record): int {
-                if (!is_array($record->benefits)) {
-                    return 0;
-                }
-
-                return collect($record->benefits)->sum(function ($benefit) {
-                    $masterBenefit = MasterEmployeeGradeBenefit::find($benefit['benefit_id']);
-                    return $masterBenefit?->amount ?? 0;
-                });
-            });
+            ->state(fn(EmployeeBenefit $record): int => $record->getTotalAmount());
 
         return $table
             ->columns($columns)
-            ->modifyQueryUsing(function (Builder $query) {
-                return $query->with(['employee.grade']);
-            })
+            ->modifyQueryUsing(fn(Builder $query) => $query->with(['employee.grade']))
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('employee')
@@ -219,62 +187,18 @@ class EmployeeBenefitResource extends Resource
                     ->searchable()
                     ->preload()
                     ->multiple(),
-
-                Tables\Filters\TrashedFilter::make()
-                    ->label('Status Data')
-                    ->trueLabel('Tampilkan data terhapus')
-                    ->falseLabel('Sembunyikan data terhapus'),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make()
-                        ->label('Lihat')
-                        ->color('info'),
-
-                    Tables\Actions\EditAction::make()
-                        ->label('Edit'),
-
-                    Tables\Actions\DeleteAction::make()
-                        ->label('Hapus')
-                        ->modalHeading('Hapus Tunjangan Pegawai')
-                        ->modalDescription('Apakah Anda yakin ingin menghapus tunjangan pegawai ini? Data yang sudah dihapus dapat dipulihkan.')
-                        ->modalSubmitActionLabel('Ya, Hapus')
-                        ->modalCancelActionLabel('Batal'),
-
-                    Tables\Actions\RestoreAction::make()
-                        ->label('Pulihkan'),
-                ])
-                    ->label('Aksi')
-                    ->icon('heroicon-m-chevron-down')
-                    ->size('sm')
-                    ->color('primary'),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->label('Hapus yang dipilih')
-                        ->modalHeading('Hapus Tunjangan Pegawai')
-                        ->modalDescription('Apakah Anda yakin ingin menghapus tunjangan pegawai yang dipilih? Data yang sudah dihapus dapat dipulihkan.')
-                        ->modalSubmitActionLabel('Ya, Hapus')
-                        ->modalCancelActionLabel('Batal'),
-
-                    Tables\Actions\RestoreBulkAction::make()
-                        ->label('Pulihkan yang dipilih'),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])
-            ->emptyStateHeading('Belum ada data tunjangan')
-            ->emptyStateDescription('Mulai tambahkan tunjangan pegawai dengan klik tombol di bawah ini')
-            ->emptyStateIcon('heroicon-o-banknotes')
-            ->striped()
-            ->paginated([10, 25, 50])
-            ->poll('10s');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+            ]);
     }
 
     public static function getPages(): array
@@ -284,13 +208,5 @@ class EmployeeBenefitResource extends Resource
             'create' => Pages\CreateEmployeeBenefit::route('/create'),
             'edit' => Pages\EditEmployeeBenefit::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }

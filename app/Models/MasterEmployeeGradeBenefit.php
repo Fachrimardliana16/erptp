@@ -11,27 +11,52 @@ class MasterEmployeeGradeBenefit extends Model
     use HasFactory, HasUuids;
 
     protected $table = 'master_employee_grade_benefit';
-    protected $fillable = ['benefit_id', 'grade_id', 'amount', 'desc', 'users_id'];
 
-    public $timestamps = true;
+    protected $fillable = [
+        'benefits',
+        'grade_id',
+        'desc',
+        'users_id'
+    ];
+
+    protected $casts = [
+        'benefits' => 'array'
+    ];
 
     public function gradeBenefits()
     {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id');
+        return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id', 'id');
     }
 
-    public function benefit()
+    public function benefits()
     {
-        return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
+        return $this->hasMany(MasterEmployeeBenefit::class, 'id', 'benefit_id');
     }
 
-    public function employeeGradeBenefit()
+    // Method untuk mendapatkan nilai tunjangan spesifik
+    public function getBenefitAmount($benefitId)
     {
-        return $this->hasMany(EmployeeBenefit::class, 'employee_grade_benefit_id');
+        if (!is_array($this->benefits)) {
+            return 0;
+        }
+
+        $benefit = collect($this->benefits)
+            ->firstWhere('benefit_id', $benefitId);
+
+        return $benefit ? (int)($benefit['amount'] ?? 0) : 0;
     }
 
-    public function masterBenefit()
+    // Method untuk mendapatkan semua nilai tunjangan
+    public function getAllBenefitAmounts()
     {
-        return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
+        if (!is_array($this->benefits)) {
+            return collect();
+        }
+
+        return collect($this->benefits)->mapWithKeys(function ($benefit) {
+            return [
+                $benefit['benefit_id'] => (int)($benefit['amount'] ?? 0)
+            ];
+        });
     }
 }

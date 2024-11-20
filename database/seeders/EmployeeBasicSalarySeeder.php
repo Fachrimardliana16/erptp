@@ -242,33 +242,65 @@ class EmployeeBasicSalarySeeder extends Seeder
                 ['grade' => 'C4', 'service_grade' => '32', 'amount' => 5180700],
             ];
 
+            // First, ensure all grades exist
+            $grades = collect($salaryData)->pluck('grade')->unique();
+            foreach ($grades as $gradeName) {
+                DB::table('master_employee_grade')
+                    ->insertOrIgnore([
+                        'id' => Str::uuid(),
+                        'name' => $gradeName,
+                        'desc' => "Grade {$gradeName}",
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'users_id' => $userId,
+                    ]);
+            }
+
+            // Create a mapping of grade names to IDs
+            $gradeMapping = DB::table('master_employee_grade')
+                ->whereIn('name', $grades)
+                ->pluck('id', 'name')
+                ->toArray();
+
+            // Create service grades for each grade
             foreach ($salaryData as $data) {
-                // Cari atau buat grade
-                $grade = DB::table('master_employee_grade')
-                    ->where('name', $data['grade'])
+                $gradeId = $gradeMapping[$data['grade']];
+
+                // Insert or update service grade
+                $serviceGradeId = DB::table('master_employee_service_grade')
+                    ->insertOrIgnore([
+                        'id' => Str::uuid(),
+                        'employee_grade_id' => $gradeId,
+                        'service_grade' => $data['service_grade'],
+                        'desc' => "Service grade {$data['service_grade']} for grade {$data['grade']}",
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                        'users_id' => $userId,
+                    ]);
+
+                // Get the service grade ID
+                $serviceGrade = DB::table('master_employee_service_grade')
+                    ->where('employee_grade_id', $gradeId)
+                    ->where('service_grade', $data['service_grade'])
                     ->first();
 
-                if ($grade) {
-                    // Cari atau buat service grade
-                    $serviceGrade = DB::table('master_employee_service_grade')
-                        ->where('employee_grade_id', $grade->id)
-                        ->where('service_grade', $data['service_grade'])
-                        ->first();
-
-                    if ($serviceGrade) {
-                        // Insert basic salary dengan employee_grade_id
-                        DB::table('master_employee_basic_salary')
-                            ->insert([
-                                'id' => Str::uuid(),
+                if ($serviceGrade) {
+                    // Insert basic salary
+                    DB::table('master_employee_basic_salary')
+                        ->updateOrInsert(
+                            [
                                 'employee_service_grade_id' => $serviceGrade->id,
-                                'employee_grade_id' => $grade->id, // Tambahkan ini
+                                'employee_grade_id' => $gradeId,
+                            ],
+                            [
+                                'id' => Str::uuid(),
                                 'amount' => $data['amount'],
-                                'desc' => "Basic salary for grade {$grade->name} with service grade {$data['service_grade']}",
+                                'desc' => "Basic salary for grade {$data['grade']} with service grade {$data['service_grade']}",
                                 'created_at' => now(),
                                 'updated_at' => now(),
                                 'users_id' => $userId,
-                            ]);
-                    }
+                            ]
+                        );
                 }
             }
 
@@ -276,21 +308,8 @@ class EmployeeBasicSalarySeeder extends Seeder
             $this->command->info('Salary data seeded successfully');
         } catch (\Exception $e) {
             DB::rollBack();
+            $this->command->error("Seeding failed: {$e->getMessage()}");
             throw $e;
         }
     }
 }
-
-
-// ['grade' => 'A1', 'service_grade' => '0', 'amount' => 1685700],
-// ['grade' => 'A2', 'service_grade' => '3', 'amount' => 1840800],
-// ['grade' => 'A3', 'service_grade' => '3', 'amount' => 1918700],
-// ['grade' => 'A4', 'service_grade' => '3', 'amount' => 1999900],
-// ['grade' => 'B1', 'service_grade' => '0', 'amount' => 2184000],
-// ['grade' => 'B2', 'service_grade' => '3', 'amount' => 2385000],
-// ['grade' => 'B3', 'service_grade' => '3', 'amount' => 2485900],
-// ['grade' => 'B4', 'service_grade' => '3', 'amount' => 2591100],
-// ['grade' => 'C1', 'service_grade' => '0', 'amount' => 2785700],
-// ['grade' => 'C2', 'service_grade' => '0', 'amount' => 2903600],
-// ['grade' => 'C3', 'service_grade' => '0', 'amount' => 3026400],
-// ['grade' => 'C4', 'service_grade' => '0', 'amount' => 3154400],
