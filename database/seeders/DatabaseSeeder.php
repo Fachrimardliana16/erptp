@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             EmployeePositionSeeder::class,
             EmployeeAgreementSeeder::class,
             EmployeePermisionSeeder::class,
-            EmployeeGradeSeeder::class,
+            //EmployeeGradeSeeder::class,
             EmployeeBasicSalarySeeder::class,
             EmployeeBenefitSeeder::class,
             EmployeeSalaryCutsSeeder::class,
