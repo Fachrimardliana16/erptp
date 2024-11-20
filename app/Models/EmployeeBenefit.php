@@ -16,9 +16,13 @@ class EmployeeBenefit extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'employee_grade_benefit_id',
         'employee_id',
-        'description',
+        'benefits',
+        'users_id'
+    ];
+
+    protected $casts = [
+        'benefits' => 'array'
     ];
 
     public function employeeGradeBenefit()

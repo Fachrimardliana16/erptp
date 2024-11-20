@@ -12,6 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use App\Models\MasterEmployeeBenefit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -41,7 +42,7 @@ class MasterEmployeeGradeBenefitResource extends Resource
                                         ];
                                     })
                                     ->mapWithKeys(function ($grade) {
-                                        return [$grade->id => "Golongan = {$grade->name}"];
+                                        return [$grade->id => "{$grade->name}"];
                                     })
                             )
                             ->label('Golongan')
@@ -49,8 +50,12 @@ class MasterEmployeeGradeBenefitResource extends Resource
                             ->preload()
                             ->required(),
                         Forms\Components\Select::make('benefit_id')
-                            ->relationship('gradeBenefits', 'name')
+                            ->options(function () {
+                                return MasterEmployeeBenefit::all()->pluck('name', 'id');
+                            })
                             ->label('Tunjangan')
+                            ->searchable()
+                            ->preload()
                             ->required(),
                         Forms\Components\TextInput::make('amount')
                             ->label('Jumlah')
@@ -82,6 +87,7 @@ class MasterEmployeeGradeBenefitResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
+                    ->label('Jumlah')
                     ->numeric()
                     ->prefix('Rp. ')
                     ->sortable()

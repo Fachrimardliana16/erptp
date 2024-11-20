@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_employee_grade_banefit', function (Blueprint $table) {
+        Schema::create('master_employee_grade_benefit', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('benefit_id');
             $table->uuid('grade_id');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_employee_grade_banefit');
+        Schema::dropIfExists('master_employee_grade_benefit');
     }
 };

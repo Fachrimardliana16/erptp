@@ -10,7 +10,7 @@ class MasterEmployeeGradeBenefit extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'master_employee_grade_banefit';
+    protected $table = 'master_employee_grade_benefit';
     protected $fillable = ['benefit_id', 'grade_id', 'amount', 'desc', 'users_id'];
 
     public $timestamps = true;
@@ -28,5 +28,10 @@ class MasterEmployeeGradeBenefit extends Model
     public function employeeGradeBenefit()
     {
         return $this->hasMany(EmployeeBenefit::class, 'employee_grade_benefit_id');
+    }
+
+    public function masterBenefit()
+    {
+        return $this->belongsTo(MasterEmployeeBenefit::class, 'benefit_id');
     }
 }
