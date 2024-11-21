@@ -4,14 +4,18 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeTrainingResource\Pages;
 use App\Filament\Resources\EmployeeTrainingResource\RelationManagers;
+use App\Models\Employees;
 use App\Models\EmployeeTraining;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeeTrainingResource extends Resource
 {
@@ -70,27 +74,68 @@ class EmployeeTrainingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Tables\Actions\BulkAction::make('Export Pdf')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                        // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                        $employees = Employees::whereHas('employeePosition', function ($query) {
+                            $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                        })->first();
+                        // Cek apakah pegawai ditemukan
+                        if (!$employees) {
+                            // Menampilkan notifikasi kesalahan
+                            Notification::make()
+                                ->title('Kesalahan')
+                                ->danger() // notifikasi kesalahan
+                                ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                                ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                                ->send();
+                            return;
+                        }
+
+                        // Render PDF dengan data records dan employee
+                        return response()->streamDownload(function () use ($records, $employees) {
+                            $pdfContent = Blade::render('pdf.report_employee_training', [
+                                'records' => $records,
+                                'employees' => $employees
+                            ]);
+
+                            // Load HTML ke dalam PDF dengan orientasi landscape
+                            $pdf = Pdf::loadHTML($pdfContent);
+                                // ->setPaper('a4', 'landscape');
+
+                            echo $pdf->stream();
+                        }, 'report_employee_training.pdf');
+                    }),
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('training_date')
+                    ->label('Tanggal Pelatihan/Diklat')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('employee_id')
+                Tables\Columns\TextColumn::make('employeeTraining.name')
+                    ->label('Pegawai')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('training_title')
+                    ->label('Judul Pelatihan/Diklat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('training_location')
+                    ->label('Lokasi')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('organizer')
+                    ->label('Penyelenggara')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('salary_increase')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\ImageColumn::make('photo_training')
+                    ->label('Bukti Foto Pelaksanaan')
                     ->searchable(),
                 Tables\Columns\ImageColumn::make('docs_training')
+                    ->label('Lampiran Sertifikat')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -101,7 +146,8 @@ class EmployeeTrainingResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('users_id')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

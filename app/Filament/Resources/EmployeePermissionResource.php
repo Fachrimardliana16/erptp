@@ -5,13 +5,17 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeePermissionResource\Pages;
 use App\Filament\Resources\EmployeePermissionResource\RelationManagers;
 use App\Models\EmployeePermission;
+use App\Models\Employees;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Blade;
 
 class EmployeePermissionResource extends Resource
 {
@@ -68,6 +72,42 @@ class EmployeePermissionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            Tables\Actions\BulkAction::make('Export Pdf')
+                ->icon('heroicon-m-arrow-down-tray')
+                ->deselectRecordsAfterCompletion()
+                ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                    // Ambil data karyawan yang memiliki jabatan 'Kepala Sub Bagian Kepegawaian'
+                    $employees = Employees::whereHas('employeePosition', function ($query) {
+                        $query->where('name', 'Kepala Sub Bagian Kepegawaian');
+                    })->first();
+                    // Cek apakah pegawai ditemukan
+                    if (!$employees) {
+                        // Menampilkan notifikasi kesalahan
+                        Notification::make()
+                            ->title('Kesalahan')
+                            ->danger() // notifikasi kesalahan
+                            ->body('Tidak ada pegawai dengan jabatan Kepala Sub Bagian Kepegawaian.')
+                            ->persistent() // Notifikasi akan tetap muncul sampai ditutup oleh pengguna
+                            ->send();
+                        return;
+                    }
+
+                    // Render PDF dengan data records dan employee
+                    return response()->streamDownload(function () use ($records, $employees) {
+                        $pdfContent = Blade::render('pdf.report_employee_permission', [
+                            'records' => $records,
+                            'employees' => $employees
+                        ]);
+
+                        // Load HTML ke dalam PDF dengan orientasi landscape
+                        $pdf = Pdf::loadHTML($pdfContent);
+                            // ->setPaper('a4', 'landscape');
+
+                        echo $pdf->stream();
+                    }, 'report_employee_permission.pdf');
+                }),
+        ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
