@@ -2,21 +2,40 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 
 class MasterEmployeeBenefit extends Model
 {
-    use HasFactory, HasUuids;
+    use HasUuids;
 
     protected $table = 'master_employee_benefit';
-    protected $fillable = ['name', 'desc', 'users_id'];
 
-    public $timestamps = true;
+    protected $fillable = [
+        'name',
+        'type',
+        'status',
+        'desc',
+        'users_id'
+    ];
 
-    public function BenefitGrade()
+    protected $casts = [
+        'status' => 'string',
+        'type' => 'string'
+    ];
+
+    public function gradeBenefits()
     {
-        return $this->hasMany(MasterEmployeeGradeBenefit::class);
+        return $this->hasMany(MasterEmployeeGradeBenefit::class, 'benefits->benefit_id', 'id');
+    }
+
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 }

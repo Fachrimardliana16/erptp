@@ -155,19 +155,21 @@ class EmployeeBenefitResource extends Resource
                 ->color('success'),
         ];
 
-        // Add columns for each benefit type
         foreach ($masterBenefits as $benefit) {
             $columns[] = Tables\Columns\TextColumn::make('benefit_' . $benefit->id)
                 ->label($benefit->name)
                 ->money('IDR')
-                ->state(fn(EmployeeBenefit $record): int => $record->getBenefitAmount($benefit->id));
+                ->state(function (EmployeeBenefit $record) use ($benefit) {
+                    return $record->getBenefitAmount($benefit->id);
+                })
+                ->alignRight();
         }
 
-        // Add total column
         $columns[] = Tables\Columns\TextColumn::make('total_amount')
             ->label('Total')
             ->money('IDR')
-            ->state(fn(EmployeeBenefit $record): int => $record->getTotalAmount());
+            ->state(fn(EmployeeBenefit $record): int => $record->getTotalAmount())
+            ->alignRight();
 
         return $table
             ->columns($columns)

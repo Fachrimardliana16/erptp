@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class MasterEmployeeGradeBenefitResource extends Resource
 {
+    protected static ?string $model = MasterEmployeeGradeBenefit::class;  // Tambahkan ini
+
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Master Employee';
     protected static ?string $navigationLabel = 'Golongan Tunjangan';
@@ -30,17 +32,7 @@ class MasterEmployeeGradeBenefitResource extends Resource
                     ->description('Kelola data golongan tunjangan')
                     ->schema([
                         Forms\Components\Select::make('grade_id')
-                            ->options(
-                                MasterEmployeeGrade::all()
-                                    ->sortBy(function ($grade) {
-                                        return [
-                                            $grade->name,
-                                        ];
-                                    })
-                                    ->mapWithKeys(function ($grade) {
-                                        return [$grade->id => "{$grade->name}"];
-                                    })
-                            )
+                            ->relationship('grade', 'name')  // Gunakan relationship() sebagai gantinya
                             ->label('Golongan')
                             ->searchable()
                             ->preload()
@@ -136,7 +128,8 @@ class MasterEmployeeGradeBenefitResource extends Resource
                 ->label('ID')
                 ->searchable()
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('gradeBenefits.name')
+
+            Tables\Columns\TextColumn::make('grade.name')  // Ubah dari gradeBenefits.name ke grade.name
                 ->label('Golongan')
                 ->searchable()
                 ->sortable()
@@ -181,7 +174,7 @@ class MasterEmployeeGradeBenefitResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('grade_id')
-                    ->relationship('gradeBenefits', 'name')
+                    ->relationship('grade', 'name')  // Ubah dari gradeBenefits ke grade
                     ->label('Golongan')
                     ->searchable()
                     ->preload()

@@ -64,6 +64,7 @@ class Employees extends Model
         'retirement'
     ];
 
+
     public function employmentStatus()
     {
         return $this->belongsTo(MasterEmployeeStatusEmployemnt::class, 'employment_status_id', 'id');

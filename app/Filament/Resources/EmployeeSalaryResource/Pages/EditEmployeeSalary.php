@@ -1,5 +1,5 @@
 <?php
-
+// Pages/EditEmployeeSalary.php
 namespace App\Filament\Resources\EmployeeSalaryResource\Pages;
 
 use App\Filament\Resources\EmployeeSalaryResource;
@@ -15,5 +15,10 @@ class EditEmployeeSalary extends EditRecord
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }
