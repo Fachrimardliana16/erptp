@@ -6,25 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('master_employee_benefit', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->enum('type', ['fixed', 'percentage', 'calculated'])->default('fixed');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->text('desc')->nullable();
-            $table->timestamps();
-
             $table->uuid('users_id');
+
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('master_employee_benefit');

@@ -1,5 +1,5 @@
 <?php
-// App/Models/EmployeeBenefit.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class EmployeeBenefit extends Model
 {
-    use HasFactory, SoftDeletes, HasUuids;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'employee_benefits';
-    protected $keyType = 'string';
 
     protected $fillable = [
         'employee_id',
@@ -24,62 +23,115 @@ class EmployeeBenefit extends Model
         'benefits' => 'array'
     ];
 
+    // Relasi
     public function employee()
     {
-        return $this->belongsTo(Employees::class, 'employee_id', 'id');
+        return $this->belongsTo(Employees::class, 'employee_id');
+    }
+
+    public function salaries()
+    {
+        return $this->hasMany(EmployeeSalary::class, 'employee_benefit_id');
     }
 
     // Method untuk mendapatkan nilai tunjangan spesifik
     public function getBenefitAmount($benefitId)
     {
-        if (!$this->employee || !$this->employee->grade || !is_array($this->benefits)) {
-            return 0;
+        $benefits = is_array($this->benefits) ? $this->benefits : json_decode($this->benefits, true);
+
+        foreach ($benefits as $benefit) {
+            if ($benefit['benefit_id'] === $benefitId) {
+                return (float)($benefit['amount'] ?? 0);
+            }
         }
 
-        // Cek apakah pegawai memiliki tunjangan ini
-        $hasBenefit = collect($this->benefits)->pluck('benefit_id')->contains($benefitId);
-        if (!$hasBenefit) {
-            return 0;
+        return 0;
+    }
+
+    // Method untuk mendapatkan detail semua tunjangan
+    public function getBenefitDetails()
+    {
+        if (!is_array($this->benefits)) {
+            return collect([]);
         }
 
-        // Ambil nilai tunjangan dari grade pegawai
-        $gradeBenefit = MasterEmployeeGradeBenefit::where('grade_id', $this->employee->grade->id)->first();
-        if (!$gradeBenefit || !is_array($gradeBenefit->benefits)) {
-            return 0;
+        return collect($this->benefits)->map(function ($benefit) {
+            $masterBenefit = MasterEmployeeBenefit::find($benefit['benefit_id']);
+            return [
+                'id' => $benefit['benefit_id'],
+                'name' => $masterBenefit?->name ?? 'Unknown',
+                'amount' => (float) $benefit['amount']
+            ];
+        });
+    }
+
+    // Method untuk mendapatkan semua nilai tunjangan
+    public function getAllBenefitAmounts()
+    {
+        if (!$this->employee?->grade || !is_array($this->benefits)) {
+            return collect();
         }
 
-        // Cari nilai tunjangan yang sesuai
-        $benefit = collect($gradeBenefit->benefits)
-            ->firstWhere('benefit_id', $benefitId);
+        return collect($this->benefits)->mapWithKeys(function ($benefit) {
+            $benefitId = $benefit['benefit_id'] ?? null;
+            if (!$benefitId) return [];
 
-        return $benefit ? (int)($benefit['amount'] ?? 0) : 0;
+            return [$benefitId => $this->getBenefitAmount($benefitId)];
+        });
     }
 
     // Method untuk mendapatkan total semua tunjangan
     public function getTotalAmount()
     {
-        if (!$this->employee || !$this->employee->grade || !is_array($this->benefits)) {
-            return 0;
+        return $this->getAllBenefitAmounts()->sum();
+    }
+
+    // Method untuk validasi benefits
+    public function validateBenefits()
+    {
+        if (!is_array($this->benefits)) {
+            return false;
         }
 
-        $gradeBenefit = MasterEmployeeGradeBenefit::where('grade_id', $this->employee->grade->id)->first();
-        if (!$gradeBenefit || !is_array($gradeBenefit->benefits)) {
-            return 0;
-        }
+        foreach ($this->benefits as $benefit) {
+            if (!isset($benefit['benefit_id'])) {
+                return false;
+            }
 
-        $total = 0;
-        foreach ($this->benefits as $employeeBenefit) {
-            $benefitId = $employeeBenefit['benefit_id'] ?? null;
-            if (!$benefitId) continue;
-
-            $gradeBenefitValue = collect($gradeBenefit->benefits)
-                ->firstWhere('benefit_id', $benefitId);
-
-            if ($gradeBenefitValue) {
-                $total += (int)($gradeBenefitValue['amount'] ?? 0);
+            if (!MasterEmployeeBenefit::where('id', $benefit['benefit_id'])
+                ->where('status', 'active')
+                ->exists()) {
+                return false;
             }
         }
 
-        return $total;
+        return true;
+    }
+
+    // Observer events
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            if (!$model->validateBenefits()) {
+                return false;
+            }
+        });
+    }
+
+    public function getBenefitLabel(): string
+    {
+        $benefitCount = count($this->benefits ?? []);
+        return "Tunjangan ({$benefitCount} item) - " . $this->created_at->format('d M Y');
+    }
+
+    public function hasBenefit($masterBenefitId): bool
+    {
+        if (!is_array($this->benefits)) return false;
+
+        return collect($this->benefits)
+            ->pluck('benefit_id')
+            ->contains($masterBenefitId);
     }
 }

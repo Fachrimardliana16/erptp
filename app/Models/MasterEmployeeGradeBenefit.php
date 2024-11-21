@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class MasterEmployeeGradeBenefit extends Model
 {
-    use HasFactory, HasUuids;
+    use HasUuids;
 
     protected $table = 'master_employee_grade_benefit';
 
     protected $fillable = [
-        'benefits',
         'grade_id',
+        'benefits',
         'desc',
         'users_id'
     ];
@@ -23,40 +23,53 @@ class MasterEmployeeGradeBenefit extends Model
         'benefits' => 'array'
     ];
 
-    public function gradeBenefits()
+    public function grade()
     {
-        return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id', 'id');
+        return $this->belongsTo(MasterEmployeeGrade::class, 'grade_id');
     }
 
-    public function benefits()
-    {
-        return $this->hasMany(MasterEmployeeBenefit::class, 'id', 'benefit_id');
-    }
 
-    // Method untuk mendapatkan nilai tunjangan spesifik
     public function getBenefitAmount($benefitId)
     {
-        if (!is_array($this->benefits)) {
-            return 0;
-        }
+        if (!is_array($this->benefits)) return 0;
 
         $benefit = collect($this->benefits)
             ->firstWhere('benefit_id', $benefitId);
 
-        return $benefit ? (int)($benefit['amount'] ?? 0) : 0;
+        return $benefit ? (float)($benefit['amount'] ?? 0) : 0;
     }
 
-    // Method untuk mendapatkan semua nilai tunjangan
     public function getAllBenefitAmounts()
     {
-        if (!is_array($this->benefits)) {
-            return collect();
-        }
+        if (!is_array($this->benefits)) return collect();
 
         return collect($this->benefits)->mapWithKeys(function ($benefit) {
-            return [
-                $benefit['benefit_id'] => (int)($benefit['amount'] ?? 0)
-            ];
+            return [$benefit['benefit_id'] => (float)($benefit['amount'] ?? 0)];
         });
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            return $model->validateBenefits();
+        });
+    }
+
+    public function validateBenefits()
+    {
+        if (!is_array($this->benefits)) return false;
+
+        foreach ($this->benefits as $benefit) {
+            if (!isset($benefit['benefit_id'], $benefit['amount'])) return false;
+            if (!is_numeric($benefit['amount']) || $benefit['amount'] < 0) return false;
+            if (!MasterEmployeeBenefit::where('id', $benefit['benefit_id'])
+                ->where('status', 'active')
+                ->exists()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
