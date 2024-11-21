@@ -82,7 +82,7 @@
                     <td class="no-col">{{ $loop->iteration }}</td>
                     <td>{{ $record->decision_letter_number }}</td>
                     <td>{{ \Carbon\Carbon::parse($record->promotion_date)->format('d F Y') }}</td>
-                    <td>{{ $record->employeePromotion}}</td>
+                    <td>{{ $record->employee->name}}</td>
                     <td>{{ $record->oldGrade->name }}</td>
                     <td>{{ 'Rp ' . number_format($record->oldBasicSalary->amount, 0, ',', '.') }}</td>
                     <td>{{ $record->newGrade->name}}</td>
